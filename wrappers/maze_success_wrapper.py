@@ -1,23 +1,25 @@
-from typing import SupportsFloat, Any, Optional, Tuple
+from typing import SupportsFloat, Any, Optional, Tuple, Callable
 
-from gymnasium.core import WrapperActType, WrapperObsType, Wrapper
 import wandb
+from gymnasium.core import WrapperActType, WrapperObsType, Wrapper
 
 
 class MazeSuccessWrapper(Wrapper):
     def __init__(
         self,
         env,
-        goal: Tuple[float, float, float],
         radius: float,
         reward: float,
+        goal_selector: Callable[[], Tuple[float, float, float]],
         **kwargs,
     ):
         self.env = env
-        self.goal = goal
         self.radius = radius
         self.reward = reward
-        self.success_count = 0
+        self.success_counts = {}
+        self.goal_selector = goal_selector
+        self.goal = self.goal_selector()
+        self.cooldown = 0
         super().__init__(self.env)
 
     def step(
@@ -28,18 +30,25 @@ class MazeSuccessWrapper(Wrapper):
         x = info_obs.x
         y = info_obs.y
         z = info_obs.z
+        self.cooldown -= 1
 
-        # square goal check
-        if (
-            self.goal[0] - self.radius <= x <= self.goal[0] + self.radius
-            and self.goal[1] - self.radius <= y <= self.goal[1] + self.radius
-            and self.goal[2] - self.radius <= z <= self.goal[2] + self.radius
-        ):
-            reward += self.reward
-            print("Goal Reached")
-            self.success_count += 1
-            wandb.log({"success_count": self.success_count})
-            terminated = True
+        if self.cooldown <= 0:
+            # square goal check
+            if (
+                self.goal[0] - self.radius <= x <= self.goal[0] + self.radius
+                and self.goal[1] - self.radius <= y <= self.goal[1] + self.radius
+                and self.goal[2] - self.radius <= z <= self.goal[2] + self.radius
+            ):
+                reward += self.reward
+                print("Goal Reached")
+                self.success_counts[self.goal] = (
+                    self.success_counts.get(self.goal, 0) + 1
+                )
+                goal_str = str(self.goal)
+                wandb.log({f"{goal_str}_success_count": self.success_counts[self.goal]})
+                terminated = True
+                self.cooldown = 10
+                self.goal = self.goal_selector()
 
         return (
             obs,

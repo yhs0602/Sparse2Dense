@@ -14,6 +14,16 @@ from wandb.integration.sb3 import WandbCallback
 
 from wrappers.maze_success_wrapper import MazeSuccessWrapper
 
+GOALS = [
+    (21, 1, 1),  # 앞쪽
+    (21, 1, 14),  # 앞 오른쪽
+    (3, 1, 14),  # 뒤 오른쪽
+]
+
+
+def select_goal():
+    return random.choice(GOALS)
+
 
 def structure_any():
     run = wandb.init(
@@ -21,7 +31,7 @@ def structure_any():
         project="craftground-sb3",
         entity="jourhyang123",
         # track hyperparameters and run metadata
-        group="hmaze-noreward-a2c-vision",
+        group="hmaze-noreward-random-goal",
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional    save_code=True,  # optional
@@ -32,7 +42,7 @@ def structure_any():
         craftground.make(
             port=8001,
             initialInventoryCommands=[],
-            verbose=True,
+            verbose=False,
             initialPosition=[5, 5, 5],  # nullable
             initialMobsCommands=[],
             imageSizeX=size_x,
@@ -76,7 +86,7 @@ def structure_any():
                     Action.TURN_RIGHT,
                 ],
             ),
-            goal=(21, 1, 1),
+            goal_selector=select_goal,
             reward=0,
             radius=2,
         ),
@@ -111,7 +121,7 @@ def structure_any():
             # sample one from the action space
             action = random.sample([0, 1, 2], 1)
             action = np.array(action)
-            print(f"Action: {action}")
+            # print(f"Action: {action}")
             obs, reward, done, info = vec_env.step(action)
             if i % 4000 == 0:
                 print(f"Step: {i}")
