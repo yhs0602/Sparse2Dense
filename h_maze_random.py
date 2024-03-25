@@ -107,7 +107,7 @@ def structure_any():
     else:
         vec_env = env
         obs = vec_env.reset()
-        for i in range(300000):
+        for i in range(900000):
             # sample one from the action space
             action = random.sample([0, 1, 2], 1)
             action = np.array(action)
