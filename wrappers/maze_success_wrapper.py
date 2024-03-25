@@ -1,6 +1,7 @@
 from typing import SupportsFloat, Any, Optional, Tuple
 
 from gymnasium.core import WrapperActType, WrapperObsType, Wrapper
+import wandb
 
 
 class MazeSuccessWrapper(Wrapper):
@@ -16,6 +17,7 @@ class MazeSuccessWrapper(Wrapper):
         self.goal = goal
         self.radius = radius
         self.reward = reward
+        self.success_count = 0
         super().__init__(self.env)
 
     def step(
@@ -35,6 +37,8 @@ class MazeSuccessWrapper(Wrapper):
         ):
             reward += self.reward
             print("Goal Reached")
+            self.success_count += 1
+            wandb.log({"success_count": self.success_count})
             terminated = True
 
         return (
