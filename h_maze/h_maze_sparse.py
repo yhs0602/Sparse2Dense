@@ -31,7 +31,7 @@ def hmaze_rppo_sparse():
         project="craftground-sb3",
         entity="jourhyang123",
         # track hyperparameters and run metadata
-        group="hmaze-sparse-random-goal",
+        group="hcmaze-sparse-random-goal",
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional    save_code=True,  # optional
@@ -116,7 +116,7 @@ def hmaze_rppo_sparse():
                 verbose=2,
             ),
         )
-        model.save("rppo_sparse_pmaze_random_goal")
+        model.save("rppo_sparse_hcmaze_random_goal")
         run.finish()
     finally:
         base_env.terminate()
