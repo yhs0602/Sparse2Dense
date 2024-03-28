@@ -99,7 +99,7 @@ def hmaze_rppo_sparse():
     env = VecVideoRecorder(
         env,
         f"videos/{run.id}",
-        record_video_trigger=lambda x: x % 100000 == 0,
+        record_video_trigger=lambda x: x % 10000 == 0,
         video_length=10000,
     )
 
