@@ -5,6 +5,7 @@ import wandb
 from craftground import craftground
 from craftground.wrappers.action import ActionWrapper, Action
 from craftground.wrappers.fast_reset import FastResetWrapper
+from craftground.wrappers.time_limit import TimeLimitWrapper
 from craftground.wrappers.vision import VisionWrapper
 from sb3_contrib import RecurrentPPO
 from stable_baselines3.common.monitor import Monitor
@@ -72,22 +73,25 @@ def hmaze_rppo_sparse():
         [],
     )
     env = FastResetWrapper(
-        MazeSuccessWrapper(
-            ActionWrapper(
-                VisionWrapper(
-                    base_env,
-                    x_dim=size_x,
-                    y_dim=size_y,
+        TimeLimitWrapper(
+            MazeSuccessWrapper(
+                ActionWrapper(
+                    VisionWrapper(
+                        base_env,
+                        x_dim=size_x,
+                        y_dim=size_y,
+                    ),
+                    enabled_actions=[
+                        Action.FORWARD,
+                        Action.TURN_LEFT,
+                        Action.TURN_RIGHT,
+                    ],
                 ),
-                enabled_actions=[
-                    Action.FORWARD,
-                    Action.TURN_LEFT,
-                    Action.TURN_RIGHT,
-                ],
+                goal_selector=select_goal,
+                reward=1,
+                radius=2,
             ),
-            goal_selector=select_goal,
-            reward=1,
-            radius=2,
+            max_timesteps=10000,
         ),
     )
     env = DummyVecEnv([lambda: env])
@@ -95,8 +99,8 @@ def hmaze_rppo_sparse():
     env = VecVideoRecorder(
         env,
         f"videos/{run.id}",
-        record_video_trigger=lambda x: x % 4000 == 0,
-        video_length=400,
+        record_video_trigger=lambda x: x % 100000 == 0,
+        video_length=10000,
     )
 
     model = RecurrentPPO(
@@ -113,8 +117,8 @@ def hmaze_rppo_sparse():
             ),
         )
         model.save("rppo_sparse_pmaze_random_goal")
-    finally:
         run.finish()
+    finally:
         base_env.terminate()
 
 

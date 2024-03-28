@@ -52,9 +52,6 @@ class MazeSuccessWrapper(Wrapper):
                 terminated = True
                 self.cooldown = 10
                 self.time_took = 0
-                self.goal = self.goal_selector()
-                # TODO: Set cake at the goal
-                # self.env.unwrapped.set_blocks(
 
         return (
             obs,
@@ -71,4 +68,19 @@ class MazeSuccessWrapper(Wrapper):
         options: Optional[dict[str, Any]] = None,
     ) -> tuple[WrapperObsType, dict[str, Any]]:
         obs, info = self.env.reset(seed=seed, options=options)
+        # Remove cake at the goal
+        self.get_wrapper_attr("add_commands")(
+            [
+                f"setblock {self.goal[0]} {self.goal[1]} {self.goal[2]} minecraft:air replace"
+            ]
+        )
+        self.goal = self.goal_selector()
+        # Set cake at the goal
+        self.get_wrapper_attr("add_commands")(
+            [
+                f"setblock {self.goal[0]} {self.goal[1]} {self.goal[2]} minecraft:cake replace"
+            ]
+        )
+        self.time_took = 0
+        self.cooldown = 10
         return obs, info
