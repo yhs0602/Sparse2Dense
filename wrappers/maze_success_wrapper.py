@@ -49,6 +49,8 @@ class MazeSuccessWrapper(Wrapper):
                 terminated = True
                 self.cooldown = 10
                 self.goal = self.goal_selector()
+                # TODO: Set cake at the goal
+                # self.env.unwrapped.set_blocks(
 
         return (
             obs,
