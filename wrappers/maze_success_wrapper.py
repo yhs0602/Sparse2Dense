@@ -20,6 +20,7 @@ class MazeSuccessWrapper(Wrapper):
         self.goal_selector = goal_selector
         self.goal = self.goal_selector()
         self.cooldown = 0
+        self.time_took = 0
         super().__init__(self.env)
 
     def step(
@@ -31,6 +32,7 @@ class MazeSuccessWrapper(Wrapper):
         y = info_obs.y
         z = info_obs.z
         self.cooldown -= 1
+        self.time_took += 1
 
         if self.cooldown <= 0:
             # square goal check
@@ -40,14 +42,16 @@ class MazeSuccessWrapper(Wrapper):
                 and self.goal[2] - self.radius <= z <= self.goal[2] + self.radius
             ):
                 reward += self.reward
-                print("Goal Reached")
+                print(f"Goal Reached in {self.time_took} steps")
                 self.success_counts[self.goal] = (
                     self.success_counts.get(self.goal, 0) + 1
                 )
                 goal_str = str(self.goal)
                 wandb.log({f"{goal_str}_success_count": self.success_counts[self.goal]})
+                wandb.log({f"{goal_str}_time_took": self.time_took})
                 terminated = True
                 self.cooldown = 10
+                self.time_took = 0
                 self.goal = self.goal_selector()
                 # TODO: Set cake at the goal
                 # self.env.unwrapped.set_blocks(

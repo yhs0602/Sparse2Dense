@@ -6,7 +6,7 @@ from craftground import craftground
 from craftground.wrappers.action import ActionWrapper, Action
 from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.vision import VisionWrapper
-from stable_baselines3 import PPO
+from sb3_contrib import RecurrentPPO
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
@@ -24,7 +24,7 @@ def select_goal():
     return random.choice(GOALS)
 
 
-def structure_any():
+def hmaze_rppo_sparse():
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -99,22 +99,24 @@ def structure_any():
         video_length=400,
     )
 
-    model = PPO(
-        "CnnPolicy", env, verbose=1, device="mps", tensorboard_log=f"runs/{run.id}"
+    model = RecurrentPPO(
+        "CnnLstmPolicy", env, verbose=1, device="mps", tensorboard_log=f"runs/{run.id}"
     )
 
-    model.learn(
-        total_timesteps=300000,
-        callback=WandbCallback(
-            gradient_save_freq=100,
-            model_save_path=f"models/{run.id}",
-            verbose=2,
-        ),
-    )
-    model.save("ppo_sparse_pmaze_random_goal")
-    run.finish()
-    base_env.terminate()
+    try:
+        model.learn(
+            total_timesteps=300000,
+            callback=WandbCallback(
+                gradient_save_freq=100,
+                model_save_path=f"models/{run.id}",
+                verbose=2,
+            ),
+        )
+        model.save("rppo_sparse_pmaze_random_goal")
+    finally:
+        run.finish()
+        base_env.terminate()
 
 
 if __name__ == "__main__":
-    structure_any()
+    hmaze_rppo_sparse()
