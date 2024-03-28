@@ -60,6 +60,7 @@ def hmaze_rppo_sparse():
             obs_keys=[],  # No sound subtitles
             miscStatKeys=[],  # No stats
             initialExtraCommands=[
+                "time set noon",
                 "place template minecraft:hmaze1_colored 0 0 0",
                 "tp @p 3 1 1 -90 0",
             ],  # x y z yaw pitch
