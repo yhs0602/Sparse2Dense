@@ -8,11 +8,11 @@ class LivingPenaltyWrapper(Wrapper):
     def __init__(
         self,
         env,
-        penalty: SupportsFloat,
+        penalty_abs: SupportsFloat,
         **kwargs,
     ):
         self.env = env
-        self.penalty = penalty
+        self.penalty = penalty_abs
         super().__init__(self.env)
 
     def step(

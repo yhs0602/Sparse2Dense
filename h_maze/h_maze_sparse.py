@@ -12,6 +12,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
+from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.maze_success_wrapper import MazeSuccessWrapper
 
 GOALS = [
@@ -74,22 +75,25 @@ def hmaze_rppo_sparse():
     )
     env = FastResetWrapper(
         TimeLimitWrapper(
-            MazeSuccessWrapper(
-                ActionWrapper(
-                    VisionWrapper(
-                        base_env,
-                        x_dim=size_x,
-                        y_dim=size_y,
+            LivingPenaltyWrapper(
+                MazeSuccessWrapper(
+                    ActionWrapper(
+                        VisionWrapper(
+                            base_env,
+                            x_dim=size_x,
+                            y_dim=size_y,
+                        ),
+                        enabled_actions=[
+                            Action.FORWARD,
+                            Action.TURN_LEFT,
+                            Action.TURN_RIGHT,
+                        ],
                     ),
-                    enabled_actions=[
-                        Action.FORWARD,
-                        Action.TURN_LEFT,
-                        Action.TURN_RIGHT,
-                    ],
+                    goal_selector=select_goal,
+                    reward=1,
+                    radius=2,
                 ),
-                goal_selector=select_goal,
-                reward=1,
-                radius=2,
+                penalty_abs=0.01,
             ),
             max_timesteps=10000,
         ),
