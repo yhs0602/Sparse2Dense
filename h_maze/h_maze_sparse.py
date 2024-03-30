@@ -12,6 +12,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
+from h_maze.episode_reward_logger import EpisodeRewardLogger
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.maze_success_wrapper import MazeSuccessWrapper
 
@@ -27,16 +28,20 @@ def select_goal():
 
 
 def hmaze_rppo_sparse():
+    group_name = "hcrmaze-sparse-gae-0.995"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
         entity="jourhyang123",
         # track hyperparameters and run metadata
-        group="hcmaze-sparse-random-goal",
+        group=group_name,
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional    save_code=True,  # optional
     )
+    for goal in GOALS:
+        wandb.define_metric(f"{goal}/success_count", summary="max")
+        wandb.define_metric(f"{goal}/time_took", step_metric=f"{goal}/success_count")
     size_x = 114
     size_y = 64
     base_env, sound_list = (
@@ -65,7 +70,7 @@ def hmaze_rppo_sparse():
                 "tp @p 3 1 1 -90 0",
             ],  # x y z yaw pitch
             isHudHidden=True,
-            render_action=True,
+            render_action=False,
             render_distance=5,
             simulation_distance=5,
             structure_paths=[
@@ -109,19 +114,27 @@ def hmaze_rppo_sparse():
     )
 
     model = RecurrentPPO(
-        "CnnLstmPolicy", env, verbose=1, device="mps", tensorboard_log=f"runs/{run.id}"
+        "CnnLstmPolicy",
+        env,
+        verbose=1,
+        device="mps",
+        tensorboard_log=f"runs/{run.id}",
+        gae_lambda=0.995,
     )
 
     try:
         model.learn(
             total_timesteps=300000,
-            callback=WandbCallback(
-                gradient_save_freq=100,
-                model_save_path=f"models/{run.id}",
-                verbose=2,
-            ),
+            callback=[
+                WandbCallback(
+                    gradient_save_freq=100,
+                    model_save_path=f"models/{run.id}",
+                    verbose=2,
+                ),
+                EpisodeRewardLogger(),
+            ],
         )
-        model.save("rppo_sparse_hcmaze_random_goal")
+        model.save(group_name)
         run.finish()
     finally:
         base_env.terminate()

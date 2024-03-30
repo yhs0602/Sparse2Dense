@@ -47,8 +47,12 @@ class MazeSuccessWrapper(Wrapper):
                     self.success_counts.get(self.goal, 0) + 1
                 )
                 goal_str = str(self.goal)
-                wandb.log({f"{goal_str}_success_count": self.success_counts[self.goal]})
-                wandb.log({f"{goal_str}_time_took": self.time_took})
+                wandb.log(
+                    {
+                        f"{goal_str}/success_count": self.success_counts[self.goal],
+                        f"{goal_str}/time_took": self.time_took,
+                    }
+                )
                 terminated = True
                 self.cooldown = 10
                 self.time_took = 0

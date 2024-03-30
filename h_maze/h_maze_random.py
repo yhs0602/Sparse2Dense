@@ -36,6 +36,9 @@ def structure_any():
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional    save_code=True,  # optional
     )
+    for goal in GOALS:
+        wandb.define_metric(f"{goal}/success_count", summary="max")
+        wandb.define_metric(f"{goal}/time_took", step_metric=f"{goal}/success_count")
     size_x = 114
     size_y = 64
     base_env, sound_list = (
@@ -63,7 +66,7 @@ def structure_any():
                 "tp @p 3 1 1 -90 0",
             ],  # x y z yaw pitch
             isHudHidden=True,
-            render_action=True,
+            render_action=False,
             render_distance=5,
             simulation_distance=5,
             structure_paths=[
