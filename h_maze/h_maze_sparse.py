@@ -99,9 +99,9 @@ def hmaze_rppo_sparse():
                     reward=1,
                     radius=2,
                 ),
-                penalty_abs=0.0005,
+                penalty_abs=0.0002,
             ),
-            max_timesteps=15000,
+            max_timesteps=20000,
         ),
     )
     env = DummyVecEnv([lambda: env])
@@ -109,8 +109,8 @@ def hmaze_rppo_sparse():
     env = VecVideoRecorder(
         env,
         f"videos/{run.id}",
-        record_video_trigger=lambda x: x % 15000 == 0,
-        video_length=15000,
+        record_video_trigger=lambda x: x % 20000 == 0,
+        video_length=20000,
     )
 
     model = RecurrentPPO(
@@ -120,6 +120,7 @@ def hmaze_rppo_sparse():
         device="mps",
         tensorboard_log=f"runs/{run.id}",
         gae_lambda=0.99,
+        ent_coef=0.01,
     )
 
     try:
