@@ -10,7 +10,7 @@ charset-normalizer==3.3.0
 click==8.1.7
 cloudpickle==3.0.0
 contourpy==1.1.1
-craftground @ git+https://github.com/yhs0602/CraftGround@e0039e253bf3375a6166d9d6937f897974992c46
+craftground @ git+https://github.com/yhs0602/CraftGround@baeb32c80886c72a7c9b8a93c0d6c182360eab78
 cryptography==42.0.2
 cycler==0.12.1
 decorator==4.4.2
@@ -47,6 +47,7 @@ packaging==23.2
 pandas==2.1.1
 pathtools==0.1.2
 Pillow==10.1.0
+plotly==5.20.0
 proglog==0.1.10
 protobuf==4.23.4
 psutil==5.9.6
@@ -71,6 +72,7 @@ six==1.16.0
 smmap==5.0.1
 stable-baselines3==2.2.1
 sympy==1.12
+tenacity==8.2.3
 tensorboard==2.15.0
 tensorboard-data-server==0.7.1
 torch==2.1.0

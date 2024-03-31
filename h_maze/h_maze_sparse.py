@@ -12,7 +12,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
-from h_maze.episode_reward_logger import EpisodeRewardLogger
+from h_maze.episode_reward_logger import EpisodeLogger
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.maze_success_wrapper import MazeSuccessWrapper
 
@@ -28,7 +28,7 @@ def select_goal():
 
 
 def hmaze_rppo_sparse():
-    group_name = "hcrmaze-sparse-gae-0.995"
+    group_name = "hcrmaze-sparse-gae-0.99-sreward"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -99,9 +99,9 @@ def hmaze_rppo_sparse():
                     reward=1,
                     radius=2,
                 ),
-                penalty_abs=0.01,
+                penalty_abs=0.0005,
             ),
-            max_timesteps=10000,
+            max_timesteps=15000,
         ),
     )
     env = DummyVecEnv([lambda: env])
@@ -109,8 +109,8 @@ def hmaze_rppo_sparse():
     env = VecVideoRecorder(
         env,
         f"videos/{run.id}",
-        record_video_trigger=lambda x: x % 10000 == 0,
-        video_length=10000,
+        record_video_trigger=lambda x: x % 15000 == 0,
+        video_length=15000,
     )
 
     model = RecurrentPPO(
@@ -119,7 +119,7 @@ def hmaze_rppo_sparse():
         verbose=1,
         device="mps",
         tensorboard_log=f"runs/{run.id}",
-        gae_lambda=0.995,
+        gae_lambda=0.99,
     )
 
     try:
@@ -131,7 +131,7 @@ def hmaze_rppo_sparse():
                     model_save_path=f"models/{run.id}",
                     verbose=2,
                 ),
-                EpisodeRewardLogger(),
+                EpisodeLogger(),
             ],
         )
         model.save(group_name)
