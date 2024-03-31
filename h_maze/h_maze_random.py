@@ -105,7 +105,11 @@ def structure_any():
 
     if False:
         model = A2C(
-            "CnnPolicy", env, verbose=1, device="mps", tensorboard_log=f"runs/{run.id}"
+            "CnnPolicy",
+            env,
+            verbose=1,
+            device=get_device(),
+            tensorboard_log=f"runs/{run.id}",
         )
 
         model.learn(

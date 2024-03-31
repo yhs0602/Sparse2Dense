@@ -12,6 +12,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
+from get_device import get_device
 from h_maze.episode_reward_logger import EpisodeLogger
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.maze_success_wrapper import MazeSuccessWrapper
@@ -117,7 +118,7 @@ def hmaze_rppo_sparse():
         "CnnLstmPolicy",
         env,
         verbose=1,
-        device="mps",
+        device=get_device(),
         tensorboard_log=f"runs/{run.id}",
         gae_lambda=0.99,
         ent_coef=0.01,
