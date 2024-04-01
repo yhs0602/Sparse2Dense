@@ -17,6 +17,9 @@ from h_maze.episode_reward_logger import EpisodeLogger
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.maze_success_wrapper import MazeSuccessWrapper
 
+current_path = os.path.dirname(os.path.abspath(__file__))
+map_path = os.path.join(current_path, "hmaze1_colored.nbt")
+
 GOALS = [
     (21, 1, 1),  # 앞쪽
     (21, 1, 14),  # 앞 오른쪽
@@ -75,7 +78,7 @@ def hmaze_rppo_sparse():
             render_distance=5,
             simulation_distance=5,
             structure_paths=[
-                os.path.abspath("hmaze1_colored.nbt"),
+                map_path,
             ],
         ),
         [],
@@ -136,7 +139,7 @@ def hmaze_rppo_sparse():
                 EpisodeLogger(),
             ],
         )
-        model.save(group_name)
+        model.save(f"{group_name}.ckpt")
         run.finish()
     finally:
         base_env.terminate()

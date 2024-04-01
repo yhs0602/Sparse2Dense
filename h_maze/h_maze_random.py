@@ -14,6 +14,9 @@ from wandb.integration.sb3 import WandbCallback
 
 from wrappers.maze_success_wrapper import MazeSuccessWrapper
 
+current_path = os.path.dirname(os.path.abspath(__file__))
+map_path = os.path.join(current_path, "hmaze1_colored.nbt")
+
 GOALS = [
     (21, 1, 1),  # 앞쪽
     (21, 1, 14),  # 앞 오른쪽
@@ -70,7 +73,7 @@ def structure_any():
             render_distance=5,
             simulation_distance=5,
             structure_paths=[
-                os.path.abspath("hmaze1.nbt"),
+                map_path,
             ],
         ),
         [],
