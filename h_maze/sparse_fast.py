@@ -3,7 +3,6 @@ import random
 
 import wandb
 from craftground import craftground
-from craftground.wrappers.action import ActionWrapper, Action
 from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.time_limit import TimeLimitWrapper
 from craftground.wrappers.vision import VisionWrapper
@@ -14,6 +13,7 @@ from wandb.integration.sb3 import WandbCallback
 
 from get_device import get_device
 from h_maze.episode_reward_logger import EpisodeLogger
+from h_maze.turn_90_wrapper import Turn90Wrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.maze_success_wrapper import MazeSuccessWrapper
 
@@ -72,6 +72,7 @@ def hmaze_rppo_sparse():
                 "time set noon",
                 "place template minecraft:hmaze1_colored 0 0 0",
                 "tp @p 3 1 1 -90 0",
+                "effect give @p minecraft:speed infinite 2 true",  # speed effect, particle hidden
             ],  # x y z yaw pitch
             isHudHidden=True,
             render_action=False,
@@ -80,6 +81,7 @@ def hmaze_rppo_sparse():
             structure_paths=[
                 map_path,
             ],
+            no_pov_effect=True,
         ),
         [],
     )
@@ -87,17 +89,12 @@ def hmaze_rppo_sparse():
         TimeLimitWrapper(
             LivingPenaltyWrapper(
                 MazeSuccessWrapper(
-                    ActionWrapper(
+                    Turn90Wrapper(
                         VisionWrapper(
                             base_env,
                             x_dim=size_x,
                             y_dim=size_y,
                         ),
-                        enabled_actions=[
-                            Action.FORWARD,
-                            Action.TURN_LEFT,
-                            Action.TURN_RIGHT,
-                        ],
                     ),
                     goal_selector=select_goal,
                     reward=1,
