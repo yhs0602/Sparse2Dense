@@ -1,9 +1,12 @@
 import os.path
 import random
+import sys
+import time
 
 import numpy as np
 import wandb
 from craftground import craftground
+from craftground.craftground.screen_encoding_modes import ScreenEncodingMode
 from craftground.wrappers.action import ActionWrapper, Action
 from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.vision import VisionWrapper
@@ -12,6 +15,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
+from check_vglrun import check_vglrun
 from wrappers.maze_success_wrapper import MazeSuccessWrapper
 
 current_path = os.path.dirname(os.path.abspath(__file__))
@@ -75,6 +79,9 @@ def structure_any():
             structure_paths=[
                 map_path,
             ],
+            no_pov_effect=True,
+            screen_encoding_mode=ScreenEncodingMode.RAW,
+            use_vglrun=check_vglrun(),
         ),
         [],
     )
@@ -102,8 +109,8 @@ def structure_any():
     env = VecVideoRecorder(
         env,
         f"videos/{run.id}",
-        record_video_trigger=lambda x: x % 4000 == 0,
-        video_length=400,
+        record_video_trigger=lambda x: x % 400000 == 0,
+        video_length=20000,
     )
 
     if False:
@@ -127,12 +134,25 @@ def structure_any():
     else:
         vec_env = env
         obs = vec_env.reset()
-        for i in range(900000):
+        start_time = time.time_ns()
+        for i in range(9000000):
             # sample one from the action space
             action = random.sample([0, 1, 2], 1)
             action = np.array(action)
             # print(f"Action: {action}")
             obs, reward, done, info = vec_env.step(action)
+            time_elapsed = max(
+                (time.time_ns() - start_time) / 1e9, sys.float_info.epsilon
+            )
+            fps = int(i / time_elapsed)
+            wandb.log(
+                {
+                    "time/iterations": i,
+                    "time/fps": fps,
+                    "time/time_elapsed": int(time_elapsed),
+                    "time/total_timesteps": i,
+                }
+            )
             if i % 4000 == 0:
                 print(f"Step: {i}")
     run.finish()

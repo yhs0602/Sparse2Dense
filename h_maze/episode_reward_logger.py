@@ -19,7 +19,12 @@ class EpisodeLogger(BaseCallback):
         if reward is not None:
             self.episode_rewards.append(reward)
         self.episode_length += 1
-        if self.locals.get("done_"):
+        dones = self.locals.get("dones")
+        infos = self.locals.get("infos")
+        truncated = False
+        if infos:
+            truncated = infos[0]["TimeLimit.truncated"]
+        if self.locals.get("done_") or (dones and dones[0]) or truncated:
             self.episode += 1
             print(
                 f"done={self.locals.get('done_')} dones={self.locals.get('dones')} rewards={self.locals.get('rewards')}"

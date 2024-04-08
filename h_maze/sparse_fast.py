@@ -3,6 +3,7 @@ import random
 
 import wandb
 from craftground import craftground
+from craftground.craftground.screen_encoding_modes import ScreenEncodingMode
 from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.time_limit import TimeLimitWrapper
 from craftground.wrappers.vision import VisionWrapper
@@ -11,6 +12,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
+from check_vglrun import check_vglrun
 from get_device import get_device
 from h_maze.episode_reward_logger import EpisodeLogger
 from h_maze.turn_90_wrapper import Turn90Wrapper
@@ -82,6 +84,8 @@ def hmaze_rppo_sparse():
                 map_path,
             ],
             no_pov_effect=True,
+            screen_encoding_mode=ScreenEncodingMode.RAW,
+            use_vglrun=check_vglrun(),
         ),
         [],
     )
@@ -110,7 +114,7 @@ def hmaze_rppo_sparse():
     env = VecVideoRecorder(
         env,
         f"videos/{run.id}",
-        record_video_trigger=lambda x: x % 20000 == 0,
+        record_video_trigger=lambda x: x % 400000 == 0,
         video_length=20000,
     )
 
