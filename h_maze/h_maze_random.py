@@ -9,6 +9,7 @@ from craftground import craftground
 from craftground.craftground.screen_encoding_modes import ScreenEncodingMode
 from craftground.wrappers.action import ActionWrapper, Action
 from craftground.wrappers.fast_reset import FastResetWrapper
+from craftground.wrappers.time_limit import TimeLimitWrapper
 from craftground.wrappers.vision import VisionWrapper
 from stable_baselines3 import A2C
 from stable_baselines3.common.monitor import Monitor
@@ -16,6 +17,8 @@ from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
 from check_vglrun import check_vglrun
+from h_maze.turn_90_wrapper import Turn90Wrapper
+from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.maze_success_wrapper import MazeSuccessWrapper
 
 current_path = os.path.dirname(os.path.abspath(__file__))
@@ -69,8 +72,10 @@ def structure_any():
             obs_keys=[],  # No sound subtitles
             miscStatKeys=[],  # No stats
             initialExtraCommands=[
-                "place template minecraft:hmaze1 0 0 0",
+                "time set noon",
+                "place template minecraft:hmaze1_colored 0 0 0",
                 "tp @p 3 1 1 -90 0",
+                "effect give @p minecraft:speed infinite 2 true",  # speed effect, particle hidden
             ],  # x y z yaw pitch
             isHudHidden=True,
             render_action=False,
@@ -86,22 +91,23 @@ def structure_any():
         [],
     )
     env = FastResetWrapper(
-        MazeSuccessWrapper(
-            ActionWrapper(
-                VisionWrapper(
-                    base_env,
-                    x_dim=size_x,
-                    y_dim=size_y,
+        TimeLimitWrapper(
+            LivingPenaltyWrapper(
+                MazeSuccessWrapper(
+                    Turn90Wrapper(
+                        VisionWrapper(
+                            base_env,
+                            x_dim=size_x,
+                            y_dim=size_y,
+                        ),
+                    ),
+                    goal_selector=select_goal,
+                    reward=1,
+                    radius=2,
                 ),
-                enabled_actions=[
-                    Action.FORWARD,
-                    Action.TURN_LEFT,
-                    Action.TURN_RIGHT,
-                ],
+                penalty_abs=0.0001,
             ),
-            goal_selector=select_goal,
-            reward=0,
-            radius=2,
+            max_timesteps=20000,
         ),
     )
     env = Monitor(env)
