@@ -7,7 +7,6 @@ import numpy as np
 import wandb
 from craftground import craftground
 from craftground.craftground.screen_encoding_modes import ScreenEncodingMode
-from craftground.wrappers.action import ActionWrapper, Action
 from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.time_limit import TimeLimitWrapper
 from craftground.wrappers.vision import VisionWrapper
@@ -55,7 +54,7 @@ def structure_any():
         craftground.make(
             port=8001,
             initialInventoryCommands=[],
-            verbose=False,
+            verbose=True,
             initialPosition=[5, 5, 5],  # nullable
             initialMobsCommands=[],
             imageSizeX=size_x,
@@ -119,50 +118,52 @@ def structure_any():
         video_length=20000,
     )
 
-    if False:
-        model = A2C(
-            "CnnPolicy",
-            env,
-            verbose=1,
-            device=get_device(),
-            tensorboard_log=f"runs/{run.id}",
-        )
+    try:
+        if False:
+            model = A2C(
+                "CnnPolicy",
+                env,
+                verbose=1,
+                device=get_device(),
+                tensorboard_log=f"runs/{run.id}",
+            )
 
-        model.learn(
-            total_timesteps=300000,
-            callback=WandbCallback(
-                gradient_save_freq=100,
-                model_save_path=f"models/{run.id}",
-                verbose=2,
-            ),
-        )
-        # model.save("dqn_sound_husk")
-    else:
-        vec_env = env
-        obs = vec_env.reset()
-        start_time = time.time_ns()
-        for i in range(9000000):
-            # sample one from the action space
-            action = random.sample([0, 1, 2], 1)
-            action = np.array(action)
-            # print(f"Action: {action}")
-            obs, reward, done, info = vec_env.step(action)
-            time_elapsed = max(
-                (time.time_ns() - start_time) / 1e9, sys.float_info.epsilon
+            model.learn(
+                total_timesteps=300000,
+                callback=WandbCallback(
+                    gradient_save_freq=100,
+                    model_save_path=f"models/{run.id}",
+                    verbose=2,
+                ),
             )
-            fps = int(i / time_elapsed)
-            wandb.log(
-                {
-                    "time/iterations": i,
-                    "time/fps": fps,
-                    "time/time_elapsed": int(time_elapsed),
-                    "time/total_timesteps": i,
-                }
-            )
-            if i % 4000 == 0:
-                print(f"Step: {i}")
-    run.finish()
-    base_env.terminate()
+            # model.save("dqn_sound_husk")
+        else:
+            vec_env = env
+            obs = vec_env.reset()
+            start_time = time.time_ns()
+            for i in range(9000000):
+                # sample one from the action space
+                action = random.sample([0, 1, 2], 1)
+                action = np.array(action)
+                # print(f"Action: {action}")
+                obs, reward, done, info = vec_env.step(action)
+                time_elapsed = max(
+                    (time.time_ns() - start_time) / 1e9, sys.float_info.epsilon
+                )
+                fps = int(i / time_elapsed)
+                wandb.log(
+                    {
+                        "time/iterations": i,
+                        "time/fps": fps,
+                        "time/time_elapsed": int(time_elapsed),
+                        "time/total_timesteps": i,
+                    }
+                )
+                if i % 4000 == 0:
+                    print(f"Step: {i}")
+        run.finish()
+    finally:
+        base_env.terminate()
 
 
 if __name__ == "__main__":
