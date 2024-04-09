@@ -54,7 +54,7 @@ def structure_any():
         craftground.make(
             port=8001,
             initialInventoryCommands=[],
-            verbose=True,
+            verbose=False,
             initialPosition=[5, 5, 5],  # nullable
             initialMobsCommands=[],
             imageSizeX=size_x,
@@ -151,14 +151,15 @@ def structure_any():
                     (time.time_ns() - start_time) / 1e9, sys.float_info.epsilon
                 )
                 fps = int(i / time_elapsed)
-                wandb.log(
-                    {
-                        "time/iterations": i,
-                        "time/fps": fps,
-                        "time/time_elapsed": int(time_elapsed),
-                        "time/total_timesteps": i,
-                    }
-                )
+                if i % 512 == 0:
+                    wandb.log(
+                        {
+                            "time/iterations": i,
+                            "time/fps": fps,
+                            "time/time_elapsed": int(time_elapsed),
+                            "time/total_timesteps": i,
+                        }
+                    )
                 if i % 4000 == 0:
                     print(f"Step: {i}")
         run.finish()
