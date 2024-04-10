@@ -24,7 +24,8 @@ class EpisodeLogger(BaseCallback):
         truncated = False
         if infos:
             truncated = infos[0]["TimeLimit.truncated"]
-        if self.locals.get("done_") or (dones and dones[0]) or truncated:
+        done_ = self.locals.get("done_")
+        if (dones and dones[0]) or truncated:
             self.episode += 1
             print(
                 f"done={self.locals.get('done_')} dones={self.locals.get('dones')} rewards={self.locals.get('rewards')}"
