@@ -193,10 +193,10 @@ def generalized_hmaze():
         eval_env,
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
-        eval_freq=200000,
+        eval_freq=40000,
         n_eval_episodes=5,
         deterministic=True,
-        render=True,
+        render=False,
     )
 
     model = RecurrentPPO(
