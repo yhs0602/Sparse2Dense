@@ -1,9 +1,9 @@
 import torch
 
 
-def get_device() -> torch.device:
+def get_device(dev_num: int = 0) -> torch.device:
     if torch.cuda.is_available():
-        device = torch.device("cuda:0")
+        device = torch.device(f"cuda:{dev_num}")
         torch.cuda.empty_cache()
     elif torch.backends.mps.is_built():
         device = torch.device("mps")
