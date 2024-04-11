@@ -178,7 +178,7 @@ def generalized_refactored_hmaze(
         "CnnLstmPolicy",
         env,
         verbose=1,
-        device=get_device(),
+        device=get_device(device_id),
         tensorboard_log=f"runs/{run.id}",
         gae_lambda=0.99,
         ent_coef=0.005,
@@ -208,10 +208,12 @@ def generalized_refactored_hmaze(
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("--goal", type=int, default=2)
-    arg_parser.add_argument("--port1", type=int, default=8001)
-    arg_parser.add_argument("--port2", type=int, default=8002)
-    arg_parser.add_argument("--device-id", type=int, default=0)
+    arg_parser.add_argument("--goal", type=int, default=2, help="Goal index to test")
+    arg_parser.add_argument("--port1", type=int, default=8001, help="Port for training")
+    arg_parser.add_argument("--port2", type=int, default=8002, help="Port for testing")
+    arg_parser.add_argument(
+        "--device-id", type=int, default=0, help="CUDA Device ID for training"
+    )
     args = arg_parser.parse_args()
     TEST_GOAL_IDX = args.goal
     port1 = args.port1
