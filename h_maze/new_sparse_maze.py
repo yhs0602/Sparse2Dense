@@ -216,6 +216,8 @@ if __name__ == "__main__":
     )
     args = arg_parser.parse_args()
     TEST_GOAL_IDX = args.goal
+    TRAIN_GOALS = [goal for i, goal in enumerate(GROUND_GOALS) if i != TEST_GOAL_IDX]
+    TEST_GOAL = GROUND_GOALS[TEST_GOAL_IDX]
     port1 = args.port1
     port2 = args.port2
     device_id = args.device_id
