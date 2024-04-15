@@ -8,7 +8,7 @@ from gymnasium.core import WrapperActType, WrapperObsType, Wrapper
 # - Reward 계산: Potential Based
 #     - Taxicab distance로 계산한 거리 이용
 #     - 스텝 당 리워드: 멀어졌으면 -0.01, 가까워졌으면 0.01
-class DenseMazeSuccessWrapper(Wrapper):
+class DenseMazeWrapper(Wrapper):
     def __init__(
         self,
         env,
