@@ -117,7 +117,8 @@ def wrap_env(env, size_x, size_y, goal_selector) -> gymnasium.Env:
                         ),
                         radius=2,
                     ),
-                    reward=1,
+                    radius=5,
+                    reward=0.001,
                 ),
                 penalty_abs=0.0001,
             ),
@@ -129,7 +130,7 @@ def wrap_env(env, size_x, size_y, goal_selector) -> gymnasium.Env:
 def generalized_refactored_hmaze(
     port1: int = 8001, port2: int = 8002, device_id: int = 0
 ):
-    group_name = f"hcrmaze-generalization{TEST_GOAL_IDX}"
+    group_name = f"hcrmaze-dense_generalization{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
