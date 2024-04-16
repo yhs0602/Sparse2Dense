@@ -12,6 +12,10 @@ from wrappers.maze_selection_wrapper import MazeSelectionWrapper
 #     MazeSelectionWrapper()
 # )
 # )
+
+COOLDOWN = 5
+
+
 class MazeReachCheckAndLogWrapper(Wrapper):
     def __init__(
         self,
@@ -21,7 +25,7 @@ class MazeReachCheckAndLogWrapper(Wrapper):
     ):
         self.env = env
         self.radius = radius
-        self.cooldown = 10
+        self.cooldown = COOLDOWN
         self.reached_goal = False
         self.success_counts = {}
         self.time_took = 0
@@ -57,7 +61,7 @@ class MazeReachCheckAndLogWrapper(Wrapper):
                         f"{goal_str}/time_took": self.time_took,
                     }
                 )
-                self.cooldown = 10
+                self.cooldown = COOLDOWN
                 self.time_took = 0
                 terminated = True
         return (
@@ -75,7 +79,7 @@ class MazeReachCheckAndLogWrapper(Wrapper):
         options: Optional[dict[str, Any]] = None,
     ) -> tuple[WrapperObsType, dict[str, Any]]:
         obs, info = self.env.reset(seed=seed, options=options)
-        self.cooldown = 10
+        self.cooldown = COOLDOWN
         self.time_took = 0
         self.reached_goal = False
         return obs, info

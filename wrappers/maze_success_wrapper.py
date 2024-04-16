@@ -3,6 +3,8 @@ from typing import SupportsFloat, Any, Optional, Tuple, Callable
 import wandb
 from gymnasium.core import WrapperActType, WrapperObsType, Wrapper
 
+COOLDOWN = 5
+
 
 class MazeSuccessWrapper(Wrapper):
     def __init__(
@@ -54,7 +56,7 @@ class MazeSuccessWrapper(Wrapper):
                     }
                 )
                 terminated = True
-                self.cooldown = 10
+                self.cooldown = COOLDOWN
                 self.time_took = 0
 
         return (
@@ -86,5 +88,5 @@ class MazeSuccessWrapper(Wrapper):
             ]
         )
         self.time_took = 0
-        self.cooldown = 10
+        self.cooldown = COOLDOWN
         return obs, info
