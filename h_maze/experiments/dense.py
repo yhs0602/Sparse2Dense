@@ -7,6 +7,7 @@ import wandb
 from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.time_limit import TimeLimitWrapper
 from craftground.wrappers.vision import VisionWrapper
+from gymnasium.wrappers import TimeLimit
 from sb3_contrib import RecurrentPPO
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
@@ -16,9 +17,12 @@ from wandb.integration.sb3 import WandbCallback
 from h_maze.h_maze_env import make_h_maze_env, H_MAZE_GOALS
 from utils.get_device import get_device
 from wrappers.dense_maze_wrapper import DenseMazeWrapper
+from wrappers.episode_logger import EpisodeLoggerWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
+from wrappers.log_flush_wrapper import LogFlushWrapper
 from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
 from wrappers.maze_selection_wrapper import MazeSelectionWrapper
+from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
 
 current_path = os.path.dirname(os.path.abspath(__file__))
@@ -48,36 +52,49 @@ def select_goal_eval():
     return goal
 
 
-def wrap_env(env, size_x, size_y, goal_selector) -> gymnasium.Env:
-    return FastResetWrapper(
-        # Truncate the episode if it takes too long
-        TimeLimitWrapper(
-            # Living penalty
-            LivingPenaltyWrapper(
-                # Dense reward
-                DenseMazeWrapper(
-                    # Checks, Logs, Terminates
-                    MazeReachCheckAndLogWrapper(
-                        # Select goal when reset
-                        MazeSelectionWrapper(
-                            Turn90Wrapper(
-                                VisionWrapper(
-                                    env,
-                                    x_dim=size_x,
-                                    y_dim=size_y,
+def wrap_env(env, size_x, size_y, central_logger, goal_selector) -> gymnasium.Env:
+    return LogFlushWrapper(
+        FastResetWrapper(
+            EpisodeLoggerWrapper(
+                # Truncate the episode if it takes too long
+                TimeLimit(
+                    # Living penalty
+                    LivingPenaltyWrapper(
+                        # Dense reward
+                        DenseMazeWrapper(
+                            SparseRewardWrapper(
+                                # Checks, Logs, Terminates
+                                MazeReachCheckAndLogWrapper(
+                                    # Select goal when reset
+                                    MazeSelectionWrapper(
+                                        PositionLoggingWrapper(
+                                            Turn90Wrapper(
+                                                VisionWrapper(
+                                                    env,
+                                                    x_dim=size_x,
+                                                    y_dim=size_y,
+                                                ),
+                                            ),
+                                            logger=central_logger,
+                                        ),
+                                        goal_selector=goal_selector,
+                                    ),
+                                    radius=2,
+                                    central_logger=central_logger,
                                 ),
+                                reward=1,
                             ),
-                            goal_selector=goal_selector,
+                            radius=5,
+                            reward=0.001,
                         ),
-                        radius=2,
+                        penalty_abs=0.0001,
                     ),
-                    radius=5,
-                    reward=0.001,
+                    max_episode_steps=20000,
                 ),
-                penalty_abs=0.0001,
-            ),
-            max_timesteps=20000,
+                logger=central_logger,
+            )
         ),
+        logger=central_logger,
     )
 
 

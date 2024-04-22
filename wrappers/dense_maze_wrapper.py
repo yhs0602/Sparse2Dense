@@ -2,8 +2,6 @@ from typing import SupportsFloat, Any, Optional
 
 from gymnasium.core import WrapperActType, WrapperObsType, Wrapper
 
-from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
-
 
 # Goal 지점으로부터 일정 거리까지 (거리 5 이내) dense reward를 주고, 에피소드 종료
 #
@@ -13,7 +11,7 @@ from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
 class DenseMazeWrapper(Wrapper):
     def __init__(
         self,
-        env: MazeReachCheckAndLogWrapper,
+        env: Wrapper,
         radius: float,
         reward: float,
         **kwargs,

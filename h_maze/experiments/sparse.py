@@ -109,6 +109,8 @@ def generalized_refactored_hmaze(
     for goal in H_MAZE_GOALS:
         wandb.define_metric(f"{goal}/success_count", summary="max")
         wandb.define_metric(f"{goal}/time_took", step_metric=f"{goal}/success_count")
+    wandb.define_metric("episode/length", summary="max")
+    wandb.define_metric("episode/reward", summary="max")
     size_x = 114
     size_y = 64
 
