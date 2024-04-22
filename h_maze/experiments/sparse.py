@@ -1,12 +1,8 @@
-import os.path
+import argparse
 import random
-from typing import Tuple
 
 import gymnasium
 import wandb
-from craftground import craftground
-from craftground.craftground import CraftGroundEnvironment
-from craftground.craftground.screen_encoding_modes import ScreenEncodingMode
 from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.time_limit import TimeLimitWrapper
 from craftground.wrappers.vision import VisionWrapper
@@ -16,25 +12,14 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
-from utils.check_vglrun import check_vglrun
-from utils.get_device import get_device
+from h_maze.h_maze_env import H_MAZE_GOALS, make_h_maze_env
 from sb3_exts.episode_reward_logger import EpisodeLogger
-from wrappers.turn_90_wrapper import Turn90Wrapper
+from utils.get_device import get_device
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
 from wrappers.maze_selection_wrapper import MazeSelectionWrapper
 from wrappers.sparse_maze_wrapper import SparseMazeWrapper
-
-import argparse
-
-current_path = os.path.dirname(os.path.abspath(__file__))
-map_path = os.path.join(current_path, "hmaze1_colored.nbt")
-
-GROUND_GOALS = [
-    (21, 1, 1),  # 앞쪽
-    (21, 1, 14),  # 앞 오른쪽
-    (3, 1, 14),  # 뒤 오른쪽
-]
+from wrappers.turn_90_wrapper import Turn90Wrapper
 
 # 실험 설명
 # 학습할 때는 저 Goals 중 두 개를 랜덤하게 선택해서 학습합니다.
@@ -43,56 +28,12 @@ GROUND_GOALS = [
 # 3개의 버전을 만들어서 각각 다른 Goal을 학습하고 테스트하도록 합니다.
 
 TEST_GOAL_IDX = 2
-TRAIN_GOALS = [goal for i, goal in enumerate(GROUND_GOALS) if i != TEST_GOAL_IDX]
-TEST_GOAL = GROUND_GOALS[TEST_GOAL_IDX]
+TRAIN_GOALS = [goal for i, goal in enumerate(H_MAZE_GOALS) if i != TEST_GOAL_IDX]
+TEST_GOAL = H_MAZE_GOALS[TEST_GOAL_IDX]
 
 
 def select_goal():
     return random.choice(TRAIN_GOALS)
-
-
-def make_env(
-    port: int, size_x: int, size_y: int
-) -> Tuple[CraftGroundEnvironment, list[str]]:
-    return (
-        craftground.make(
-            port=port,
-            initialInventoryCommands=[],
-            verbose=False,
-            initialPosition=[5, 5, 5],  # nullable
-            initialMobsCommands=[],
-            imageSizeX=size_x,
-            imageSizeY=size_y,
-            visibleSizeX=size_x,
-            visibleSizeY=size_y,
-            seed=12345,  # nullable
-            allowMobSpawn=False,
-            alwaysDay=True,
-            alwaysNight=False,
-            initialWeather="clear",  # nullable
-            isHardCore=False,
-            isWorldFlat=True,  # superflat world
-            obs_keys=[],  # No sound subtitles
-            miscStatKeys=[],  # No stats
-            initialExtraCommands=[
-                "time set noon",
-                "place template minecraft:hmaze1_colored 0 0 0",
-                "tp @p 3 1 1 -90 0",
-                "effect give @p minecraft:speed infinite 2 true",  # speed effect, particle hidden
-            ],  # x y z yaw pitch
-            isHudHidden=True,
-            render_action=False,
-            render_distance=5,
-            simulation_distance=5,
-            structure_paths=[
-                map_path,
-            ],
-            no_pov_effect=True,
-            screen_encoding_mode=ScreenEncodingMode.RAW,
-            use_vglrun=check_vglrun(),
-        ),
-        [],
-    )
 
 
 def wrap_env(env, size_x, size_y, goal_selector) -> gymnasium.Env:
@@ -141,19 +82,19 @@ def generalized_refactored_hmaze(
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional
     )
-    for goal in GROUND_GOALS:
+    for goal in H_MAZE_GOALS:
         wandb.define_metric(f"{goal}/success_count", summary="max")
         wandb.define_metric(f"{goal}/time_took", step_metric=f"{goal}/success_count")
     size_x = 114
     size_y = 64
 
     # Setup train environment
-    base_env, _ = make_env(port1, size_x, size_y)
+    base_env, _ = make_h_maze_env(port1, size_x, size_y)
     env = wrap_env(base_env, size_x, size_y, select_goal)
     env = DummyVecEnv([lambda: env])
 
     # Setup eval environment
-    eval_base_env, _ = make_env(port2, size_x, size_y)
+    eval_base_env, _ = make_h_maze_env(port2, size_x, size_y)
     eval_env = wrap_env(eval_base_env, size_x, size_y, lambda: TEST_GOAL)
     eval_env = DummyVecEnv([lambda: eval_env])
     eval_env = Monitor(eval_env)
@@ -216,8 +157,8 @@ if __name__ == "__main__":
     )
     args = arg_parser.parse_args()
     TEST_GOAL_IDX = args.goal
-    TRAIN_GOALS = [goal for i, goal in enumerate(GROUND_GOALS) if i != TEST_GOAL_IDX]
-    TEST_GOAL = GROUND_GOALS[TEST_GOAL_IDX]
+    TRAIN_GOALS = [goal for i, goal in enumerate(H_MAZE_GOALS) if i != TEST_GOAL_IDX]
+    TEST_GOAL = H_MAZE_GOALS[TEST_GOAL_IDX]
     port1 = args.port1
     port2 = args.port2
     device_id = args.device_id
