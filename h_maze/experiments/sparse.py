@@ -13,6 +13,7 @@ from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
 from h_maze.h_maze_env import H_MAZE_GOALS, make_h_maze_env
+from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
 from wrappers.episode_logger import EpisodeLoggerWrapper
@@ -132,7 +133,7 @@ def generalized_refactored_hmaze(
         eval_env,
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
-        eval_freq=400_000,
+        eval_freq=10,
         n_eval_episodes=6,
         deterministic=True,
         render=False,
@@ -159,7 +160,7 @@ def generalized_refactored_hmaze(
                     verbose=2,
                 ),
                 # EpisodeLogger(),
-                eval_callback,
+                EpisodeStartCallback(eval_callback),
             ],
         )
         model.save(f"{group_name}.ckpt")
