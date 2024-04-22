@@ -1,0 +1,32 @@
+from typing import List
+
+import gymnasium
+from gymnasium import Env
+
+
+class RewardTransitionWrapper(gymnasium.Wrapper):
+    """
+    A wrapper that modifies the reward based on the episode count.
+    :param env: The environment
+    :param reward_envs: A list of reward environments to apply to the environment
+    (observation, reward, terminated, truncated, info) -> reward
+    :param transition_timings: A list of timings in episode to transition between reward environments
+    len(transition_timings) == len(reward_envs) - 1
+    The episode number starts from 1
+    For example, if reward_envs = [env1, env2, env3] and transition_timings = [10, 20],
+    the reward environment will be env1 for episodes 1-10, env2 for episodes 11-20, and env3 for episodes 21 onwards
+    """
+
+    def __init__(self, reward_envs: List[Env], transition_timings: List[int], **kwargs):
+        super().__init__(reward_envs[0])
+        self.episode_count = 0
+        self.reward_envs = reward_envs
+        self.transition_timings = transition_timings
+        self.env_idx = 0
+
+    def reset(self, **kwargs):
+        self.episode_count += 1
+        if self.episode_count >= self.transition_timings[self.env_idx]:
+            self.env_idx += 1
+        self.env = self.reward_envs[self.env_idx]
+        return self.env.reset(**kwargs)
