@@ -25,6 +25,5 @@ class PositionLoggingWrapper(gymnasium.Wrapper):
     def reset(self, **kwargs):
         ret = self.env.reset(**kwargs)
         self.logger.log({"episode/positions": self.position_log})
-        self.logger.end_episode()  # Idempotent
         self.position_log = []
         return ret
