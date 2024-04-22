@@ -50,6 +50,17 @@ def select_goal():
     return random.choice(TRAIN_GOALS)
 
 
+eval_idx = 0
+
+
+def select_goal_eval():
+    global eval_idx
+
+    goal = GROUND_GOALS[eval_idx % 3]
+    eval_idx += 1
+    return goal
+
+
 def make_env(
     port: int, size_x: int, size_y: int
 ) -> Tuple[CraftGroundEnvironment, list[str]]:
@@ -130,7 +141,7 @@ def wrap_env(env, size_x, size_y, goal_selector) -> gymnasium.Env:
 def generalized_refactored_hmaze(
     port1: int = 8001, port2: int = 8002, device_id: int = 0
 ):
-    group_name = f"hcrmaze-dense_generalization{TEST_GOAL_IDX}"
+    group_name = f"hcrmaze-spdense_generalization{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -154,7 +165,7 @@ def generalized_refactored_hmaze(
 
     # Setup eval environment
     eval_base_env, _ = make_env(port2, size_x, size_y)
-    eval_env = wrap_env(eval_base_env, size_x, size_y, lambda: TEST_GOAL)
+    eval_env = wrap_env(eval_base_env, size_x, size_y, select_goal_eval)
     eval_env = DummyVecEnv([lambda: eval_env])
     eval_env = Monitor(eval_env)
     eval_env = VecVideoRecorder(

@@ -4,7 +4,7 @@ from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.time_limit import TimeLimitWrapper
 from stable_baselines3 import DQN
 
-from avoid_damage import AvoidDamageWrapper
+from old_examples.avoid_damage import AvoidDamageWrapper
 from ksc_experiments.avoid_husk_wrapper import AvoidHuskWrapper
 from ksc_experiments.ksc_env import ContinuousHuskEnvironment
 from ksc_experiments.runner import run_ksc_experiment

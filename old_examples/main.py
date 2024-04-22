@@ -3,13 +3,13 @@ from craftground.wrappers.action import ActionWrapper, Action
 from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.time_limit import TimeLimitWrapper
 from craftground.wrappers.vision import VisionWrapper
-from stable_baselines3 import A2C, DQN
+from stable_baselines3 import DQN
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
 import wandb
-from avoid_damage import AvoidDamageWrapper
+from old_examples.avoid_damage import AvoidDamageWrapper
 
 
 def main():

@@ -9,7 +9,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
-from avoid_damage import AvoidDamageWrapper
+from old_examples.avoid_damage import AvoidDamageWrapper
 
 
 def main():

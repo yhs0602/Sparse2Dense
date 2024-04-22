@@ -53,7 +53,7 @@ def structure_any():
             render_distance=5,
             simulation_distance=5,
             structure_paths=[
-                os.path.abspath("portable_maze.nbt"),
+                os.path.abspath("../h_maze/portable_maze.nbt"),
             ],
         ),
         [],
