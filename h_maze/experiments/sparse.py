@@ -84,7 +84,7 @@ def wrap_env(
                         ),
                         penalty_abs=0.0001,
                     ),
-                    max_episode_steps=4000,
+                    max_episode_steps=20000,
                 ),
                 logger=central_logger,
             )
@@ -138,15 +138,15 @@ def generalized_refactored_hmaze(
     eval_env = VecVideoRecorder(
         eval_env,
         f"videos/{run.id}",
-        record_video_trigger=lambda x: x % 4000 == 0,
-        video_length=4000,
+        record_video_trigger=lambda x: x % 20000 == 0,
+        video_length=20000,
     )
 
     eval_callback = EvalCallback(
         eval_env,
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
-        eval_freq=10,
+        eval_freq=100,
         n_eval_episodes=6,
         deterministic=True,
         render=False,

@@ -155,7 +155,7 @@ def generalized_refactored_hmaze(
         eval_env,
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
-        eval_freq=10,
+        eval_freq=100,
         n_eval_episodes=6,
         deterministic=True,
         render=False,
