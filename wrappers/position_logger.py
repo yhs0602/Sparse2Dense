@@ -18,7 +18,7 @@ class PositionLoggingWrapper(gymnasium.Wrapper):
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
         info_obs = info["obs"]
-        pos = (info_obs.x, info_obs.y, info_obs.z)
+        pos = (info_obs.x, info_obs.y, info_obs.z, info_obs.yaw)
         self.position_log.append(pos)
         return observation, reward, terminated, truncated, info
 
