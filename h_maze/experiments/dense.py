@@ -5,7 +5,6 @@ import random
 import gymnasium
 import wandb
 from craftground.wrappers.fast_reset import FastResetWrapper
-from craftground.wrappers.time_limit import TimeLimitWrapper
 from craftground.wrappers.vision import VisionWrapper
 from gymnasium.wrappers import TimeLimit
 from sb3_contrib import RecurrentPPO
@@ -15,6 +14,8 @@ from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
 from h_maze.h_maze_env import make_h_maze_env, H_MAZE_GOALS
+from sb3_exts.episode_start_callback import EpisodeStartCallback
+from utils.central_logger import CentralLogger
 from utils.get_device import get_device
 from wrappers.dense_maze_wrapper import DenseMazeWrapper
 from wrappers.episode_logger import EpisodeLoggerWrapper
@@ -22,6 +23,7 @@ from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.log_flush_wrapper import LogFlushWrapper
 from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
 from wrappers.maze_selection_wrapper import MazeSelectionWrapper
+from wrappers.position_logger import PositionLoggingWrapper
 from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
 
@@ -101,7 +103,7 @@ def wrap_env(env, size_x, size_y, central_logger, goal_selector) -> gymnasium.En
 def generalized_refactored_hmaze(
     port1: int = 8001, port2: int = 8002, device_id: int = 0
 ):
-    group_name = f"hcrmaze-spdense_generalization{TEST_GOAL_IDX}"
+    group_name = f"h-dense-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -112,20 +114,23 @@ def generalized_refactored_hmaze(
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional
     )
+    central_logger = CentralLogger()
     for goal in H_MAZE_GOALS:
         wandb.define_metric(f"{goal}/success_count", summary="max")
         wandb.define_metric(f"{goal}/time_took", step_metric=f"{goal}/success_count")
+    wandb.define_metric("episode/length", summary="max")
+    wandb.define_metric("episode/reward", summary="max")
     size_x = 114
     size_y = 64
 
     # Setup train environment
     base_env, _ = make_h_maze_env(port1, size_x, size_y)
-    env = wrap_env(base_env, size_x, size_y, select_goal)
+    env = wrap_env(base_env, size_x, size_y, central_logger, select_goal)
     env = DummyVecEnv([lambda: env])
 
     # Setup eval environment
     eval_base_env, _ = make_h_maze_env(port2, size_x, size_y)
-    eval_env = wrap_env(eval_base_env, size_x, size_y, select_goal_eval)
+    eval_env = wrap_env(eval_base_env, size_x, size_y, central_logger, select_goal_eval)
     eval_env = DummyVecEnv([lambda: eval_env])
     eval_env = Monitor(eval_env)
     eval_env = VecVideoRecorder(
@@ -139,7 +144,7 @@ def generalized_refactored_hmaze(
         eval_env,
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
-        eval_freq=400_000,
+        eval_freq=10,
         n_eval_episodes=6,
         deterministic=True,
         render=False,
@@ -166,7 +171,7 @@ def generalized_refactored_hmaze(
                     verbose=2,
                 ),
                 # EpisodeLogger(),
-                eval_callback,
+                EpisodeStartCallback(eval_callback),
             ],
         )
         model.save(f"{group_name}.ckpt")
