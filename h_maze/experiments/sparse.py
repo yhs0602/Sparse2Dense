@@ -18,7 +18,7 @@ from utils.get_device import get_device
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
 from wrappers.maze_selection_wrapper import MazeSelectionWrapper
-from wrappers.sparse_maze_wrapper import SparseMazeWrapper
+from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
 
 # 실험 설명
@@ -43,7 +43,7 @@ def wrap_env(env, size_x, size_y, goal_selector) -> gymnasium.Env:
             # Living penalty
             LivingPenaltyWrapper(
                 # Sparse reward
-                SparseMazeWrapper(
+                SparseRewardWrapper(
                     # Checks, Logs, Terminates
                     MazeReachCheckAndLogWrapper(
                         # Select goal when reset

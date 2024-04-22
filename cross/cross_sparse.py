@@ -25,7 +25,7 @@ from sb3_exts.episode_start_callback import EpisodeStartCallback
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
 from wrappers.maze_selection_wrapper import MazeSelectionWrapper
-from wrappers.sparse_maze_wrapper import SparseMazeWrapper
+from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 
 current_path = os.path.dirname(os.path.abspath(__file__))
 map_path = os.path.join(current_path, "cross.nbt")
@@ -112,7 +112,7 @@ def wrap_env(env, size_x, size_y, goal_selector) -> gymnasium.Env:
             # Living penalty
             LivingPenaltyWrapper(
                 # Sparse reward
-                SparseMazeWrapper(
+                SparseRewardWrapper(
                     # Checks, Logs, Terminates
                     MazeReachCheckAndLogWrapper(
                         # Select goal when reset

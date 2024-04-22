@@ -5,14 +5,15 @@ import time
 import numpy as np
 import wandb
 from craftground.wrappers.fast_reset import FastResetWrapper
-from craftground.wrappers.time_limit import TimeLimitWrapper
-from craftground.wrappers.vision import VisionWrapper
+from gymnasium.wrappers import TimeLimit
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 
 from h_maze.h_maze_env import H_MAZE_GOALS, make_h_maze_env
 from wrappers.living_penalty import LivingPenaltyWrapper
-from wrappers.maze_success_wrapper import MazeSuccessWrapper
+from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
+from wrappers.maze_selection_wrapper import MazeSelectionWrapper
+from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
 
 
@@ -29,7 +30,7 @@ def h_maze_random():
         group="hmaze-noreward-random-goal",
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
-        save_code=True,  # optional    save_code=True,  # optional
+        save_code=True,  # optional
     )
     for goal in H_MAZE_GOALS:
         wandb.define_metric(f"{goal}/success_count", summary="max")
@@ -38,23 +39,21 @@ def h_maze_random():
     size_y = 64
     base_env, _ = make_h_maze_env(port=8001, size_x=size_x, size_y=size_y)
     env = FastResetWrapper(
-        TimeLimitWrapper(
+        TimeLimit(
             LivingPenaltyWrapper(
-                MazeSuccessWrapper(
-                    Turn90Wrapper(
-                        VisionWrapper(
-                            base_env,
-                            x_dim=size_x,
-                            y_dim=size_y,
+                SparseRewardWrapper(
+                    MazeReachCheckAndLogWrapper(
+                        MazeSelectionWrapper(
+                            Turn90Wrapper(base_env),
+                            goal_selector=select_goal,
                         ),
+                        radius=2,
                     ),
-                    goal_selector=select_goal,
                     reward=1,
-                    radius=2,
                 ),
                 penalty_abs=0.0001,
             ),
-            max_timesteps=20000,
+            max_episode_steps=20000,
         ),
     )
     env = Monitor(env)

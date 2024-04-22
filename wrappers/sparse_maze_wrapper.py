@@ -11,7 +11,7 @@ from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
 #     MazeSelectionWrapper()
 # )
 # )
-class SparseMazeWrapper(Wrapper):
+class SparseRewardWrapper(Wrapper):
     def __init__(
         self,
         env: MazeReachCheckAndLogWrapper,
