@@ -14,7 +14,6 @@ from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
 from h_maze.h_maze_env import make_h_maze_env, H_MAZE_GOALS
-from sb3_exts.episode_reward_logger import EpisodeLogger
 from utils.get_device import get_device
 from wrappers.dense_maze_wrapper import DenseMazeWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
@@ -124,7 +123,7 @@ def generalized_refactored_hmaze(
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
         eval_freq=400_000,
-        n_eval_episodes=5,
+        n_eval_episodes=6,
         deterministic=True,
         render=False,
     )
@@ -149,7 +148,7 @@ def generalized_refactored_hmaze(
                     model_save_path=f"models/{run.id}",
                     verbose=2,
                 ),
-                EpisodeLogger(),
+                # EpisodeLogger(),
                 eval_callback,
             ],
         )

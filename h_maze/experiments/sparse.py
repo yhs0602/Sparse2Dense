@@ -4,8 +4,8 @@ import random
 import gymnasium
 import wandb
 from craftground.wrappers.fast_reset import FastResetWrapper
-from craftground.wrappers.time_limit import TimeLimitWrapper
 from craftground.wrappers.vision import VisionWrapper
+from gymnasium.wrappers import TimeLimit
 from sb3_contrib import RecurrentPPO
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
@@ -13,19 +13,20 @@ from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
 from h_maze.h_maze_env import H_MAZE_GOALS, make_h_maze_env
-from sb3_exts.episode_reward_logger import EpisodeLogger
+from utils.central_logger import CentralLogger
 from utils.get_device import get_device
+from wrappers.episode_logger import EpisodeLoggerWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
+from wrappers.log_flush_wrapper import LogFlushWrapper
 from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
 from wrappers.maze_selection_wrapper import MazeSelectionWrapper
+from wrappers.position_logger import PositionLoggingWrapper
 from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
 
 # 실험 설명
 # 학습할 때는 저 Goals 중 두 개를 랜덤하게 선택해서 학습합니다.
-# 학습이 끝나면 나머지 하나의 Goal을 선택해서 테스트합니다.
-# 근데 랜덤하게 한다기보다는 어차피 두 개를 학습하고 나머지 하나를 테스트하는 것이므로
-# 3개의 버전을 만들어서 각각 다른 Goal을 학습하고 테스트하도록 합니다.
+# 학습이 끝나면 3개의 Goals에 대해 전부 테스트합니다.
 
 TEST_GOAL_IDX = 2
 TRAIN_GOALS = [goal for i, goal in enumerate(H_MAZE_GOALS) if i != TEST_GOAL_IDX]
@@ -36,42 +37,63 @@ def select_goal():
     return random.choice(TRAIN_GOALS)
 
 
-def wrap_env(env, size_x, size_y, goal_selector) -> gymnasium.Env:
-    return FastResetWrapper(
-        # Truncate the episode if it takes too long
-        TimeLimitWrapper(
-            # Living penalty
-            LivingPenaltyWrapper(
-                # Sparse reward
-                SparseRewardWrapper(
-                    # Checks, Logs, Terminates
-                    MazeReachCheckAndLogWrapper(
-                        # Select goal when reset
-                        MazeSelectionWrapper(
-                            Turn90Wrapper(
-                                VisionWrapper(
-                                    env,
-                                    x_dim=size_x,
-                                    y_dim=size_y,
+eval_idx = 0
+
+
+def select_goal_eval():
+    global eval_idx
+
+    goal = H_MAZE_GOALS[eval_idx % 3]
+    eval_idx += 1
+    return goal
+
+
+def wrap_env(env, size_x, size_y, central_logger, goal_selector) -> gymnasium.Env:
+    return LogFlushWrapper(
+        FastResetWrapper(
+            EpisodeLoggerWrapper(
+                # Truncate the episode if it takes too long
+                TimeLimit(
+                    # Living penalty
+                    LivingPenaltyWrapper(
+                        # Sparse reward
+                        SparseRewardWrapper(
+                            # Checks, Logs, Terminates
+                            MazeReachCheckAndLogWrapper(
+                                # Select goal when reset
+                                MazeSelectionWrapper(
+                                    PositionLoggingWrapper(
+                                        Turn90Wrapper(
+                                            VisionWrapper(
+                                                env,
+                                                x_dim=size_x,
+                                                y_dim=size_y,
+                                            ),
+                                        ),
+                                        logger=central_logger,
+                                    ),
+                                    goal_selector=goal_selector,
                                 ),
+                                radius=2,
+                                central_logger=central_logger,
                             ),
-                            goal_selector=goal_selector,
+                            reward=1,
                         ),
-                        radius=2,
+                        penalty_abs=0.0001,
                     ),
-                    reward=1,
+                    max_episode_steps=20000,
                 ),
-                penalty_abs=0.0001,
-            ),
-            max_timesteps=20000,
+                logger=central_logger,
+            )
         ),
+        logger=central_logger,
     )
 
 
 def generalized_refactored_hmaze(
     port1: int = 8001, port2: int = 8002, device_id: int = 0
 ):
-    group_name = f"hcrmaze-generalization{TEST_GOAL_IDX}"
+    group_name = f"h-sparse-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -82,6 +104,7 @@ def generalized_refactored_hmaze(
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional
     )
+    central_logger = CentralLogger()
     for goal in H_MAZE_GOALS:
         wandb.define_metric(f"{goal}/success_count", summary="max")
         wandb.define_metric(f"{goal}/time_took", step_metric=f"{goal}/success_count")
@@ -90,12 +113,12 @@ def generalized_refactored_hmaze(
 
     # Setup train environment
     base_env, _ = make_h_maze_env(port1, size_x, size_y)
-    env = wrap_env(base_env, size_x, size_y, select_goal)
+    env = wrap_env(base_env, size_x, size_y, central_logger, select_goal)
     env = DummyVecEnv([lambda: env])
 
     # Setup eval environment
     eval_base_env, _ = make_h_maze_env(port2, size_x, size_y)
-    eval_env = wrap_env(eval_base_env, size_x, size_y, lambda: TEST_GOAL)
+    eval_env = wrap_env(eval_base_env, size_x, size_y, central_logger, select_goal_eval)
     eval_env = DummyVecEnv([lambda: eval_env])
     eval_env = Monitor(eval_env)
     eval_env = VecVideoRecorder(
@@ -110,7 +133,7 @@ def generalized_refactored_hmaze(
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
         eval_freq=400_000,
-        n_eval_episodes=5,
+        n_eval_episodes=6,
         deterministic=True,
         render=False,
     )
@@ -135,7 +158,7 @@ def generalized_refactored_hmaze(
                     model_save_path=f"models/{run.id}",
                     verbose=2,
                 ),
-                EpisodeLogger(),
+                # EpisodeLogger(),
                 eval_callback,
             ],
         )

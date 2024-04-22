@@ -32,7 +32,7 @@ def h_maze_random():
         project="craftground-sb3",
         entity="jourhyang123",
         # track hyperparameters and run metadata
-        group="hmaze-noreward-random-goal",
+        group="h-random",
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional
@@ -63,7 +63,6 @@ def h_maze_random():
                                                 y_dim=size_y,
                                             )
                                         ),
-                                        goal_selector=select_goal,
                                         logger=central_logger,
                                     ),
                                     goal_selector=select_goal,
