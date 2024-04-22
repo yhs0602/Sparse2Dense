@@ -15,11 +15,11 @@ maze_str = [
     "oxoxxxxxxxxxxoxo",
     "oxoxxxxxxxxxxoxo",
     "oxoxxxxxxxxxxoxo",
-    "oxoxxxxxxxxxxoxo",
-    "oxoxxxxxxxxxxoxo",
     "oxooooooooooooxo",
     "oxxxxxxxxxxxxxxo",  # 통로
     "oxooooooooooooxo",
+    "oxoxxxxxxxxxxoxo",
+    "oxoxxxxxxxxxxoxo",
     "oxoxxxxxxxxxxoxo",
     "oxoxxxxxxxxxxoxo",
     "oxoxxxxxxxxxxoxo",
@@ -34,9 +34,14 @@ assert len(maze_str) == 21
 # start point: 3 1 1 > 0 0 0
 
 
-def create_video_from_positions(maze, positions, episode_id, frame_rate=1000):
+def create_video_from_positions(
+    maze, x_offset, y_offset, positions, episode_id, frame_rate=1000
+):
     pygame.init()
-    width, height = 160, 210
+    maze_size_w, maze_size_h = len(maze[0]), len(maze)
+    width, height = (maze_size_w + abs(x_offset)) * 10, (
+        maze_size_h + abs(y_offset)
+    ) * 10
     screen = pygame.display.set_mode((width, height))
     clock = pygame.time.Clock()
 
@@ -77,7 +82,9 @@ def create_video_from_positions(maze, positions, episode_id, frame_rate=1000):
         for y, row in enumerate(maze):
             for x, cell in enumerate(row):
                 color = (0, 0, 0) if cell == "o" else (0, 255, 0)
-                pygame.draw.rect(screen, color, (x * 10, y * 10, 10, 10))
+                pygame.draw.rect(
+                    screen, color, ((x + x_offset) * 10, (y + y_offset) * 10, 10, 10)
+                )
         y, z, x = position
         pygame.draw.circle(
             screen, (255, 0, 0), (int(x) * 10 + 5, int(y) * 10 + 5), 5
@@ -112,7 +119,7 @@ def make_movie():
     n = 0
     for episode_id, episode_data in enumerate(data):
         positions = episode_data["episode/positions"]
-        create_video_from_positions(maze_str, positions, episode_id)
+        create_video_from_positions(maze_str, 0, 2, positions, episode_id)
         n += 1
         if n >= 3:
             break
