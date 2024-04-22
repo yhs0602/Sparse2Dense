@@ -5,9 +5,9 @@ from craftground.wrappers.time_limit import TimeLimitWrapper
 from stable_baselines3 import DQN
 
 from old_examples.avoid_damage import AvoidDamageWrapper
-from ksc_experiments.avoid_husk_wrapper import AvoidHuskWrapper
-from ksc_experiments.ksc_env import ContinuousHuskEnvironment
-from ksc_experiments.runner import run_ksc_experiment
+from old_examples.ksc_experiments.avoid_husk_wrapper import AvoidHuskWrapper
+from old_examples.ksc_experiments.ksc_env import ContinuousHuskEnvironment
+from old_examples.ksc_experiments.runner import run_ksc_experiment
 
 if __name__ == "__main__":
     env, sound_list = ContinuousHuskEnvironment().make(

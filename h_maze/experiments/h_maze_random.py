@@ -1,21 +1,22 @@
 import os.path
 import random
+import sys
+import time
 
+import numpy as np
 import wandb
 from craftground import craftground
 from craftground.craftground.screen_encoding_modes import ScreenEncodingMode
 from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.time_limit import TimeLimitWrapper
 from craftground.wrappers.vision import VisionWrapper
-from sb3_contrib import RecurrentPPO
+from stable_baselines3 import A2C
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
-from check_vglrun import check_vglrun
-from get_device import get_device
-from h_maze.episode_reward_logger import EpisodeLogger
-from h_maze.turn_90_wrapper import Turn90Wrapper
+from utils.check_vglrun import check_vglrun
+from wrappers.turn_90_wrapper import Turn90Wrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.maze_success_wrapper import MazeSuccessWrapper
 
@@ -33,17 +34,16 @@ def select_goal():
     return random.choice(GOALS)
 
 
-def hmaze_rppo_sparse():
-    group_name = "hcrmaze-gae0.99-ent0.005step512-sparse"
+def structure_any():
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
         entity="jourhyang123",
         # track hyperparameters and run metadata
-        group=group_name,
+        group="hmaze-noreward-random-goal",
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
-        save_code=True,  # optional
+        save_code=True,  # optional    save_code=True,  # optional
     )
     for goal in GOALS:
         wandb.define_metric(f"{goal}/success_count", summary="max")
@@ -109,43 +109,63 @@ def hmaze_rppo_sparse():
             max_timesteps=20000,
         ),
     )
-    env = DummyVecEnv([lambda: env])
     env = Monitor(env)
+    env = DummyVecEnv([lambda: env])
     env = VecVideoRecorder(
         env,
         f"videos/{run.id}",
-        record_video_trigger=lambda x: x % 20000 == 0,
+        record_video_trigger=lambda x: x % 400000 == 0,
         video_length=20000,
     )
 
-    model = RecurrentPPO(
-        "CnnLstmPolicy",
-        env,
-        verbose=1,
-        device=get_device(),
-        tensorboard_log=f"runs/{run.id}",
-        gae_lambda=0.99,
-        ent_coef=0.005,
-        n_steps=512,
-    )
-
     try:
-        model.learn(
-            total_timesteps=6000000,
-            callback=[
-                WandbCallback(
-                    gradient_save_freq=500,
+        if False:
+            model = A2C(
+                "CnnPolicy",
+                env,
+                verbose=1,
+                device=get_device(),
+                tensorboard_log=f"runs/{run.id}",
+            )
+
+            model.learn(
+                total_timesteps=300000,
+                callback=WandbCallback(
+                    gradient_save_freq=100,
                     model_save_path=f"models/{run.id}",
                     verbose=2,
                 ),
-                EpisodeLogger(),
-            ],
-        )
-        model.save(f"{group_name}.ckpt")
+            )
+            # model.save("dqn_sound_husk")
+        else:
+            vec_env = env
+            obs = vec_env.reset()
+            start_time = time.time_ns()
+            for i in range(9000000):
+                # sample one from the action space
+                action = random.sample([0, 1, 2], 1)
+                action = np.array(action)
+                # print(f"Action: {action}")
+                obs, reward, done, info = vec_env.step(action)
+                time_elapsed = max(
+                    (time.time_ns() - start_time) / 1e9, sys.float_info.epsilon
+                )
+                fps = int(i / time_elapsed)
+                if i % 512 == 0:
+                    wandb.log(
+                        {
+                            "time/iterations": i,
+                            "time/fps": fps,
+                            "time/time_elapsed": int(time_elapsed),
+                            "time/total_timesteps": i,
+                        }
+                    )
+                if i % 4000 == 0:
+                    print(f"Step: {i}")
         run.finish()
     finally:
         base_env.terminate()
 
 
 if __name__ == "__main__":
-    hmaze_rppo_sparse()
+    structure_any()

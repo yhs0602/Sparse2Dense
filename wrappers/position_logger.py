@@ -1,6 +1,6 @@
 import gymnasium
 
-from central_logger import CentralLogger
+from utils.central_logger import CentralLogger
 
 
 class PositionLoggingWrapper(gymnasium.Wrapper):

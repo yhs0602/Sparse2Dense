@@ -17,10 +17,10 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
-from check_vglrun import check_vglrun
-from get_device import get_device
-from h_maze.episode_reward_logger import EpisodeLogger
-from h_maze.turn_90_wrapper import Turn90Wrapper
+from utils.check_vglrun import check_vglrun
+from utils.get_device import get_device
+from sb3_exts.episode_reward_logger import EpisodeLogger
+from wrappers.turn_90_wrapper import Turn90Wrapper
 from sb3_exts.episode_start_callback import EpisodeStartCallback
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper

@@ -1,8 +1,12 @@
+import argparse
 import os.path
 import random
+from typing import Tuple
 
+import gymnasium
 import wandb
 from craftground import craftground
+from craftground.craftground import CraftGroundEnvironment
 from craftground.craftground.screen_encoding_modes import ScreenEncodingMode
 from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.time_limit import TimeLimitWrapper
@@ -13,12 +17,14 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
-from check_vglrun import check_vglrun
-from get_device import get_device
-from h_maze.episode_reward_logger import EpisodeLogger
-from h_maze.turn_90_wrapper import Turn90Wrapper
+from utils.check_vglrun import check_vglrun
+from utils.get_device import get_device
+from sb3_exts.episode_reward_logger import EpisodeLogger
+from wrappers.turn_90_wrapper import Turn90Wrapper
+from wrappers.dense_maze_wrapper import DenseMazeWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
-from wrappers.maze_success_wrapper import MazeSuccessWrapper
+from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
+from wrappers.maze_selection_wrapper import MazeSelectionWrapper
 
 current_path = os.path.dirname(os.path.abspath(__file__))
 map_path = os.path.join(current_path, "hmaze1_colored.nbt")
@@ -44,8 +50,98 @@ def select_goal():
     return random.choice(TRAIN_GOALS)
 
 
-def generalized_hmaze():
-    group_name = f"hcrmaze-generalization{TEST_GOAL_IDX}"
+eval_idx = 0
+
+
+def select_goal_eval():
+    global eval_idx
+
+    goal = GROUND_GOALS[eval_idx % 3]
+    eval_idx += 1
+    return goal
+
+
+def make_env(
+    port: int, size_x: int, size_y: int
+) -> Tuple[CraftGroundEnvironment, list[str]]:
+    return (
+        craftground.make(
+            port=port,
+            initialInventoryCommands=[],
+            verbose=False,
+            initialPosition=[5, 5, 5],  # nullable
+            initialMobsCommands=[],
+            imageSizeX=size_x,
+            imageSizeY=size_y,
+            visibleSizeX=size_x,
+            visibleSizeY=size_y,
+            seed=12345,  # nullable
+            allowMobSpawn=False,
+            alwaysDay=True,
+            alwaysNight=False,
+            initialWeather="clear",  # nullable
+            isHardCore=False,
+            isWorldFlat=True,  # superflat world
+            obs_keys=[],  # No sound subtitles
+            miscStatKeys=[],  # No stats
+            initialExtraCommands=[
+                "time set noon",
+                "place template minecraft:hmaze1_colored 0 0 0",
+                "tp @p 3 1 1 -90 0",
+                "effect give @p minecraft:speed infinite 2 true",  # speed effect, particle hidden
+            ],  # x y z yaw pitch
+            isHudHidden=True,
+            render_action=False,
+            render_distance=5,
+            simulation_distance=5,
+            structure_paths=[
+                map_path,
+            ],
+            no_pov_effect=True,
+            screen_encoding_mode=ScreenEncodingMode.RAW,
+            use_vglrun=check_vglrun(),
+        ),
+        [],
+    )
+
+
+def wrap_env(env, size_x, size_y, goal_selector) -> gymnasium.Env:
+    return FastResetWrapper(
+        # Truncate the episode if it takes too long
+        TimeLimitWrapper(
+            # Living penalty
+            LivingPenaltyWrapper(
+                # Dense reward
+                DenseMazeWrapper(
+                    # Checks, Logs, Terminates
+                    MazeReachCheckAndLogWrapper(
+                        # Select goal when reset
+                        MazeSelectionWrapper(
+                            Turn90Wrapper(
+                                VisionWrapper(
+                                    env,
+                                    x_dim=size_x,
+                                    y_dim=size_y,
+                                ),
+                            ),
+                            goal_selector=goal_selector,
+                        ),
+                        radius=2,
+                    ),
+                    radius=5,
+                    reward=0.001,
+                ),
+                penalty_abs=0.0001,
+            ),
+            max_timesteps=20000,
+        ),
+    )
+
+
+def generalized_refactored_hmaze(
+    port1: int = 8001, port2: int = 8002, device_id: int = 0
+):
+    group_name = f"hcrmaze-spdense_generalization{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -61,126 +157,15 @@ def generalized_hmaze():
         wandb.define_metric(f"{goal}/time_took", step_metric=f"{goal}/success_count")
     size_x = 114
     size_y = 64
-    base_env, sound_list = (
-        craftground.make(
-            port=8001,
-            initialInventoryCommands=[],
-            verbose=False,
-            initialPosition=[5, 5, 5],  # nullable
-            initialMobsCommands=[],
-            imageSizeX=size_x,
-            imageSizeY=size_y,
-            visibleSizeX=size_x,
-            visibleSizeY=size_y,
-            seed=12345,  # nullable
-            allowMobSpawn=False,
-            alwaysDay=True,
-            alwaysNight=False,
-            initialWeather="clear",  # nullable
-            isHardCore=False,
-            isWorldFlat=True,  # superflat world
-            obs_keys=[],  # No sound subtitles
-            miscStatKeys=[],  # No stats
-            initialExtraCommands=[
-                "time set noon",
-                "place template minecraft:hmaze1_colored 0 0 0",
-                "tp @p 3 1 1 -90 0",
-                "effect give @p minecraft:speed infinite 2 true",  # speed effect, particle hidden
-            ],  # x y z yaw pitch
-            isHudHidden=True,
-            render_action=False,
-            render_distance=5,
-            simulation_distance=5,
-            structure_paths=[
-                map_path,
-            ],
-            no_pov_effect=True,
-            screen_encoding_mode=ScreenEncodingMode.RAW,
-            use_vglrun=check_vglrun(),
-        ),
-        [],
-    )
-    env = FastResetWrapper(
-        TimeLimitWrapper(
-            LivingPenaltyWrapper(
-                MazeSuccessWrapper(
-                    Turn90Wrapper(
-                        VisionWrapper(
-                            base_env,
-                            x_dim=size_x,
-                            y_dim=size_y,
-                        ),
-                    ),
-                    goal_selector=select_goal,
-                    reward=1,
-                    radius=2,
-                ),
-                penalty_abs=0.0001,
-            ),
-            max_timesteps=20000,
-        ),
-    )
+
+    # Setup train environment
+    base_env, _ = make_env(port1, size_x, size_y)
+    env = wrap_env(base_env, size_x, size_y, select_goal)
     env = DummyVecEnv([lambda: env])
 
-    eval_base_env, _ = (
-        craftground.make(
-            port=8002,
-            initialInventoryCommands=[],
-            verbose=False,
-            initialPosition=[5, 5, 5],  # nullable
-            initialMobsCommands=[],
-            imageSizeX=size_x,
-            imageSizeY=size_y,
-            visibleSizeX=size_x,
-            visibleSizeY=size_y,
-            seed=12345,  # nullable
-            allowMobSpawn=False,
-            alwaysDay=True,
-            alwaysNight=False,
-            initialWeather="clear",  # nullable
-            isHardCore=False,
-            isWorldFlat=True,  # superflat world
-            obs_keys=[],  # No sound subtitles
-            miscStatKeys=[],  # No stats
-            initialExtraCommands=[
-                "time set noon",
-                "place template minecraft:hmaze1_colored 0 0 0",
-                "tp @p 3 1 1 -90 0",
-                "effect give @p minecraft:speed infinite 2 true",  # speed effect, particle hidden
-            ],  # x y z yaw pitch
-            isHudHidden=True,
-            render_action=False,
-            render_distance=5,
-            simulation_distance=5,
-            structure_paths=[
-                map_path,
-            ],
-            no_pov_effect=True,
-            screen_encoding_mode=ScreenEncodingMode.RAW,
-            use_vglrun=check_vglrun(),
-        ),
-        [],
-    )
-    eval_env = FastResetWrapper(
-        TimeLimitWrapper(
-            LivingPenaltyWrapper(
-                MazeSuccessWrapper(
-                    Turn90Wrapper(
-                        VisionWrapper(
-                            base_env,
-                            x_dim=size_x,
-                            y_dim=size_y,
-                        ),
-                    ),
-                    goal_selector=lambda: TEST_GOAL,
-                    reward=1,
-                    radius=2,
-                ),
-                penalty_abs=0.0001,
-            ),
-            max_timesteps=20000,
-        ),
-    )
+    # Setup eval environment
+    eval_base_env, _ = make_env(port2, size_x, size_y)
+    eval_env = wrap_env(eval_base_env, size_x, size_y, select_goal_eval)
     eval_env = DummyVecEnv([lambda: eval_env])
     eval_env = Monitor(eval_env)
     eval_env = VecVideoRecorder(
@@ -189,11 +174,12 @@ def generalized_hmaze():
         record_video_trigger=lambda x: x % 20000 == 0,
         video_length=20000,
     )
+
     eval_callback = EvalCallback(
         eval_env,
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
-        eval_freq=40000,
+        eval_freq=400_000,
         n_eval_episodes=5,
         deterministic=True,
         render=False,
@@ -203,7 +189,7 @@ def generalized_hmaze():
         "CnnLstmPolicy",
         env,
         verbose=1,
-        device=get_device(),
+        device=get_device(device_id),
         tensorboard_log=f"runs/{run.id}",
         gae_lambda=0.99,
         ent_coef=0.005,
@@ -212,7 +198,7 @@ def generalized_hmaze():
 
     try:
         model.learn(
-            total_timesteps=6_000_000,
+            total_timesteps=10_000_000,
             callback=[
                 WandbCallback(
                     gradient_save_freq=500,
@@ -232,4 +218,18 @@ def generalized_hmaze():
 
 
 if __name__ == "__main__":
-    generalized_hmaze()
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("--goal", type=int, default=2, help="Goal index to test")
+    arg_parser.add_argument("--port1", type=int, default=8001, help="Port for training")
+    arg_parser.add_argument("--port2", type=int, default=8002, help="Port for testing")
+    arg_parser.add_argument(
+        "--device-id", type=int, default=0, help="CUDA Device ID for training"
+    )
+    args = arg_parser.parse_args()
+    TEST_GOAL_IDX = args.goal
+    TRAIN_GOALS = [goal for i, goal in enumerate(GROUND_GOALS) if i != TEST_GOAL_IDX]
+    TEST_GOAL = GROUND_GOALS[TEST_GOAL_IDX]
+    port1 = args.port1
+    port2 = args.port2
+    device_id = args.device_id
+    generalized_refactored_hmaze(port1=port1, port2=port2, device_id=device_id)
