@@ -23,7 +23,8 @@ class PositionLoggingWrapper(gymnasium.Wrapper):
         return observation, reward, terminated, truncated, info
 
     def reset(self, **kwargs):
-        self.logger.log("positions", self.position_log)
+        ret = self.env.reset(**kwargs)
+        self.logger.log({"episode/positions": self.position_log})
         self.logger.end_episode()  # Idempotent
         self.position_log = []
-        return self.env.reset(**kwargs)
+        return ret

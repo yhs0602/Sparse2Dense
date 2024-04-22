@@ -5,14 +5,19 @@ import time
 import numpy as np
 import wandb
 from craftground.wrappers.fast_reset import FastResetWrapper
+from craftground.wrappers.vision import VisionWrapper
 from gymnasium.wrappers import TimeLimit
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 
 from h_maze.h_maze_env import H_MAZE_GOALS, make_h_maze_env
+from utils.central_logger import CentralLogger
+from wrappers.episode_logger import EpisodeLoggerWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
+from wrappers.log_flush_wrapper import LogFlushWrapper
 from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
 from wrappers.maze_selection_wrapper import MazeSelectionWrapper
+from wrappers.position_logger import PositionLoggingWrapper
 from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
 
@@ -32,36 +37,57 @@ def h_maze_random():
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional
     )
+    central_logger = CentralLogger()
     for goal in H_MAZE_GOALS:
         wandb.define_metric(f"{goal}/success_count", summary="max")
         wandb.define_metric(f"{goal}/time_took", step_metric=f"{goal}/success_count")
+    wandb.define_metric("episode/length", summary="max")
+    wandb.define_metric("episode/reward", summary="max")
+
     size_x = 114
     size_y = 64
     base_env, _ = make_h_maze_env(port=8001, size_x=size_x, size_y=size_y)
-    env = FastResetWrapper(
-        TimeLimit(
-            LivingPenaltyWrapper(
-                SparseRewardWrapper(
-                    MazeReachCheckAndLogWrapper(
-                        MazeSelectionWrapper(
-                            Turn90Wrapper(base_env),
-                            goal_selector=select_goal,
+    env = LogFlushWrapper(
+        FastResetWrapper(
+            EpisodeLoggerWrapper(
+                TimeLimit(
+                    LivingPenaltyWrapper(
+                        SparseRewardWrapper(
+                            MazeReachCheckAndLogWrapper(
+                                MazeSelectionWrapper(
+                                    PositionLoggingWrapper(
+                                        Turn90Wrapper(
+                                            VisionWrapper(
+                                                base_env,
+                                                x_dim=size_x,
+                                                y_dim=size_y,
+                                            )
+                                        ),
+                                        goal_selector=select_goal,
+                                        logger=central_logger,
+                                    ),
+                                    goal_selector=select_goal,
+                                ),
+                                radius=2,
+                                central_logger=central_logger,
+                            ),
+                            reward=1,
                         ),
-                        radius=2,
+                        penalty_abs=0.0001,
                     ),
-                    reward=1,
+                    max_episode_steps=20000,
                 ),
-                penalty_abs=0.0001,
+                logger=central_logger,
             ),
-            max_episode_steps=20000,
         ),
+        logger=central_logger,
     )
     env = Monitor(env)
     env = DummyVecEnv([lambda: env])
     env = VecVideoRecorder(
         env,
         f"videos/{run.id}",
-        record_video_trigger=lambda x: x % 400000 == 0,
+        record_video_trigger=lambda x: x % 40000 == 0,
         video_length=20000,
     )
 

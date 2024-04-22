@@ -3,6 +3,7 @@ from typing import SupportsFloat, Any, Optional
 import wandb
 from gymnasium.core import WrapperActType, WrapperObsType, Wrapper
 
+from utils.central_logger import CentralLogger
 from wrappers.maze_selection_wrapper import MazeSelectionWrapper
 
 
@@ -21,6 +22,7 @@ class MazeReachCheckAndLogWrapper(Wrapper):
         self,
         env: MazeSelectionWrapper,
         radius: float,
+        central_logger: CentralLogger,
         **kwargs,
     ):
         self.env = env
@@ -29,6 +31,7 @@ class MazeReachCheckAndLogWrapper(Wrapper):
         self.reached_goal = False
         self.success_counts = {}
         self.time_took = 0
+        self.logger = central_logger
         super().__init__(self.env)
 
     def step(
@@ -55,7 +58,7 @@ class MazeReachCheckAndLogWrapper(Wrapper):
                 print(f"Goal Reached in {self.time_took} steps")
                 self.success_counts[goal] = self.success_counts.get(goal, 0) + 1
                 goal_str = str(goal)
-                wandb.log(
+                self.logger.log(
                     {
                         f"{goal_str}/success_count": self.success_counts[goal],
                         f"{goal_str}/time_took": self.time_took,

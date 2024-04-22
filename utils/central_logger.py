@@ -1,20 +1,24 @@
+from typing import Dict, Any
+
 import wandb
 
 
 class CentralLogger:
     """
     Only log data to wandb at the end of each episode.
-    Idempotent.
+    Not Idempotent.
     Usage: log data using `log` method, then call `end_episode` at the end of each episode.
     """
 
     def __init__(self):
         self.data = {}
 
-    def log(self, key, value):
-        if key not in self.data:
-            self.data[key] = []
-        self.data[key].append(value)
+    def log(self, log_dict: Dict[str, Any]):
+        """
+        Log data to be logged at the end of the episode.
+        :param log_dict: A dictionary containing the data to be logged.
+        """
+        self.data.update(log_dict)
 
     def end_episode(self):
         if self.data:  # 로깅할 데이터가 있는지 확인
