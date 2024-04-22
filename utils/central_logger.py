@@ -20,7 +20,12 @@ class CentralLogger:
         """
         self.data.update(log_dict)
 
-    def end_episode(self):
+    def end_episode(self, is_eval: bool = False):
         if self.data:  # 로깅할 데이터가 있는지 확인
+            if is_eval:
+                prepended_dict = {
+                    f"eval_{key}": value for key, value in self.data.items()
+                }
+                self.data = prepended_dict
             wandb.log(self.data)
             self.data = {}  # 로그 후 데이터 초기화

@@ -39,10 +39,16 @@ def h_maze_random():
     )
     central_logger = CentralLogger()
     for goal in H_MAZE_GOALS:
-        wandb.define_metric(f"{goal}/success_count", summary="max")
-        wandb.define_metric(f"{goal}/time_took", step_metric=f"{goal}/success_count")
-    wandb.define_metric("episode/length", summary="max")
-    wandb.define_metric("episode/reward", summary="max")
+        wandb.define_metric(
+            f"{goal}/success_count", summary="max", step_metric="episode"
+        )
+        wandb.define_metric(f"{goal}/time_took", step_metric="episode")
+        wandb.define_metric(
+            f"eval_{goal}/success_count", summary="max", step_metric="episode"
+        )
+        wandb.define_metric(f"eval_{goal}/time_took", step_metric="episode")
+    wandb.define_metric("eval_episode/length", summary="max", step_metric="episode")
+    wandb.define_metric("eval_episode/reward", summary="max", step_metric="episode")
 
     size_x = 114
     size_y = 64

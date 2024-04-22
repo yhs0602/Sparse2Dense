@@ -54,7 +54,9 @@ def select_goal_eval():
     return goal
 
 
-def wrap_env(env, size_x, size_y, central_logger, goal_selector) -> gymnasium.Env:
+def wrap_env(
+    env, size_x, size_y, central_logger, goal_selector, is_eval: bool
+) -> gymnasium.Env:
     return LogFlushWrapper(
         FastResetWrapper(
             EpisodeLoggerWrapper(
@@ -97,6 +99,7 @@ def wrap_env(env, size_x, size_y, central_logger, goal_selector) -> gymnasium.En
             )
         ),
         logger=central_logger,
+        is_eval=is_eval,
     )
 
 
@@ -116,21 +119,29 @@ def generalized_refactored_hmaze(
     )
     central_logger = CentralLogger()
     for goal in H_MAZE_GOALS:
-        wandb.define_metric(f"{goal}/success_count", summary="max")
-        wandb.define_metric(f"{goal}/time_took", step_metric=f"{goal}/success_count")
-    wandb.define_metric("episode/length", summary="max")
-    wandb.define_metric("episode/reward", summary="max")
+        wandb.define_metric(
+            f"{goal}/success_count", summary="max", step_metric="episode"
+        )
+        wandb.define_metric(f"{goal}/time_took", step_metric="episode")
+        wandb.define_metric(
+            f"eval_{goal}/success_count", summary="max", step_metric="episode"
+        )
+        wandb.define_metric(f"eval_{goal}/time_took", step_metric="episode")
+    wandb.define_metric("eval_episode/length", summary="max", step_metric="episode")
+    wandb.define_metric("eval_episode/reward", summary="max", step_metric="episode")
     size_x = 114
     size_y = 64
 
     # Setup train environment
     base_env, _ = make_h_maze_env(port1, size_x, size_y)
-    env = wrap_env(base_env, size_x, size_y, central_logger, select_goal)
+    env = wrap_env(base_env, size_x, size_y, central_logger, select_goal, is_eval=False)
     env = DummyVecEnv([lambda: env])
 
     # Setup eval environment
     eval_base_env, _ = make_h_maze_env(port2, size_x, size_y)
-    eval_env = wrap_env(eval_base_env, size_x, size_y, central_logger, select_goal_eval)
+    eval_env = wrap_env(
+        eval_base_env, size_x, size_y, central_logger, select_goal_eval, is_eval=True
+    )
     eval_env = DummyVecEnv([lambda: eval_env])
     eval_env = Monitor(eval_env)
     eval_env = VecVideoRecorder(
