@@ -35,7 +35,14 @@ assert len(maze_str) == 21
 
 
 def create_video_from_positions(
-    maze, x_offset, y_offset, positions, episode_id, block_size=10, frame_rate=1000
+    maze,
+    x_offset,
+    y_offset,
+    positions,
+    episode_id,
+    goal=(0, 0),
+    block_size=10,
+    frame_rate=1000,
 ):
     pygame.init()
     maze_size_w, maze_size_h = len(maze[0]), len(maze)
@@ -74,13 +81,42 @@ def create_video_from_positions(
 
     pos0 = positions[0]
     dimension = len(pos0)
+
+    # cache maze surface and goal
+    background = pygame.Surface((width, height))
+    background.fill((255, 255, 255))
+    for y, row in enumerate(maze):
+        for x, cell in enumerate(row):
+            if cell == "o":
+                pygame.draw.rect(
+                    background,
+                    (0, 0, 0),
+                    (
+                        (x + x_offset) * block_size,
+                        (y + y_offset) * block_size,
+                        block_size,
+                        block_size,
+                    ),
+                )
+    # Goal 그리기
+    goal_x, goal_y = goal
+    pygame.draw.circle(
+        background,
+        (0, 255, 0),
+        (
+            goal_x * block_size + int(block_size / 2),
+            goal_y * block_size + int(block_size / 2),
+        ),
+        int(block_size / 2),
+    )
+
     # 에이전트 위치를 기반으로 프레임 생성
     for position in tqdm.tqdm(positions):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-        screen.fill((255, 255, 255))  # 배경색 설정
+        screen.blit(background, (0, 0))  # 배경 그리기
         # TODO: Cache maze surface
         for y, row in enumerate(maze):
             for x, cell in enumerate(row):
