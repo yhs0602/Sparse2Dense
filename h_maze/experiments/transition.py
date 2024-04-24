@@ -120,10 +120,10 @@ def wrap_env(
 
 
 def generalized_refactored_hmaze(
-    port1: int = 8001,
-    port2: int = 8002,
-    device_id: int = 0,
-    transition_timing: int = 1000,
+    port1: int,
+    port2: int,
+    device_id: int,
+    transition_timing: int,
 ):
     group_name = f"h-transition-{transition_timing}-{TEST_GOAL_IDX}"
     run = wandb.init(
@@ -240,7 +240,7 @@ if __name__ == "__main__":
         "--transition-timing",
         type=int,
         default=250,
-        help="Reward transition timing S->D",
+        help="Reward transition timing in timesteps S->D; 10_000_000; 2000000, 3000000, 4000000",
     )
     args = arg_parser.parse_args()
     TEST_GOAL_IDX = args.goal

@@ -5,6 +5,11 @@
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/wandb" />
       <excludeFolder url="file://$MODULE_DIR$/h_maze/wandb" />
+      <excludeFolder url="file://$MODULE_DIR$/h_maze/experiments/logs" />
+      <excludeFolder url="file://$MODULE_DIR$/h_maze/experiments/models" />
+      <excludeFolder url="file://$MODULE_DIR$/h_maze/experiments/runs" />
+      <excludeFolder url="file://$MODULE_DIR$/h_maze/experiments/videos" />
+      <excludeFolder url="file://$MODULE_DIR$/h_maze/experiments/wandb" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
