@@ -19,10 +19,12 @@ class EpisodeLoggerWrapper(gymnasium.Wrapper):
         self.length += 1
         self.reward += reward
         if terminated or truncated:
+            goal = self.get_wrapper_attr("maze_goal")
             self.logger.log(
                 {
                     "episode/length": self.length,
                     "episode/reward": self.reward,
+                    "episode/goal": goal,
                 }
             )
             self.length = 0
