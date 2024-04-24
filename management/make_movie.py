@@ -35,13 +35,13 @@ assert len(maze_str) == 21
 
 
 def create_video_from_positions(
-    maze, x_offset, y_offset, positions, episode_id, frame_rate=1000
+    maze, x_offset, y_offset, positions, episode_id, block_size=10, frame_rate=1000
 ):
     pygame.init()
     maze_size_w, maze_size_h = len(maze[0]), len(maze)
-    width, height = (maze_size_w + abs(x_offset)) * 10, (
+    width, height = (maze_size_w + abs(x_offset)) * block_size, (
         maze_size_h + abs(y_offset)
-    ) * 10
+    ) * block_size
     screen = pygame.display.set_mode((width, height))
     clock = pygame.time.Clock()
 
@@ -72,6 +72,8 @@ def create_video_from_positions(
     # FFmpeg 프로세스 시작
     process = subprocess.Popen(command, stdin=subprocess.PIPE)
 
+    pos0 = positions[0]
+    dimension = len(pos0)
     # 에이전트 위치를 기반으로 프레임 생성
     for position in tqdm.tqdm(positions):
         for event in pygame.event.get():
@@ -79,16 +81,85 @@ def create_video_from_positions(
                 pygame.quit()
                 return
         screen.fill((255, 255, 255))  # 배경색 설정
+        # TODO: Cache maze surface
         for y, row in enumerate(maze):
             for x, cell in enumerate(row):
-                color = (0, 0, 0) if cell == "o" else (0, 255, 0)
+                color = (0, 0, 0) if cell == "o" else (255, 255, 255)
                 pygame.draw.rect(
-                    screen, color, ((x + x_offset) * 10, (y + y_offset) * 10, 10, 10)
+                    screen,
+                    color,
+                    (
+                        (x + x_offset) * block_size,
+                        (y + y_offset) * block_size,
+                        block_size,
+                        block_size,
+                    ),
                 )
-        y, z, x = position
-        pygame.draw.circle(
-            screen, (255, 0, 0), (int(x) * 10 + 5, int(y) * 10 + 5), 5
-        )  # 에이전트 그리기
+        if dimension == 3:
+            y, z, x = position
+            yaw = 0
+        elif dimension == 4:
+            y, z, x, yaw = position
+        else:
+            raise ValueError(f"Invalid dimension {dimension}")
+
+        agent_size = int(block_size * 0.6)  # (hitbox = 0.6 x 1.8 x 0.6)
+        agent_radius = int(agent_size / 2)
+        agent_dx = int(agent_radius * 0.8660254038)  # sqrt(3)/2
+        agent_dy = int(agent_radius * 0.5)
+        # draw triangle based on yaw
+        yaw = int(yaw / 90) % 4
+        agent_color = (255, 0, 0)
+        if yaw == 0:
+            pygame.draw.polygon(
+                screen,
+                agent_color,
+                [
+                    (int(x * block_size) - agent_dx, int(y * block_size) - agent_dy),
+                    (int(x * block_size), int(y * block_size) + agent_radius),
+                    (int(x * block_size) + agent_dx, int(y * block_size) - agent_dy),
+                ],
+            )
+        elif yaw == 1:
+            pygame.draw.polygon(
+                screen,
+                agent_color,
+                [
+                    (int(x * block_size) - agent_dy, int(y * block_size) - agent_dx),
+                    (int(x * block_size) + agent_radius, int(y * block_size)),
+                    (int(x * block_size) - agent_dy, int(y * block_size) + agent_dx),
+                ],
+            )
+        elif yaw == 2:
+            pygame.draw.polygon(
+                screen,
+                agent_color,
+                [
+                    (int(x * block_size) + agent_dx, int(y * block_size) + agent_dy),
+                    (int(x * block_size), int(y * block_size) - agent_radius),
+                    (int(x * block_size) - agent_dx, int(y * block_size) + agent_dy),
+                ],
+            )
+        elif yaw == 3:
+            pygame.draw.polygon(
+                screen,
+                agent_color,
+                [
+                    (int(x * block_size) + agent_dy, int(y * block_size) + agent_dx),
+                    (int(x * block_size) - agent_radius, int(y * block_size)),
+                    (int(x * block_size) + agent_dy, int(y * block_size) - agent_dx),
+                ],
+            )
+        else:
+            pygame.draw.circle(
+                screen,
+                (255, 0, 0),
+                (
+                    int(x * block_size) + agent_radius,
+                    int(y * block_size) + agent_radius,
+                ),
+                agent_radius,
+            )  # 에이전트 그리기
 
         # 프레임을 FFmpeg로 파이프
         frame = pygame.surfarray.array3d(screen)
@@ -106,7 +177,7 @@ def create_video_from_positions(
 
 def make_movie():
     # W&B API 초기화
-    api = wandb.Api()
+    api = wandb.Api(timeout=30)
 
     # 특정 프로젝트와 run ID 지정
     project_name = "craftground-sb3"
