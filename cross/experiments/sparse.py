@@ -78,6 +78,7 @@ def wrap_env(
                                 ),
                                 radius=2,
                                 central_logger=central_logger,
+                                cooldown=2,
                             ),
                             reward=1,
                         ),

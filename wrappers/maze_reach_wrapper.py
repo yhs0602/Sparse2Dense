@@ -23,11 +23,13 @@ class MazeReachCheckAndLogWrapper(Wrapper):
         env: MazeSelectionWrapper,
         radius: float,
         central_logger: CentralLogger,
+        cooldown: int = COOLDOWN,
         **kwargs,
     ):
         self.env = env
         self.radius = radius
-        self.cooldown = COOLDOWN
+        self.config_cooldown = cooldown
+        self.cooldown = cooldown
         self.reached_goal = False
         self.success_counts = {}
         self.time_took = 0
@@ -64,7 +66,7 @@ class MazeReachCheckAndLogWrapper(Wrapper):
                         f"{goal_str}/time_took": self.time_took,
                     }
                 )
-                self.cooldown = COOLDOWN
+                self.cooldown = self.config_cooldown
                 self.time_took = 0
                 terminated = True
         return (
@@ -82,7 +84,7 @@ class MazeReachCheckAndLogWrapper(Wrapper):
         options: Optional[dict[str, Any]] = None,
     ) -> tuple[WrapperObsType, dict[str, Any]]:
         obs, info = self.env.reset(seed=seed, options=options)
-        self.cooldown = COOLDOWN
+        self.cooldown = self.config_cooldown
         self.time_took = 0
         self.reached_goal = False
         return obs, info

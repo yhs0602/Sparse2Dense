@@ -48,7 +48,7 @@ def make_cross_env(
                 "time set noon",
                 "place template minecraft:cross 0 0 0",
                 "tp @p 2 2 6 -90 0",
-                "effect give @p minecraft:speed infinite 1 true",  # speed effect, particle hidden
+                # "effect give @p minecraft:speed infinite 1 true",  # speed effect, particle hidden
             ],  # x y z yaw pitch
             isHudHidden=True,
             render_action=False,
