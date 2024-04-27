@@ -1,3 +1,4 @@
+import argparse
 import random
 import sys
 import time
@@ -26,13 +27,13 @@ def select_goal():
     return random.choice(H_MAZE_GOALS)
 
 
-def h_maze_random():
+def h_maze_random(port: int):
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
         entity="jourhyang123",
         # track hyperparameters and run metadata
-        group="h-random",
+        group="v1-h-random",
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional
@@ -52,7 +53,7 @@ def h_maze_random():
 
     size_x = 114
     size_y = 64
-    base_env, _ = make_h_maze_env(port=8001, size_x=size_x, size_y=size_y)
+    base_env, _ = make_h_maze_env(port=port, size_x=size_x, size_y=size_y)
     env = LogFlushWrapper(
         FastResetWrapper(
             EpisodeLoggerWrapper(
@@ -127,4 +128,8 @@ def h_maze_random():
 
 
 if __name__ == "__main__":
-    h_maze_random()
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("--port", type=int, default=8001, help="Port for training")
+    args = arg_parser.parse_args()
+    port = args.port
+    h_maze_random(port=port)
