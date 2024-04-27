@@ -12,7 +12,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
-from h_maze.h_maze_env import make_h_maze_env, H_MAZE_GOALS
+from cross.cross_env import CROSS_GOALS, make_cross_env
 from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
@@ -32,8 +32,8 @@ from wrappers.turn_90_wrapper import Turn90Wrapper
 # 학습이 끝나면 3개의 Goals에 대해 전부 테스트합니다.
 
 TEST_GOAL_IDX = 2
-TRAIN_GOALS = [goal for i, goal in enumerate(H_MAZE_GOALS) if i != TEST_GOAL_IDX]
-TEST_GOAL = H_MAZE_GOALS[TEST_GOAL_IDX]
+TRAIN_GOALS = [goal for i, goal in enumerate(CROSS_GOALS) if i != TEST_GOAL_IDX]
+TEST_GOAL = CROSS_GOALS[TEST_GOAL_IDX]
 
 
 def select_goal():
@@ -46,19 +46,19 @@ eval_idx = 0
 def select_goal_eval():
     global eval_idx
 
-    goal = H_MAZE_GOALS[eval_idx % 3]
+    goal = CROSS_GOALS[eval_idx % 3]
     eval_idx += 1
     return goal
 
 
 def wrap_env(
-    env,
-    size_x,
-    size_y,
-    central_logger,
-    goal_selector,
-    is_eval: bool,
-    transition_timing: int,
+        env,
+        size_x,
+        size_y,
+        central_logger,
+        goal_selector,
+        is_eval: bool,
+        transition_timing: int,
 ) -> gymnasium.Env:
     # Checks, Logs, Terminates
     maze_wrapper = MazeReachCheckAndLogWrapper(
@@ -115,13 +115,13 @@ def wrap_env(
     )
 
 
-def h_maze_transition(
-    port1: int,
-    port2: int,
-    device_id: int,
-    transition_timing: int,
+def cross_transition(
+        port1: int,
+        port2: int,
+        device_id: int,
+        transition_timing: int,
 ):
-    group_name = f"v1-h-transition-{transition_timing}-{TEST_GOAL_IDX}"
+    group_name = f"v1-cross-transition-{transition_timing}-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -133,7 +133,7 @@ def h_maze_transition(
         save_code=True,  # optional
     )
     central_logger = CentralLogger()
-    for goal in H_MAZE_GOALS:
+    for goal in CROSS_GOALS:
         wandb.define_metric(
             f"{goal}/success_count", summary="max", step_metric="episode"
         )
@@ -148,7 +148,7 @@ def h_maze_transition(
     size_y = 64
 
     # Setup train environment
-    base_env, _ = make_h_maze_env(port1, size_x, size_y)
+    base_env, _ = make_cross_env(port1, size_x, size_y)
     env = wrap_env(
         base_env,
         size_x,
@@ -161,7 +161,7 @@ def h_maze_transition(
     env = DummyVecEnv([lambda: env])
 
     # Setup eval environment
-    eval_base_env, _ = make_h_maze_env(port2, size_x, size_y)
+    eval_base_env, _ = make_cross_env(port2, size_x, size_y)
     eval_env = wrap_env(
         eval_base_env,
         size_x,
@@ -240,13 +240,13 @@ if __name__ == "__main__":
     )
     args = arg_parser.parse_args()
     TEST_GOAL_IDX = args.goal
-    TRAIN_GOALS = [goal for i, goal in enumerate(H_MAZE_GOALS) if i != TEST_GOAL_IDX]
-    TEST_GOAL = H_MAZE_GOALS[TEST_GOAL_IDX]
+    TRAIN_GOALS = [goal for i, goal in enumerate(CROSS_GOALS) if i != TEST_GOAL_IDX]
+    TEST_GOAL = CROSS_GOALS[TEST_GOAL_IDX]
     port1 = args.port1
     port2 = args.port2
     device_id = args.device_id
     transition_timing = args.transition_timing
-    h_maze_transition(
+    cross_transition(
         port1=port1,
         port2=port2,
         device_id=device_id,
