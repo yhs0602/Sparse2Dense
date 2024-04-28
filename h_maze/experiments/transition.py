@@ -94,7 +94,10 @@ def wrap_env(
                                     reward=1,
                                 ),
                                 DenseMazeWrapper(
-                                    maze_wrapper,
+                                    SparseRewardWrapper(
+                                        maze_wrapper,
+                                        reward=1,
+                                    ),
                                     radius=5,
                                     reward=0.001,
                                 ),

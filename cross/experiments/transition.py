@@ -52,13 +52,13 @@ def select_goal_eval():
 
 
 def wrap_env(
-        env,
-        size_x,
-        size_y,
-        central_logger,
-        goal_selector,
-        is_eval: bool,
-        transition_timing: int,
+    env,
+    size_x,
+    size_y,
+    central_logger,
+    goal_selector,
+    is_eval: bool,
+    transition_timing: int,
 ) -> gymnasium.Env:
     # Checks, Logs, Terminates
     maze_wrapper = MazeReachCheckAndLogWrapper(
@@ -94,7 +94,10 @@ def wrap_env(
                                     reward=1,
                                 ),
                                 DenseMazeWrapper(
-                                    maze_wrapper,
+                                    SparseRewardWrapper(
+                                        maze_wrapper,
+                                        reward=1,
+                                    ),
                                     radius=5,
                                     reward=0.001,
                                 ),
@@ -116,10 +119,10 @@ def wrap_env(
 
 
 def cross_transition(
-        port1: int,
-        port2: int,
-        device_id: int,
-        transition_timing: int,
+    port1: int,
+    port2: int,
+    device_id: int,
+    transition_timing: int,
 ):
     group_name = f"v1-cross-transition-{transition_timing}-{TEST_GOAL_IDX}"
     run = wandb.init(
