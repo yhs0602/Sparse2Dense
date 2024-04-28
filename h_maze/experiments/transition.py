@@ -124,7 +124,7 @@ def h_maze_transition(
     device_id: int,
     transition_timing: int,
 ):
-    group_name = f"v1-h-transition-{transition_timing}-{TEST_GOAL_IDX}"
+    group_name = f"v2-h-transition-{transition_timing}-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
