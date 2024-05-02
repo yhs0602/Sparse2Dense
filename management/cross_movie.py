@@ -31,14 +31,14 @@ def make_cross_movie():
 
     # 특정 프로젝트와 run ID 지정
     project_name = "craftground-sb3"
-    run_id = "hlfg7lwg"
+    run_id = "af0auegt"  # 5lf40vyr: s2d
     run = api.run(f"{project_name}/{run_id}")
 
     # 로그 데이터 가져오기
     data = run.history(keys=["episode/positions"], pandas=False)
     # 각 에피소드별로 동영상 생성
     n = 0
-    for episode_id, episode_data in enumerate(data):
+    for episode_id, episode_data in enumerate(data[::-1]):
         positions = episode_data["episode/positions"]
         create_video_from_positions(cross_str, 0, 1, positions, episode_id)
         n += 1
