@@ -12,6 +12,8 @@
       <excludeFolder url="file://$MODULE_DIR$/h_maze/experiments/wandb" />
       <excludeFolder url="file://$MODULE_DIR$/cross/experiments/videos" />
       <excludeFolder url="file://$MODULE_DIR$/cross/experiments/wandb" />
+      <excludeFolder url="file://$MODULE_DIR$/cross/videos" />
+      <excludeFolder url="file://$MODULE_DIR$/cross/wandb" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

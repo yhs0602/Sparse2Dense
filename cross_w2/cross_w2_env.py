@@ -7,7 +7,7 @@ from craftground.craftground.screen_encoding_modes import ScreenEncodingMode
 
 from utils.check_vglrun import check_vglrun
 
-# ./nbt/cross.nbt
+# ./nbt/cross_w2.nbt
 current_folder_path = os.path.dirname(os.path.abspath(__file__))
 nbts_path = os.path.join(current_folder_path, "nbt")
 map_path = os.path.join(nbts_path, "cross_w2.nbt")
@@ -46,7 +46,7 @@ def make_cross_w2_env(
             miscStatKeys=[],  # No stats
             initialExtraCommands=[
                 "time set noon",
-                "place template minecraft:cross 0 0 0",
+                "place template minecraft:cross_w2 0 0 0",
                 f"tp @p {INITIAL_POSITION[0]} {INITIAL_POSITION[1]} {INITIAL_POSITION[2]} {INITIAL_POSITION[3]} {INITIAL_POSITION[4]}",
                 # "effect give @p minecraft:speed infinite 1 true",  # speed effect, particle hidden
             ],  # x y z yaw pitch
