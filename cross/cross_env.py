@@ -60,8 +60,8 @@ def make_cross_env(
             no_pov_effect=True,
             screen_encoding_mode=ScreenEncodingMode.RAW,
             use_vglrun=check_vglrun(),
-            track_native_memory=True,
-            ld_preload="/usr/lib/x86_64-linux-gnu/libjemalloc.so",
+            # track_native_memory=True,
+            # ld_preload="/usr/lib/x86_64-linux-gnu/libjemalloc.so",
         ),
         [],
     )
