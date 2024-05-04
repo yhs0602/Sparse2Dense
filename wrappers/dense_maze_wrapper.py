@@ -32,11 +32,7 @@ class DenseMazeWrapper(Wrapper):
         y = info_obs.y
         z = info_obs.z
         # Dense goal check
-        if (
-            self.goal[0] - self.radius <= x <= self.goal[0] + self.radius
-            and self.goal[1] - self.radius <= y <= self.goal[1] + self.radius
-            and self.goal[2] - self.radius <= z <= self.goal[2] + self.radius
-        ):  # Only when the agent is in the reward range
+        if self.within_range(x, y, z):  # Only when the agent is in the reward range
             new_distance = self.taxicab_distance(x, y, z)
             if new_distance > self.previous_distance:
                 reward -= self.reward
@@ -52,6 +48,20 @@ class DenseMazeWrapper(Wrapper):
             info,
         )  # , done: deprecated
 
+    def within_range(self, x, y, z):
+        if len(self.goal) == 3:
+            goals = [self.goal]
+        else:
+            goals = self.goal
+        return any(self.within_range_single(goal, x, y, z) for goal in goals)
+
+    def within_range_single(self, goal, x, y, z) -> bool:
+        return (
+            goal[0] - self.radius <= x <= goal[0] + self.radius
+            and goal[1] - self.radius <= y <= goal[1] + self.radius
+            and goal[2] - self.radius <= z <= goal[2] + self.radius
+        )
+
     def reset(
         self,
         *,
@@ -63,4 +73,11 @@ class DenseMazeWrapper(Wrapper):
         return obs, info
 
     def taxicab_distance(self, x: float, y: float, z: float) -> float:
-        return abs(x - self.goal[0]) + abs(y - self.goal[1]) + abs(z - self.goal[2])
+        if len(self.goal) == 3:
+            goals = self.goal
+        else:
+            goals = [self.goal]
+        return min(self.taxicab_distance_single(goal, x, y, z) for goal in goals)
+
+    def taxicab_distance_single(self, goal, x: float, y: float, z: float) -> float:
+        return abs(x - goal[0]) + abs(y - goal[1]) + abs(z - goal[2])

@@ -1,4 +1,4 @@
-from typing import Any, Optional, Tuple, Callable
+from typing import Any, Optional, Tuple, Callable, Union, Iterable
 
 from gymnasium.core import WrapperObsType, Wrapper
 
@@ -9,7 +9,9 @@ class MazeSelectionWrapper(Wrapper):
     def __init__(
         self,
         env,
-        goal_selector: Callable[[], Tuple[float, float, float]],
+        goal_selector: Callable[
+            [], Union[Tuple[float, float, float], Iterable[Tuple[float, float, float]]]
+        ],
         **kwargs,
     ):
         self.env = env
@@ -25,16 +27,30 @@ class MazeSelectionWrapper(Wrapper):
     ) -> tuple[WrapperObsType, dict[str, Any]]:
         obs, info = self.env.reset(seed=seed, options=options)
         # Remove cake at the goal
-        self.get_wrapper_attr("add_commands")(
-            [
-                f"setblock {self.maze_goal[0]} {self.maze_goal[1]} {self.maze_goal[2]} minecraft:air replace"
-            ]
-        )
+        self.remove_cake(self.maze_goal)
         self.maze_goal = self.goal_selector()
         # Set cake at the goal
-        self.get_wrapper_attr("add_commands")(
-            [
-                f"setblock {self.maze_goal[0]} {self.maze_goal[1]} {self.maze_goal[2]} minecraft:cake replace"
-            ]
-        )
+        self.add_cake(self.maze_goal)
         return obs, info
+
+    def remove_cake(
+        self,
+        goal: Union[Tuple[float, float, float], Iterable[Tuple[float, float, float]]],
+    ):
+        if len(goal) == 3:
+            goal = [goal]
+        for g in goal:
+            self.get_wrapper_attr("add_commands")(
+                [f"setblock {g[0]} {g[1]} {g[2]} minecraft:air replace"]
+            )
+
+    def add_cake(
+        self,
+        goal: Union[Tuple[float, float, float], Iterable[Tuple[float, float, float]]],
+    ):
+        if len(goal) == 3:
+            goal = [goal]
+        for g in goal:
+            self.get_wrapper_attr("add_commands")(
+                [f"setblock {g[0]} {g[1]} {g[2]} minecraft:cake replace"]
+            )

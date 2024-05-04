@@ -51,11 +51,7 @@ class MazeReachCheckAndLogWrapper(Wrapper):
         goal = self.env.maze_goal
         if self.cooldown <= 0:
             # square goal check
-            if (
-                goal[0] - self.radius <= x <= goal[0] + self.radius
-                and goal[1] - self.radius <= y <= goal[1] + self.radius
-                and goal[2] - self.radius <= z <= goal[2] + self.radius
-            ):
+            if self.reached_goal_checker(goal, x, y, z):
                 self.reached_goal = True
                 print(f"Goal Reached in {self.time_took} steps")
                 self.success_counts[goal] = self.success_counts.get(goal, 0) + 1
@@ -76,6 +72,18 @@ class MazeReachCheckAndLogWrapper(Wrapper):
             truncated,
             info,
         )  # , done: deprecated
+
+    def reached_goal_checker(self, goal, x, y, z):
+        if len(goal) == 3:
+            goal = [goal]
+        return any(self.check_goal(g, x, y, z) for g in goal)
+
+    def check_goal(self, goal, x, y, z):
+        return (
+            goal[0] - self.radius <= x <= goal[0] + self.radius
+            and goal[1] - self.radius <= y <= goal[1] + self.radius
+            and goal[2] - self.radius <= z <= goal[2] + self.radius
+        )
 
     def reset(
         self,
