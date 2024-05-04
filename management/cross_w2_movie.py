@@ -25,14 +25,15 @@ assert len(cross_str) == 13
 # start point: 2 32 6 > 0 0 0
 
 
-def make_cross_movie():
+def make_cross_w2_movie():
     # W&B API 초기화
     api = wandb.Api(timeout=30)
 
     # 특정 프로젝트와 run ID 지정
     project_name = "craftground-sb3"
     run_id = "af0auegt"  # 5lf40vyr: s2d
-    run = api.run(f"{project_name}/{run_id}")
+    run_name = "jourhyang123/craftground-sb3/nlc1z8m1"
+    run = api.run(run_name)
 
     # 로그 데이터 가져오기
     data = run.history(keys=["episode/positions"], pandas=False)
@@ -47,4 +48,4 @@ def make_cross_movie():
 
 
 if __name__ == "__main__":
-    make_cross_movie()
+    make_cross_w2_movie()

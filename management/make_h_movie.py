@@ -42,7 +42,7 @@ def create_video_from_positions(
     episode_id,
     goal=(0, 0),
     block_size=10,
-    frame_rate=1000,
+    frame_rate=20,  # 20 TPS
 ):
     pygame.init()
     maze_size_w, maze_size_h = len(maze[0]), len(maze)
@@ -203,7 +203,7 @@ def create_video_from_positions(
         process.stdin.write(frame.tobytes())  # 프레임 데이터를 바이트로 변환 후 FFmpeg에 전송
 
         pygame.display.flip()
-        clock.tick(frame_rate)  # 프레임 레이트 설정
+        # clock.tick(frame_rate)  # 프레임 레이트 설정
 
     # FFmpeg와 Pygame 정리
     process.stdin.close()
