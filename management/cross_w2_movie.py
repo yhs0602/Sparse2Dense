@@ -31,8 +31,6 @@ def make_cross_w2_movie():
     api = wandb.Api(timeout=30)
 
     # 특정 프로젝트와 run ID 지정
-    project_name = "craftground-sb3"
-    run_id = "af0auegt"  # 5lf40vyr: s2d
     run_name = "jourhyang123/craftground-sb3/nlc1z8m1"
     run = api.run(run_name)
 
