@@ -4,22 +4,23 @@ import wandb
 from management.make_h_movie import create_video_from_positions
 
 cross_str = [
-    "xxxxxoooxxxxx",
-    "xxxxxoxoxxxxx",
-    "xxxxxoxoxxxxx",
-    "xxxxxoxoxxxxx",
-    "xxxxxoxoxxxxx",
-    "ooooooxoooooo",
-    "oxxxxxxxxxxxo",
-    "ooooooxoooooo",
-    "xxxxxoxoxxxxx",
-    "xxxxxoxoxxxxx",
-    "xxxxxoxoxxxxx",
-    "xxxxxoxoxxxxx",
-    "xxxxxoooxxxxx",
+    "xxxxxxooxxxxxx",
+    "xxxxxoxxoxxxxx",
+    "xxxxxoxxoxxxxx",
+    "xxxxxoxxoxxxxx",
+    "xxxxxoxxoxxxxx",
+    "xoooooxxooooox",
+    "oxxxxxxxxxxxxo",
+    "oxxxxxxxxxxxxo",
+    "xoooooxxooooox",
+    "xxxxxoxxoxxxxx",
+    "xxxxxoxxoxxxxx",
+    "xxxxxoxxoxxxxx",
+    "xxxxxoxxoxxxxx",
+    "xxxxxxooxxxxxx",
 ]
 
-assert len(cross_str) == 13
+assert len(cross_str) == 14
 
 
 # start point: 2 32 6 > 0 0 0
