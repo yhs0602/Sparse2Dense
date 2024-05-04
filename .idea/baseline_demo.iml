@@ -14,6 +14,11 @@
       <excludeFolder url="file://$MODULE_DIR$/cross/experiments/wandb" />
       <excludeFolder url="file://$MODULE_DIR$/cross/videos" />
       <excludeFolder url="file://$MODULE_DIR$/cross/wandb" />
+      <excludeFolder url="file://$MODULE_DIR$/cross_w2/experiments/logs" />
+      <excludeFolder url="file://$MODULE_DIR$/cross_w2/experiments/models" />
+      <excludeFolder url="file://$MODULE_DIR$/cross_w2/experiments/runs" />
+      <excludeFolder url="file://$MODULE_DIR$/cross_w2/experiments/videos" />
+      <excludeFolder url="file://$MODULE_DIR$/cross_w2/experiments/wandb" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
