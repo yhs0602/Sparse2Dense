@@ -74,9 +74,9 @@ class DenseMazeWrapper(Wrapper):
 
     def taxicab_distance(self, x: float, y: float, z: float) -> float:
         if len(self.goal) == 3:
-            goals = self.goal
-        else:
             goals = [self.goal]
+        else:
+            goals = self.goal
         return min(self.taxicab_distance_single(goal, x, y, z) for goal in goals)
 
     def taxicab_distance_single(self, goal, x: float, y: float, z: float) -> float:
