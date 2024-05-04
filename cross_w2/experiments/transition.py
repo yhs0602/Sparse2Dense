@@ -119,13 +119,13 @@ def wrap_env(
     )
 
 
-def cross_transition(
+def cross_w2_transition(
     port1: int,
     port2: int,
     device_id: int,
     transition_timing: int,
 ):
-    group_name = f"v3-cross-transition-{transition_timing}-{TEST_GOAL_IDX}"
+    group_name = f"v3-crossw2-transition-{transition_timing}-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -188,8 +188,8 @@ def cross_transition(
         eval_env,
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
-        eval_freq=100,
-        n_eval_episodes=6,
+        eval_freq=500,
+        n_eval_episodes=30,
         deterministic=True,
         render=False,
     )
@@ -250,7 +250,7 @@ if __name__ == "__main__":
     port2 = args.port2
     device_id = args.device_id
     transition_timing = args.transition_timing
-    cross_transition(
+    cross_w2_transition(
         port1=port1,
         port2=port2,
         device_id=device_id,

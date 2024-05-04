@@ -27,13 +27,13 @@ def select_goal():
     return random.choice(CROSS_W2_GOALS)
 
 
-def cross_random(port: int):
+def cross_w2_random(port: int):
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
         entity="jourhyang123",
         # track hyperparameters and run metadata
-        group="v1-cross-random",
+        group="v1-crossw2-random",
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional
@@ -133,4 +133,4 @@ if __name__ == "__main__":
     arg_parser.add_argument("--port", type=int, default=8001, help="Port for training")
     args = arg_parser.parse_args()
     port = args.port
-    cross_random(port=port)
+    cross_w2_random(port=port)

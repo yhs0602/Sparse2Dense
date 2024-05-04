@@ -1,5 +1,4 @@
 import argparse
-import os.path
 import random
 
 import gymnasium
@@ -26,9 +25,6 @@ from wrappers.maze_selection_wrapper import MazeSelectionWrapper
 from wrappers.position_logger import PositionLoggingWrapper
 from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
-
-current_path = os.path.dirname(os.path.abspath(__file__))
-map_path = os.path.join(current_path, "hmaze1_colored.nbt")
 
 # 실험 설명
 # 학습할 때는 저 Goals 중 두 개를 랜덤하게 선택해서 학습합니다.
@@ -104,10 +100,8 @@ def wrap_env(
     )
 
 
-def generalized_refactored_hmaze(
-    port1: int = 8001, port2: int = 8002, device_id: int = 0
-):
-    group_name = f"v1-cross-dense-{TEST_GOAL_IDX}"
+def w2_maze_dense(port1: int = 8001, port2: int = 8002, device_id: int = 0):
+    group_name = f"v1-crossw2-dense-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -156,8 +150,8 @@ def generalized_refactored_hmaze(
         eval_env,
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
-        eval_freq=100,
-        n_eval_episodes=6,
+        eval_freq=500,
+        n_eval_episodes=30,
         deterministic=True,
         render=False,
     )
@@ -209,4 +203,4 @@ if __name__ == "__main__":
     port1 = args.port1
     port2 = args.port2
     device_id = args.device_id
-    generalized_refactored_hmaze(port1=port1, port2=port2, device_id=device_id)
+    w2_maze_dense(port1=port1, port2=port2, device_id=device_id)

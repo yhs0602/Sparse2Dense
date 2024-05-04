@@ -94,8 +94,8 @@ def wrap_env(
     )
 
 
-def sparse_cross(port1: int = 8001, port2: int = 8002, device_id: int = 0):
-    group_name = f"v1-cross-sparse-{TEST_GOAL_IDX}"
+def sparse_cross_w2(port1: int = 8001, port2: int = 8002, device_id: int = 0):
+    group_name = f"v1-crossw2-sparse-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -144,8 +144,8 @@ def sparse_cross(port1: int = 8001, port2: int = 8002, device_id: int = 0):
         eval_env,
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
-        eval_freq=100,
-        n_eval_episodes=6,
+        eval_freq=500,
+        n_eval_episodes=30,
         deterministic=True,
         render=False,
     )
@@ -196,4 +196,4 @@ if __name__ == "__main__":
     port1 = args.port1
     port2 = args.port2
     device_id = args.device_id
-    sparse_cross(port1=port1, port2=port2, device_id=device_id)
+    sparse_cross_w2(port1=port1, port2=port2, device_id=device_id)
