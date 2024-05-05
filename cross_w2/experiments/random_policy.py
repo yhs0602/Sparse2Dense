@@ -12,6 +12,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 
 from cross_w2.cross_w2_env import CROSS_W2_GOALS, make_cross_w2_env
+from define_metric import define_metrics
 from utils.central_logger import CentralLogger
 from wrappers.episode_logger import EpisodeLoggerWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
@@ -39,13 +40,7 @@ def cross_w2_random(port: int):
         save_code=True,  # optional
     )
     central_logger = CentralLogger()
-    for goal in CROSS_W2_GOALS:
-        wandb.define_metric(f"{goal}/success_count", step_metric="episode")
-        wandb.define_metric(f"{goal}/time_took", step_metric="episode")
-        wandb.define_metric(f"eval_{goal}/success_count", step_metric="episode")
-        wandb.define_metric(f"eval_{goal}/time_took", step_metric="episode")
-    wandb.define_metric("eval_episode/length", step_metric="eval_episode")
-    wandb.define_metric("eval_episode/reward", step_metric="eval_episode")
+    define_metrics(CROSS_W2_GOALS)
 
     size_x = 114
     size_y = 64

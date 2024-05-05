@@ -13,6 +13,7 @@ from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
 from cross_w2.cross_w2_env import CROSS_W2_GOALS, make_cross_w2_env
+from define_metric import define_metrics
 from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
@@ -107,13 +108,7 @@ def sparse_cross_w2(port1: int = 8001, port2: int = 8002, device_id: int = 0):
         save_code=True,  # optional
     )
     central_logger = CentralLogger()
-    for goal in CROSS_W2_GOALS:
-        wandb.define_metric(f"{goal}/success_count", step_metric="episode")
-        wandb.define_metric(f"{goal}/time_took", step_metric="episode")
-        wandb.define_metric(f"eval_{goal}/success_count", step_metric="episode")
-        wandb.define_metric(f"eval_{goal}/time_took", step_metric="episode")
-    wandb.define_metric("eval_episode/length", step_metric="eval_episode")
-    wandb.define_metric("eval_episode/reward", step_metric="eval_episode")
+    define_metrics(CROSS_W2_GOALS)
     size_x = 114
     size_y = 64
 
