@@ -60,6 +60,7 @@ class MazeReachCheckAndLogWrapper(Wrapper):
                     {
                         f"{goal_str}/success_count": self.success_counts[goal],
                         f"{goal_str}/time_took": self.time_took,
+                        f"goal": str(goal),
                     }
                 )
                 self.cooldown = self.config_cooldown
