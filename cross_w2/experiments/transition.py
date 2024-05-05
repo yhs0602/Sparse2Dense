@@ -138,16 +138,12 @@ def cross_w2_transition(
     )
     central_logger = CentralLogger()
     for goal in CROSS_W2_GOALS:
-        wandb.define_metric(
-            f"{goal}/success_count", summary="max", step_metric="episode"
-        )
+        wandb.define_metric(f"{goal}/success_count", step_metric="episode")
         wandb.define_metric(f"{goal}/time_took", step_metric="episode")
-        wandb.define_metric(
-            f"eval_{goal}/success_count", summary="max", step_metric="episode"
-        )
+        wandb.define_metric(f"eval_{goal}/success_count", step_metric="episode")
         wandb.define_metric(f"eval_{goal}/time_took", step_metric="episode")
-    wandb.define_metric("eval_episode/length", summary="max", step_metric="episode")
-    wandb.define_metric("eval_episode/reward", summary="max", step_metric="episode")
+    wandb.define_metric("eval_episode/length", step_metric="eval_episode")
+    wandb.define_metric("eval_episode/reward", step_metric="eval_episode")
     size_x = 114
     size_y = 64
 
