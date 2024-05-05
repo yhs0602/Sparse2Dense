@@ -294,3 +294,4 @@ runs
 *.zip
 .DS_Store
 *.ckpt
+**/logs/
