@@ -125,7 +125,7 @@ def cross_w2_transition(
     device_id: int,
     transition_timing: int,
 ):
-    group_name = f"v3-crossw2-transition-{transition_timing}-{TEST_GOAL_IDX}"
+    group_name = f"v4-crossw2-transition-{transition_timing}-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -190,7 +190,7 @@ def cross_w2_transition(
         log_path=f"logs/{run.id}",
         eval_freq=500,
         n_eval_episodes=30,
-        deterministic=True,
+        deterministic=False,
         render=False,
     )
 
