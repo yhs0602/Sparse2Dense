@@ -20,6 +20,32 @@ HMAZE_W2_GOALS = [
     ((3, 1, 10), (7, 1, 11)),  # 뒤오른쪽
 ]
 
+# 21 x 16 미로
+# 17,0 ~ 17, 12
+# 2, 12
+# 0,0 기준으로 그리기
+HMAZE_W2_STR = [
+    "x" * 13,
+    "x" * 13,
+    "xooxxxxxxxoox",
+    "oxxoxxxxxoxxo",
+    "oxxoxxxxxoxxo",
+    "oxxoxxxxxoxxo",
+    "oxxoxxxxxoxxo",
+    "oxxoxxxxxoxxo",
+    "oiioooooooiio",  # i: 휘장
+    "oxxixxxxxixxo",
+    "oxxixxxxxixxo",
+    "oiioooooooiio",  # i: 휘장
+    "oxxoxxxxxoxxo",
+    "oxxoxxxxxoxxo",
+    "oxxoxxxxxoxxo",
+    "oxxoxxxxxoxxo",
+    "oxxoxxxxxoxxo",
+    "xooxxxxxxxoox",
+]
+assert len(HMAZE_W2_STR) == 18
+
 
 def make_hmaze_w2_env(
     port: int, size_x: int, size_y: int
