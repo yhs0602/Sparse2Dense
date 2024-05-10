@@ -102,7 +102,7 @@ def wrap_env(
 
 
 def w2_maze_dense(port1: int = 8001, port2: int = 8002, device_id: int = 0):
-    group_name = f"v2-crossw2-dense-{TEST_GOAL_IDX}"
+    group_name = f"v10-crossw2-dense-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
