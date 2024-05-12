@@ -181,9 +181,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--device-id", type=int, default=0, help="CUDA Device ID for training"
     )
-    arg_parser.add_argument(
-        "--verbose", type=bool, action="store_true", help="Verbose mode"
-    )
+    arg_parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     args = arg_parser.parse_args()
     TEST_GOAL_IDX = args.goal
     TRAIN_GOALS = [goal for i, goal in enumerate(CROSS_W2_GOALS) if i != TEST_GOAL_IDX]
