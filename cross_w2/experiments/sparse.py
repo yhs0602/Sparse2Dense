@@ -113,12 +113,12 @@ def sparse_cross_w2(port1: int = 8001, port2: int = 8002, device_id: int = 0):
     size_y = 64
 
     # Setup train environment
-    base_env, _ = make_cross_w2_env(port1, size_x, size_y, verbose=False)
+    base_env, _ = make_cross_w2_env(port1, size_x, size_y)
     env = wrap_env(base_env, size_x, size_y, central_logger, select_goal, is_eval=False)
     env = DummyVecEnv([lambda: env])
 
     # Setup eval environment
-    eval_base_env, _ = make_cross_w2_env(port2, size_x, size_y, verbose=True)
+    eval_base_env, _ = make_cross_w2_env(port2, size_x, size_y, verbose_gradle=True)
     eval_env = wrap_env(
         eval_base_env, size_x, size_y, central_logger, select_goal_eval, is_eval=True
     )
@@ -180,6 +180,9 @@ if __name__ == "__main__":
     arg_parser.add_argument("--port2", type=int, default=8002, help="Port for testing")
     arg_parser.add_argument(
         "--device-id", type=int, default=0, help="CUDA Device ID for training"
+    )
+    arg_parser.add_argument(
+        "--verbose", type=bool, action="store_true", help="Verbose mode"
     )
     args = arg_parser.parse_args()
     TEST_GOAL_IDX = args.goal

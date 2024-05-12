@@ -22,7 +22,13 @@ CROSS_W2_GOALS = [
 
 
 def make_cross_w2_env(
-    port: int, size_x: int, size_y: int, verbose: bool = False
+    port: int,
+    size_x: int,
+    size_y: int,
+    verbose: bool = False,
+    verbose_python: bool = False,
+    verbose_gradle: bool = False,
+    verbose_jvm: bool = False,
 ) -> Tuple[CraftGroundEnvironment, list[str]]:
     return (
         craftground.make(
@@ -60,6 +66,9 @@ def make_cross_w2_env(
             no_pov_effect=True,
             screen_encoding_mode=ScreenEncodingMode.RAW,
             use_vglrun=check_vglrun(),
+            verbose_python=verbose_python,
+            verbose_gradle=verbose_gradle,
+            verbose_jvm=verbose_jvm,
         ),
         [],
     )
