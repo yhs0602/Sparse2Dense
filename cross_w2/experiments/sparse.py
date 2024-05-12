@@ -118,7 +118,7 @@ def sparse_cross_w2(port1: int = 8001, port2: int = 8002, device_id: int = 0):
     env = DummyVecEnv([lambda: env])
 
     # Setup eval environment
-    eval_base_env, _ = make_cross_w2_env(port2, size_x, size_y)
+    eval_base_env, _ = make_cross_w2_env(port2, size_x, size_y, verbose=True)
     eval_env = wrap_env(
         eval_base_env, size_x, size_y, central_logger, select_goal_eval, is_eval=True
     )

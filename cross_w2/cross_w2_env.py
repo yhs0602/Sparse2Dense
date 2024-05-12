@@ -22,13 +22,13 @@ CROSS_W2_GOALS = [
 
 
 def make_cross_w2_env(
-    port: int, size_x: int, size_y: int
+    port: int, size_x: int, size_y: int, verbose: bool = False
 ) -> Tuple[CraftGroundEnvironment, list[str]]:
     return (
         craftground.make(
             port=port,
             initialInventoryCommands=[],
-            verbose=False,
+            verbose=verbose,
             initialPosition=[5, 5, 5],  # nullable
             initialMobsCommands=[],
             imageSizeX=size_x,

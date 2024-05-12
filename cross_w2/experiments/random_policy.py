@@ -44,7 +44,9 @@ def cross_w2_random(port: int):
 
     size_x = 114
     size_y = 64
-    base_env, _ = make_cross_w2_env(port=port, size_x=size_x, size_y=size_y)
+    base_env, _ = make_cross_w2_env(
+        port=port, size_x=size_x, size_y=size_y, verbose=False
+    )
     env = LogFlushWrapper(
         FastResetWrapper(
             EpisodeLoggerWrapper(
