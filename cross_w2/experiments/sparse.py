@@ -113,7 +113,7 @@ def sparse_cross_w2(port1: int = 8001, port2: int = 8002, device_id: int = 0):
     size_y = 64
 
     # Setup train environment
-    base_env, _ = make_cross_w2_env(port1, size_x, size_y)
+    base_env, _ = make_cross_w2_env(port1, size_x, size_y, verbose=False)
     env = wrap_env(base_env, size_x, size_y, central_logger, select_goal, is_eval=False)
     env = DummyVecEnv([lambda: env])
 
