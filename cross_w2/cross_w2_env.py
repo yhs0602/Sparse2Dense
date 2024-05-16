@@ -27,7 +27,7 @@ def make_cross_w2_env(
     size_y: int,
     verbose: bool = False,
     verbose_python: bool = False,
-    verbose_gradle: bool = False,
+    verbose_gradle: bool = True,
     verbose_jvm: bool = False,
 ) -> Tuple[CraftGroundEnvironment, list[str]]:
     return (
