@@ -39,7 +39,7 @@ def create_video_from_positions(
     x_offset,
     y_offset,
     positions,
-    episode_id,
+    video_filename,
     goal=(0, 0),
     block_size=10,
     frame_rate=20,  # 20 TPS
@@ -52,7 +52,6 @@ def create_video_from_positions(
     screen = pygame.display.set_mode((width, height))
     clock = pygame.time.Clock()
 
-    video_filename = f"episode_{episode_id}.mp4"
     command = [
         "ffmpeg",
         "-y",  # 기존 파일 덮어쓰기
