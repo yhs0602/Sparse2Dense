@@ -32,10 +32,9 @@ def make_cross_w2_movie():
 
     # 특정 프로젝트와 run ID 지정
     run_names = [
-        "jourhyang123/craftground-sb3/djuhyq2w", # dense 0
-        "jourhyang123/craftground-sb3/dhpqzeij", # transition 0
-        "jourhyang123/craftground-sb3/ngk59t0e", # sparse 0
-
+        "jourhyang123/craftground-sb3/djuhyq2w",  # dense 0
+        "jourhyang123/craftground-sb3/dhpqzeij",  # transition 0
+        "jourhyang123/craftground-sb3/ngk59t0e",  # sparse 0
     ]
     for run_name in run_names:
         run = api.run(run_name)
@@ -45,7 +44,9 @@ def make_cross_w2_movie():
         n = 0
         for episode_id, episode_data in enumerate(data[::-1]):
             positions = episode_data["episode/positions"]
-            create_video_from_positions(cross_str, 0, 1, positions, f"{run.id}_{episode_id}.mp4")
+            create_video_from_positions(
+                cross_str, 0, 1, positions, f"{run.id}_{episode_id}.mp4"
+            )
             n += 1
             if n >= 3:
                 break

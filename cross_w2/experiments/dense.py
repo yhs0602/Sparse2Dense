@@ -13,6 +13,15 @@ from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
 from cross_w2.cross_w2_env import CROSS_W2_GOALS, make_cross_w2_env
+from cross_w2.experiments.global_settings import (
+    SUCCESS_RADIUS,
+    SUCCESS_REWARD,
+    DENSE_RADIUS,
+    DENSE_REWARD,
+    LIVING_PENALTY_ABS,
+    MAX_EPISODE_TIMESTEPS,
+    TOTAL_TIMESTEPS,
+)
 from define_metric import define_metrics
 from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
@@ -80,18 +89,18 @@ def wrap_env(
                                         ),
                                         goal_selector=goal_selector,
                                     ),
-                                    radius=2,
+                                    radius=SUCCESS_RADIUS,
                                     central_logger=central_logger,
                                     cooldown=2,
                                 ),
-                                reward=1,
+                                reward=SUCCESS_REWARD,
                             ),
-                            radius=5,
-                            reward=0.001,
+                            radius=DENSE_RADIUS,
+                            reward=DENSE_REWARD,
                         ),
-                        penalty_abs=0.0001,
+                        penalty_abs=LIVING_PENALTY_ABS,
                     ),
-                    max_episode_steps=20000,
+                    max_episode_steps=MAX_EPISODE_TIMESTEPS,
                 ),
                 logger=central_logger,
             )
@@ -102,7 +111,7 @@ def wrap_env(
 
 
 def w2_maze_dense(port1: int = 8001, port2: int = 8002, device_id: int = 0):
-    group_name = f"v10-crossw2-dense-{TEST_GOAL_IDX}"
+    group_name = f"v11-crossw2-dense-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -133,8 +142,8 @@ def w2_maze_dense(port1: int = 8001, port2: int = 8002, device_id: int = 0):
     eval_env = VecVideoRecorder(
         eval_env,
         f"videos/{run.id}",
-        record_video_trigger=lambda x: x % 20000 == 0,
-        video_length=20000,
+        record_video_trigger=lambda x: x % MAX_EPISODE_TIMESTEPS == 0,
+        video_length=MAX_EPISODE_TIMESTEPS,
     )
 
     eval_callback = EvalCallback(
@@ -160,7 +169,7 @@ def w2_maze_dense(port1: int = 8001, port2: int = 8002, device_id: int = 0):
 
     try:
         model.learn(
-            total_timesteps=10_000_000,
+            total_timesteps=TOTAL_TIMESTEPS,
             callback=[
                 WandbCallback(
                     gradient_save_freq=500,
@@ -171,12 +180,12 @@ def w2_maze_dense(port1: int = 8001, port2: int = 8002, device_id: int = 0):
                 EpisodeStartCallback(eval_callback),
             ],
         )
-        model.save(f"{group_name}.ckpt")
+        model.save(f"ckpts/{group_name}_{run.id}.ckpt")
 
-        run.finish()
     finally:
         base_env.terminate()
         eval_base_env.terminate()
+        run.finish()
 
 
 if __name__ == "__main__":

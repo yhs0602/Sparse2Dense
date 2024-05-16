@@ -13,6 +13,15 @@ from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
 from cross_w2.cross_w2_env import CROSS_W2_GOALS, make_cross_w2_env
+from cross_w2.experiments.global_settings import (
+    SUCCESS_RADIUS,
+    SUCCESS_REWARD,
+    DENSE_REWARD,
+    DENSE_RADIUS,
+    LIVING_PENALTY_ABS,
+    MAX_EPISODE_TIMESTEPS,
+    TOTAL_TIMESTEPS,
+)
 from define_metric import define_metrics
 from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
@@ -77,7 +86,7 @@ def wrap_env(
             ),
             goal_selector=goal_selector,
         ),
-        radius=2,
+        radius=SUCCESS_RADIUS,
         central_logger=central_logger,
         cooldown=2,
     )
@@ -93,24 +102,24 @@ def wrap_env(
                             reward_envs=[
                                 SparseRewardWrapper(
                                     maze_wrapper,
-                                    reward=1,
+                                    reward=SUCCESS_REWARD,
                                 ),
                                 DenseMazeWrapper(
                                     SparseRewardWrapper(
                                         maze_wrapper,
-                                        reward=1,
+                                        reward=SUCCESS_REWARD,
                                     ),
-                                    radius=5,
-                                    reward=0.001,
+                                    radius=DENSE_RADIUS,
+                                    reward=DENSE_REWARD,
                                 ),
                             ],
                             transition_timings=[
                                 transition_timing,
                             ],
                         ),
-                        penalty_abs=0.0001,
+                        penalty_abs=LIVING_PENALTY_ABS,
                     ),
-                    max_episode_steps=20000,
+                    max_episode_steps=MAX_EPISODE_TIMESTEPS,
                 ),
                 logger=central_logger,
             )
@@ -126,7 +135,7 @@ def cross_w2_transition(
     device_id: int,
     transition_timing: int,
 ):
-    group_name = f"v10-crossw2-transition-{transition_timing}-{TEST_GOAL_IDX}"
+    group_name = f"v11-crossw2-trans-{transition_timing}-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -171,8 +180,8 @@ def cross_w2_transition(
     eval_env = VecVideoRecorder(
         eval_env,
         f"videos/{run.id}",
-        record_video_trigger=lambda x: x % 20000 == 0,
-        video_length=20000,
+        record_video_trigger=lambda x: x % MAX_EPISODE_TIMESTEPS == 0,
+        video_length=MAX_EPISODE_TIMESTEPS,
     )
 
     eval_callback = EvalCallback(
@@ -198,7 +207,7 @@ def cross_w2_transition(
 
     try:
         model.learn(
-            total_timesteps=10_000_000,
+            total_timesteps=TOTAL_TIMESTEPS,
             callback=[
                 WandbCallback(
                     gradient_save_freq=500,
@@ -209,12 +218,11 @@ def cross_w2_transition(
                 EpisodeStartCallback(eval_callback),
             ],
         )
-        model.save(f"{group_name}.ckpt")
-
-        run.finish()
+        model.save(f"ckpts/{group_name}_{run.id}.ckpt")
     finally:
         base_env.terminate()
         eval_base_env.terminate()
+        run.finish()
 
 
 if __name__ == "__main__":
