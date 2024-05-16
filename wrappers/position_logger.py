@@ -22,6 +22,9 @@ class PositionLoggingWrapper(gymnasium.Wrapper):
         self.position_log.append(pos)
         return observation, reward, terminated, truncated, info
 
+    # CentralLogger waits for all the child wrappers to complete reset before logging the episode.
+    # Initial reset does not have any content.
+    # logged episode always starts from 2?
     def reset(self, **kwargs):
         ret = self.env.reset(**kwargs)
         self.logger.log({"episode/positions": self.position_log})

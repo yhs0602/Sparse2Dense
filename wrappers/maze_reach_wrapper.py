@@ -3,9 +3,9 @@ from typing import SupportsFloat, Any, Optional
 import wandb
 from gymnasium.core import WrapperActType, WrapperObsType, Wrapper
 
+from cross_w2.cross_w2_env import Goal
 from utils.central_logger import CentralLogger
 from wrappers.maze_selection_wrapper import MazeSelectionWrapper
-
 
 # Expected structure:
 # MazeSuccessWrapper(
@@ -48,23 +48,13 @@ class MazeReachCheckAndLogWrapper(Wrapper):
         self.time_took += 1
         self.reached_goal = False
 
-        goal = self.env.maze_goal
+        goal: Goal = self.env.maze_goal
         if self.cooldown <= 0:
             # square goal check
-            if self.reached_goal_checker(goal, x, y, z):
+            if self.reached_goal_checker(goal.pos, x, y, z):
                 self.reached_goal = True
                 print(f"Goal Reached in {self.time_took} steps")
                 self.success_counts[goal] = self.success_counts.get(goal, 0) + 1
-                goal_str = str(goal)
-                self.logger.log(
-                    {
-                        f"{goal_str}/success_count": self.success_counts[goal],
-                        f"{goal_str}/time_took": self.time_took,
-                        f"goal": str(goal),
-                    }
-                )
-                self.cooldown = self.config_cooldown
-                self.time_took = 0
                 terminated = True
         return (
             obs,
@@ -92,6 +82,27 @@ class MazeReachCheckAndLogWrapper(Wrapper):
         seed: Optional[int] = None,
         options: Optional[dict[str, Any]] = None,
     ) -> tuple[WrapperObsType, dict[str, Any]]:
+        goal: Goal = self.env.maze_goal
+        if goal:
+            goal_str = goal.name
+            # Success rate is logged in central logger as it knows total episode
+            self.logger.log(
+                {
+                    f"{goal_str}/success_count": self.success_counts.get(goal, 0),
+                    f"{goal_str}/time_took": self.time_took,
+                    "time_took": self.time_took,
+                    "success_count": sum(self.success_counts.values()),
+                    f"goal_idx": goal.idx,
+                    "goal_str": goal_str,
+                    "reached_goal": 1 if self.reached_goal else 0,
+                }
+            )
+        else:
+            self.logger.log(
+                {
+                    "skip_logging": True,
+                }
+            )
         obs, info = self.env.reset(seed=seed, options=options)
         self.cooldown = self.config_cooldown
         self.time_took = 0

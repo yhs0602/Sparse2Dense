@@ -3,6 +3,8 @@ from typing import SupportsFloat, Any
 import gymnasium
 from gymnasium.core import WrapperActType, WrapperObsType
 
+from cross_w2.cross_w2_env import Goal
+
 
 class EpisodeLoggerWrapper(gymnasium.Wrapper):
     def __init__(self, env, logger, **kwargs):
@@ -18,25 +20,20 @@ class EpisodeLoggerWrapper(gymnasium.Wrapper):
         obs, reward, terminated, truncated, info = self.env.step(action)
         self.length += 1
         self.reward += reward
-        if terminated or truncated:
-            goal = self.get_wrapper_attr("maze_goal")
-            self.logger.log(
-                {
-                    "episode/length": self.length,
-                    "episode/reward": self.reward,
-                    "episode/goal": goal,
-                }
-            )
-            self.length = 0
-            self.reward = 0
         return obs, reward, terminated, truncated, info
 
     def reset(self, **kwargs):
         retv = self.env.reset(**kwargs)
-        self.n_episodes += 1
+        goal: Goal = self.get_wrapper_attr("maze_goal")
         self.logger.log(
             {
+                "episode/length": self.length,
+                "episode/reward": self.reward,
+                "episode/goal_idx": goal.idx,
                 "episode": self.n_episodes,
             }
         )
+        self.length = 0
+        self.reward = 0
+        self.n_episodes += 1
         return retv

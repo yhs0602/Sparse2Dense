@@ -1,5 +1,5 @@
 import os.path
-from typing import Tuple
+from typing import Tuple, Union, Iterable
 
 from craftground import craftground
 from craftground.craftground import CraftGroundEnvironment
@@ -14,10 +14,38 @@ map_path = os.path.join(nbts_path, "cross_w2.nbt")
 
 INITIAL_POSITION = [2, 1, 6.5, -90, 0]
 
+
+class Goal:
+    def __init__(
+        self,
+        idx: int,
+        pos: Union[Tuple[float, float, float], Iterable[Tuple[float, float, float]]],
+        name: str,
+    ):
+        self.idx = idx
+        self.pos = pos
+        self.name = name
+
+    def __str__(self):
+        return f"Goal {self.name}({self.idx}): {self.pos}"
+
+    def __eq__(self, other):
+        return self.pos == other.pos
+
+    def __hash__(self):
+        return hash(self.pos)
+
+
 CROSS_W2_GOALS = [
     ((7, 1, 1), (8, 1, 1)),  # 왼쪽
     ((13, 1, 6), (13, 1, 7)),  # 앞쪽
     ((8, 1, 12), (7, 1, 12)),  # 오른쪽
+]
+
+CROSS_W2_GOALS_INSTANCES = [
+    Goal(0, CROSS_W2_GOALS[0], "Left"),
+    Goal(1, CROSS_W2_GOALS[1], "Front"),
+    Goal(2, CROSS_W2_GOALS[2], "Right"),
 ]
 
 

@@ -1,5 +1,6 @@
 import argparse
 import random
+from typing import Union
 
 import gymnasium
 import wandb
@@ -12,18 +13,29 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
-from cross_w2.cross_w2_env import CROSS_W2_GOALS, make_cross_w2_env
+from cross_w2.cross_w2_env import (
+    make_cross_w2_env,
+    CROSS_W2_GOALS_INSTANCES,
+    Goal,
+)
 from cross_w2.experiments.global_settings import (
     SUCCESS_RADIUS,
     SUCCESS_REWARD,
     LIVING_PENALTY_ABS,
     MAX_EPISODE_TIMESTEPS,
     TOTAL_TIMESTEPS,
+    PENALTY_RADIUS,
+    WRONG_PENALTY,
 )
 from define_metric import define_metrics
 from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
+from wrappers.changing_eval_wrapper import (
+    ChangingEvalWrapper,
+    InjectedParameter,
+    InjectedParameterProvider,
+)
 from wrappers.episode_logger import EpisodeLoggerWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.log_flush_wrapper import LogFlushWrapper
@@ -32,66 +44,85 @@ from wrappers.maze_selection_wrapper import MazeSelectionWrapper
 from wrappers.position_logger import PositionLoggingWrapper
 from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
+from wrappers.wrong_goal_penalty_wrapper import WrongGoalPenaltyWrapper
+
 
 # 실험 설명
 # 학습할 때는 저 Goals 중 두 개를 랜덤하게 선택해서 학습합니다.
 # 학습이 끝나면 3개의 Goals에 대해 전부 테스트합니다.
 
-TEST_GOAL_IDX = 2
-TRAIN_GOALS = [goal for i, goal in enumerate(CROSS_W2_GOALS) if i != TEST_GOAL_IDX]
+
+class TrainGoalSelector(InjectedParameterProvider):
+    def __init__(self, omit_idx: int):
+        self.train_goals = [
+            goal for i, goal in enumerate(CROSS_W2_GOALS_INSTANCES) if i != omit_idx
+        ]
+
+    def get_injected_variables(self, name: str) -> Union[Goal, None]:
+        if name == "goal":
+            return random.choice(self.train_goals)
+        return None
 
 
-def select_goal():
-    return random.choice(TRAIN_GOALS)
+class EnableWrongGoalPenaltyAndEarlyStopProvider(InjectedParameterProvider):
+    def __init__(self):
+        pass
 
-
-eval_idx = 0
-
-
-def select_goal_eval():
-    global eval_idx
-
-    goal = CROSS_W2_GOALS[eval_idx % 3]
-    eval_idx += 1
-    return goal
+    def get_injected_variables(self, name: str) -> Union[bool, None]:
+        if name == "enabled_earlystop":
+            return True
+        if name == "enabled_negative_reward":
+            return True
+        return None
 
 
 def wrap_env(
-    env, size_x, size_y, central_logger, goal_selector, is_eval: bool
+    env, size_x, size_y, central_logger, omit_goal: int, is_eval: bool
 ) -> gymnasium.Env:
-    return LogFlushWrapper(
+    train_goal_selector = TrainGoalSelector(omit_goal)
+
+    # Shared among all train / eval
+    basic_env = PositionLoggingWrapper(
+        Turn90Wrapper(
+            VisionWrapper(
+                env,
+                x_dim=size_x,
+                y_dim=size_y,
+            ),
+        ),
+        logger=central_logger,
+    )
+    # Select goal when reset
+    selection_env = MazeSelectionWrapper(basic_env)
+    # Living penalty, sparse reward
+    misc_env = LivingPenaltyWrapper(
+        # Sparse reward
+        SparseRewardWrapper(
+            # Checks, Logs, Terminates
+            MazeReachCheckAndLogWrapper(
+                selection_env,
+                radius=SUCCESS_RADIUS,
+                central_logger=central_logger,
+                cooldown=2,
+            ),
+            reward=SUCCESS_REWARD,
+        ),
+        penalty_abs=LIVING_PENALTY_ABS,
+    )
+    wrong_goal_penalty_env = WrongGoalPenaltyWrapper(
+        env=misc_env,
+        radius=PENALTY_RADIUS,
+        central_logger=central_logger,
+        cooldown=2,
+        reward=WRONG_PENALTY,
+        total_goals=CROSS_W2_GOALS_INSTANCES,
+    )
+    env = LogFlushWrapper(
         FastResetWrapper(
             EpisodeLoggerWrapper(
                 # Truncate the episode if it takes too long
                 TimeLimit(
-                    # Living penalty
-                    LivingPenaltyWrapper(
-                        # Sparse reward
-                        SparseRewardWrapper(
-                            # Checks, Logs, Terminates
-                            MazeReachCheckAndLogWrapper(
-                                # Select goal when reset
-                                MazeSelectionWrapper(
-                                    PositionLoggingWrapper(
-                                        Turn90Wrapper(
-                                            VisionWrapper(
-                                                env,
-                                                x_dim=size_x,
-                                                y_dim=size_y,
-                                            ),
-                                        ),
-                                        logger=central_logger,
-                                    ),
-                                    goal_selector=goal_selector,
-                                ),
-                                radius=SUCCESS_RADIUS,
-                                central_logger=central_logger,
-                                cooldown=2,
-                            ),
-                            reward=SUCCESS_REWARD,
-                        ),
-                        penalty_abs=LIVING_PENALTY_ABS,
-                    ),
+                    wrong_goal_penalty_env,
                     max_episode_steps=MAX_EPISODE_TIMESTEPS,
                 ),
                 logger=central_logger,
@@ -101,9 +132,42 @@ def wrap_env(
         is_eval=is_eval,
     )
 
+    if is_eval:
+        # Provide how to select goal for evaluation, and other parameters
+        eval_env = ChangingEvalWrapper(
+            env,
+            parameters=lambda reset_count: InjectedParameter(
+                {
+                    "goal": CROSS_W2_GOALS_INSTANCES[(reset_count - 1) % 3],
+                    # 0, 1, 2, 0, 1, 2, ...
+                    "enabled_earlystop": ((reset_count - 1) // 30) % 2 == 0,
+                    # True * 30, False * 30, ...
+                    "enabled_negative_reward": ((reset_count - 1) // 30) % 2 == 0,
+                    # True * 30, False * 30, ...
+                }
+            ),
+            period=60,
+            central_logger=central_logger,
+        )
+        selection_env.variable_providers.append(eval_env)
+        wrong_goal_penalty_env.variable_providers.append(eval_env)
+        return eval_env
+    else:
+        # Provide how to select goal for trainer
+        selection_env.variable_providers.append(train_goal_selector)
+        wrong_goal_penalty_env.variable_providers.append(
+            EnableWrongGoalPenaltyAndEarlyStopProvider()
+        )
+        return env
 
-def sparse_cross_w2(port1: int = 8001, port2: int = 8002, device_id: int = 0):
-    group_name = f"v11-crossw2-sparse-{TEST_GOAL_IDX}"
+
+def sparse_cross_w2(
+    port1: int = 8001,
+    port2: int = 8002,
+    device_id: int = 0,
+    omit_goal_idx: int = 0,
+):
+    group_name = f"v12-crossw2-sparse-{omit_goal_idx}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -115,19 +179,21 @@ def sparse_cross_w2(port1: int = 8001, port2: int = 8002, device_id: int = 0):
         save_code=True,  # optional
     )
     central_logger = CentralLogger()
-    define_metrics(CROSS_W2_GOALS)
+    define_metrics(CROSS_W2_GOALS_INSTANCES)
     size_x = 114
     size_y = 64
 
     # Setup train environment
     base_env, _ = make_cross_w2_env(port1, size_x, size_y)
-    env = wrap_env(base_env, size_x, size_y, central_logger, select_goal, is_eval=False)
+    env = wrap_env(
+        base_env, size_x, size_y, central_logger, omit_goal_idx, is_eval=False
+    )
     env = DummyVecEnv([lambda: env])
 
     # Setup eval environment
     eval_base_env, _ = make_cross_w2_env(port2, size_x, size_y, verbose_gradle=True)
     eval_env = wrap_env(
-        eval_base_env, size_x, size_y, central_logger, select_goal_eval, is_eval=True
+        eval_base_env, size_x, size_y, central_logger, omit_goal_idx, is_eval=True
     )
     eval_env = DummyVecEnv([lambda: eval_env])
     eval_env = Monitor(eval_env)
@@ -142,8 +208,8 @@ def sparse_cross_w2(port1: int = 8001, port2: int = 8002, device_id: int = 0):
         eval_env,
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
-        eval_freq=500,
-        n_eval_episodes=30,
+        eval_freq=10,
+        n_eval_episodes=60,
         deterministic=False,
         render=False,
     )
@@ -172,6 +238,9 @@ def sparse_cross_w2(port1: int = 8001, port2: int = 8002, device_id: int = 0):
                 EpisodeStartCallback(eval_callback),
             ],
         )
+        # To properly flush the logs
+        env.reset()
+        eval_env.reset()
         model.save(f"ckpts/{group_name}_{run.id}.ckpt")
 
     finally:
@@ -190,9 +259,9 @@ if __name__ == "__main__":
     )
     arg_parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     args = arg_parser.parse_args()
-    TEST_GOAL_IDX = args.goal
-    TRAIN_GOALS = [goal for i, goal in enumerate(CROSS_W2_GOALS) if i != TEST_GOAL_IDX]
     port1 = args.port1
     port2 = args.port2
     device_id = args.device_id
-    sparse_cross_w2(port1=port1, port2=port2, device_id=device_id)
+    sparse_cross_w2(
+        port1=port1, port2=port2, device_id=device_id, omit_goal_idx=args.goal
+    )
