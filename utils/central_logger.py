@@ -50,7 +50,9 @@ class CentralLogger:
                     early_str = "Earlystop" if early_stop else "Nostop"
                     # Parse _time_took, _reward, _success_rate
                     self.data[f"{early_str}_time_took"] = self.data["time_took"]
-                    self.data[f"{early_str}_reward"] = self.data["episode/reward"]
+                    self.data[f"{early_str}_episode/reward"] = self.data[
+                        "episode/reward"
+                    ]
                     self.data[f"{early_str}_success_rate"] = self.data["success_rate"]
                     self.data["enabled_earlystop"] = 1 if early_stop else 0
                     self.data["enabled_negative_reward"] = (
@@ -70,22 +72,16 @@ class CentralLogger:
                         # Calculate eval_group_idx/{early}_mean_time_took
                         assert len(self.eval_time_tooks) == 30
                         early_mean_time_took = sum(self.eval_time_tooks) / 30
-                        self.data[
-                            f"{eval_group_idx}/{early_str}_mean_time_took"
-                        ] = early_mean_time_took
+                        self.data[f"{early_str}/mean_time_took"] = early_mean_time_took
                         self.eval_time_tooks = []
                         # Calculate eval_group_idx/{early}_mean_reward
                         assert len(self.eval_rewards) == 30
                         early_mean_reward = sum(self.eval_rewards) / 30
-                        self.data[
-                            f"{eval_group_idx}/{early_str}_mean_reward"
-                        ] = early_mean_reward
+                        self.data[f"{early_str}/mean_reward"] = early_mean_reward
                         self.eval_rewards = []
                         # Calculate eval_group_idx/{early}_success_rate
                         early_success_rate = self.eval_success_counts / 30
-                        self.data[
-                            f"{eval_group_idx}/{early_str}_success_rate"
-                        ] = early_success_rate
+                        self.data[f"{early_str}/success_rate"] = early_success_rate
                         self.eval_success_counts = 0
                         self.eval_count = 0
 
