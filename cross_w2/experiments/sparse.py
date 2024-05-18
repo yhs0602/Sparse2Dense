@@ -208,7 +208,7 @@ def sparse_cross_w2(
         eval_env,
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
-        eval_freq=10,
+        eval_freq=500,
         n_eval_episodes=60,
         deterministic=False,
         render=False,
