@@ -31,6 +31,7 @@ class DenseMazeWrapper(Wrapper):
         x = info_obs.x
         y = info_obs.y
         z = info_obs.z
+        self.goal = self.get_wrapper_attr("maze_goal")
         # Dense goal check
         if self.within_range(x, y, z):  # Only when the agent is in the reward range
             new_distance = self.taxicab_distance(x, y, z)
@@ -49,17 +50,17 @@ class DenseMazeWrapper(Wrapper):
         )  # , done: deprecated
 
     def within_range(self, x, y, z):
-        if len(self.goal) == 3:
-            goals = [self.goal]
+        if len(self.goal.pos) == 3:
+            goals = [self.goal.pos]
         else:
-            goals = self.goal
-        return any(self.within_range_single(goal, x, y, z) for goal in goals)
+            goals = self.goal.pos
+        return any(self.within_range_single(goal_pos, x, y, z) for goal_pos in goals)
 
-    def within_range_single(self, goal, x, y, z) -> bool:
+    def within_range_single(self, goal_pos, x, y, z) -> bool:
         return (
-            goal[0] - self.radius <= x <= goal[0] + self.radius
-            and goal[1] - self.radius <= y <= goal[1] + self.radius
-            and goal[2] - self.radius <= z <= goal[2] + self.radius
+            goal_pos[0] - self.radius <= x <= goal_pos[0] + self.radius
+            and goal_pos[1] - self.radius <= y <= goal_pos[1] + self.radius
+            and goal_pos[2] - self.radius <= z <= goal_pos[2] + self.radius
         )
 
     def reset(
@@ -73,11 +74,13 @@ class DenseMazeWrapper(Wrapper):
         return obs, info
 
     def taxicab_distance(self, x: float, y: float, z: float) -> float:
-        if len(self.goal) == 3:
-            goals = [self.goal]
+        if len(self.goal.pos) == 3:
+            goals = [self.goal.pos]
         else:
-            goals = self.goal
-        return min(self.taxicab_distance_single(goal, x, y, z) for goal in goals)
+            goals = self.goal.pos
+        return min(
+            self.taxicab_distance_single(goal_pos, x, y, z) for goal_pos in goals
+        )
 
-    def taxicab_distance_single(self, goal, x: float, y: float, z: float) -> float:
-        return abs(x - goal[0]) + abs(y - goal[1]) + abs(z - goal[2])
+    def taxicab_distance_single(self, goal_pos, x: float, y: float, z: float) -> float:
+        return abs(x - goal_pos[0]) + abs(y - goal_pos[1]) + abs(z - goal_pos[2])
