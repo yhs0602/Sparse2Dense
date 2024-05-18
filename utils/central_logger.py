@@ -3,6 +3,7 @@ from typing import Dict, Any
 import wandb
 
 
+# Shared across environments; train and eval
 class CentralLogger:
     """
     Only log data to wandb at the end of each episode.
@@ -16,6 +17,8 @@ class CentralLogger:
         self.eval_time_tooks = []
         self.eval_success_counts = 0
         self.eval_count = 0
+        self.train_goal_counts = {}
+        self.eval_goal_counts = {}
 
     def log(self, log_dict: Dict[str, Any]):
         """
@@ -26,14 +29,35 @@ class CentralLogger:
 
     def end_episode(self, is_eval: bool = False):
         if self.data:  # 로깅할 데이터가 있는지 확인
+            if "goal_idx" in self.data:
+                goal_idx = self.data["goal_idx"]
+                if is_eval:
+                    self.eval_goal_counts[goal_idx] = (
+                        self.eval_goal_counts.get(goal_idx, 0) + 1
+                    )
+                else:
+                    self.train_goal_counts[goal_idx] = (
+                        self.train_goal_counts.get(goal_idx, 0) + 1
+                    )
             # check aggregate data
             if "goal_str" in self.data and "episode" in self.data:
                 goal_str = self.data["goal_str"]
                 if f"{goal_str}/success_count" in self.data:
                     episode = self.data["episode"]
-                    self.data[f"{goal_str}/success_rate"] = (
-                        self.data[f"{goal_str}/success_count"] / episode
-                    )
+                    goal_idx = self.data["goal_idx"]
+                    if is_eval:
+                        goal_count = self.eval_goal_counts.get(goal_idx, 0)
+                    else:
+                        goal_count = self.train_goal_counts.get(goal_idx, 0)
+                    if goal_count > 0:
+                        self.data[f"{goal_str}/success_rate"] = (
+                            self.data[f"{goal_str}/success_count"] / goal_count
+                        )
+                    else:
+                        self.data["zero_goal_count"] = 1
+                        self.data[f"{goal_str}/success_rate"] = (
+                            self.data[f"{goal_str}/success_count"] / episode
+                        )
             if "success_count" in self.data and "episode" in self.data:
                 if "time_took" in self.data:
                     self.data["success_rate"] = (
