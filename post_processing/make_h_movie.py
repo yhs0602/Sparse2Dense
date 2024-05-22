@@ -1,4 +1,6 @@
 import subprocess
+from collections import deque
+from typing import List, Tuple
 
 import pygame
 import tqdm
@@ -40,7 +42,7 @@ def create_video_from_positions(
     y_offset,
     positions,
     video_filename,
-    goal=(0, 0),
+    goals: List[Tuple[int, int]] = [(0, 0)],
     block_size=10,
     frame_rate=20,  # 20 TPS
 ):
@@ -98,43 +100,39 @@ def create_video_from_positions(
                     ),
                 )
     # Goal 그리기
-    goal_x, goal_y = goal
-    pygame.draw.circle(
-        background,
-        (0, 255, 0),
-        (
-            goal_x * block_size + int(block_size / 2),
-            goal_y * block_size + int(block_size / 2),
-        ),
-        int(block_size / 2),
-    )
+    font = pygame.font.Font(None, 18)
+    for idx, goal in enumerate(goals):
+        goal_x, goal_y = goal
+        pygame.draw.circle(
+            background,
+            (0, 255, 0),
+            (
+                goal_x * block_size + int(block_size / 2),
+                goal_y * block_size + int(block_size / 2),
+            ),
+            int(block_size / 2),
+        )
+        # Goal 좌표 출력
+        text = font.render(f"{goal[0], goal[1]}", True, (0, 255, 0))
+        background.blit(text, (idx * 30, 0))
 
     # 에이전트 위치를 기반으로 프레임 생성
+    last_n_poses = deque(maxlen=30)
     for position in tqdm.tqdm(positions):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
         screen.blit(background, (0, 0))  # 배경 그리기
-        # TODO: Cache maze surface
-        for y, row in enumerate(maze):
-            for x, cell in enumerate(row):
-                color = (0, 0, 0) if cell == "o" else (255, 255, 255)
-                pygame.draw.rect(
-                    screen,
-                    color,
-                    (
-                        (x + x_offset) * block_size,
-                        (y + y_offset) * block_size,
-                        block_size,
-                        block_size,
-                    ),
-                )
+        pos_txt = font.render(
+            f"{int(position[0]), int(position[2])}", True, (255, 0, 0)
+        )
+        screen.blit(pos_txt, (0, 20))
         if dimension == 3:
-            y, z, x = position
+            x, z, y = position
             yaw = 0
         elif dimension == 4:
-            y, z, x, yaw = position
+            x, z, y, yaw = position
         else:
             raise ValueError(f"Invalid dimension {dimension}")
 
@@ -145,14 +143,17 @@ def create_video_from_positions(
         # draw triangle based on yaw
         yaw = int(yaw / 90) % 4
         agent_color = (255, 0, 0)
+        agent_realx = int(x * block_size)
+        agent_realy = int(y * block_size)
+        last_n_poses.append((agent_realx, agent_realy))
         if yaw == 0:
             pygame.draw.polygon(
                 screen,
                 agent_color,
                 [
-                    (int(x * block_size) - agent_dx, int(y * block_size) - agent_dy),
-                    (int(x * block_size), int(y * block_size) + agent_radius),
-                    (int(x * block_size) + agent_dx, int(y * block_size) - agent_dy),
+                    (agent_realx - agent_dx, int(y * block_size) - agent_dy),
+                    (agent_realx, int(y * block_size) + agent_radius),
+                    (agent_realx + agent_dx, int(y * block_size) - agent_dy),
                 ],
             )
         elif yaw == 1:
@@ -160,9 +161,9 @@ def create_video_from_positions(
                 screen,
                 agent_color,
                 [
-                    (int(x * block_size) - agent_dy, int(y * block_size) - agent_dx),
-                    (int(x * block_size) + agent_radius, int(y * block_size)),
-                    (int(x * block_size) - agent_dy, int(y * block_size) + agent_dx),
+                    (agent_realx - agent_dy, int(y * block_size) - agent_dx),
+                    (agent_realx + agent_radius, int(y * block_size)),
+                    (agent_realx - agent_dy, int(y * block_size) + agent_dx),
                 ],
             )
         elif yaw == 2:
@@ -170,9 +171,9 @@ def create_video_from_positions(
                 screen,
                 agent_color,
                 [
-                    (int(x * block_size) + agent_dx, int(y * block_size) + agent_dy),
-                    (int(x * block_size), int(y * block_size) - agent_radius),
-                    (int(x * block_size) - agent_dx, int(y * block_size) + agent_dy),
+                    (agent_realx + agent_dx, int(y * block_size) + agent_dy),
+                    (agent_realx, int(y * block_size) - agent_radius),
+                    (agent_realx - agent_dx, int(y * block_size) + agent_dy),
                 ],
             )
         elif yaw == 3:
@@ -180,9 +181,9 @@ def create_video_from_positions(
                 screen,
                 agent_color,
                 [
-                    (int(x * block_size) + agent_dy, int(y * block_size) + agent_dx),
-                    (int(x * block_size) - agent_radius, int(y * block_size)),
-                    (int(x * block_size) + agent_dy, int(y * block_size) - agent_dx),
+                    (agent_realx + agent_dy, int(y * block_size) + agent_dx),
+                    (agent_realx - agent_radius, int(y * block_size)),
+                    (agent_realx + agent_dy, int(y * block_size) - agent_dx),
                 ],
             )
         else:
@@ -195,6 +196,15 @@ def create_video_from_positions(
                 ),
                 agent_radius,
             )  # 에이전트 그리기
+        # 궤적 그리기, draw_lines
+        if len(last_n_poses) > 2:
+            pygame.draw.lines(
+                screen,
+                (0, 0, 255),
+                False,
+                list(last_n_poses),
+                2,
+            )
 
         # 프레임을 FFmpeg로 파이프
         frame = pygame.surfarray.array3d(screen)
