@@ -1,4 +1,6 @@
 import argparse
+import os
+from typing import Optional
 
 import gymnasium
 import wandb
@@ -6,7 +8,7 @@ from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.vision import VisionWrapper
 from gymnasium.wrappers import TimeLimit
 from sb3_contrib import RecurrentPPO
-from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
@@ -32,6 +34,7 @@ from cross_w2.experiments.sparse import (
 )
 from define_metric import define_metrics
 from sb3_exts.episode_start_callback import EpisodeStartCallback
+from sb3_exts.last_checkpoint_callback import LastCheckpointCallback
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
 from wrappers.changing_eval_wrapper import InjectedParameter, ChangingEvalWrapper
@@ -143,6 +146,8 @@ def w2_maze_dense(
     port2: int = 8002,
     device_id: int = 0,
     omit_goal_idx: int = 0,
+    resume_id: Optional[str] = None,
+    context_path: str = None,
 ):
     group_name = f"v12-crossw2-dense-{omit_goal_idx}"
     run = wandb.init(
@@ -154,6 +159,8 @@ def w2_maze_dense(
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional
+        id=resume_id,  # resume_id가 있으면 해당 run을 resume합니다.
+        resume="must" if resume_id else "never",
     )
     central_logger = CentralLogger()
     define_metrics(CROSS_W2_GOALS_INSTANCES)
@@ -202,7 +209,18 @@ def w2_maze_dense(
         n_steps=512,
     )
 
+    if resume_id and context_path:
+        if os.path.exists(context_path):
+            model.load(context_path)
+        else:
+            raise FileNotFoundError(f"Context file {context_path} not found")
+
     try:
+        checkpoint_callback = LastCheckpointCallback(
+            save_freq=100000,  # 약 18분 주기, 1%마다 # 100000
+            save_path=f"mid_ckpts/{run.name}",  # wandb run 이름을 사용하여 저장 경로 설정
+            name_prefix="model",
+        )
         model.learn(
             total_timesteps=TOTAL_TIMESTEPS,
             callback=[
@@ -213,9 +231,10 @@ def w2_maze_dense(
                 ),
                 # EpisodeLogger(),
                 EpisodeStartCallback(eval_callback),
+                checkpoint_callback,
             ],
         )
-        model.save(f"ckpts/{group_name}_{run.id}.ckpt")
+        model.save(f"ckpts/{group_name}_{run.id}_final.ckpt.zip")
 
     finally:
         base_env.terminate()
@@ -232,10 +251,17 @@ if __name__ == "__main__":
         "--device-id", type=int, default=0, help="CUDA Device ID for training"
     )
     arg_parser.add_argument("--verbose", action="store_true", help="Verbose mode")
+    arg_parser.add_argument("--resume-run-id", type=str, help="Run id to resume")
+    arg_parser.add_argument("--context", type=str, help="Path to context file")
     args = arg_parser.parse_args()
     port1 = args.port1
     port2 = args.port2
     device_id = args.device_id
     w2_maze_dense(
-        port1=port1, port2=port2, device_id=device_id, omit_goal_idx=args.goal
+        port1=port1,
+        port2=port2,
+        device_id=device_id,
+        omit_goal_idx=args.goal,
+        resume_id=args.resume_run_id,
+        context_path=args.context,
     )
