@@ -1,7 +1,7 @@
 # 13 x 13
 import wandb
 
-from management.make_h_movie import create_video_from_positions
+from post_processing.make_h_movie import create_video_from_positions
 
 cross_str = [
     "xxxxxxooxxxxxx",
