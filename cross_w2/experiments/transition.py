@@ -25,6 +25,8 @@ from cross_w2.experiments.global_settings import (
     LIVING_PENALTY_ABS,
     MAX_EPISODE_TIMESTEPS,
     TOTAL_TIMESTEPS,
+    EVAL_EPISODES,
+    EVAL_FREQ,
 )
 from cross_w2.experiments.sparse import (
     TrainGoalSelector,
@@ -221,8 +223,8 @@ def cross_w2_transition(
         eval_env,
         best_model_save_path=f"models/{run.id}",
         log_path=f"logs/{run.id}",
-        eval_freq=500,
-        n_eval_episodes=60,
+        eval_freq=EVAL_FREQ,
+        n_eval_episodes=EVAL_EPISODES,
         deterministic=False,
         render=False,
     )

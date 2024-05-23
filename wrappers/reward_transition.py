@@ -4,6 +4,8 @@ import gymnasium
 from gymnasium import Env
 from gymnasium.core import WrapperActType, WrapperObsType
 
+from utils.central_logger import CentralLogger
+
 
 class RewardTransitionWrapper(gymnasium.Wrapper):
     """
@@ -18,7 +20,13 @@ class RewardTransitionWrapper(gymnasium.Wrapper):
     the reward environment will be env1 for episodes 1-10, env2 for episodes 11-20, and env3 for episodes 21 onwards
     """
 
-    def __init__(self, reward_envs: List[Env], transition_timings: List[int], **kwargs):
+    def __init__(
+        self,
+        reward_envs: List[Env],
+        transition_timings: List[int],
+        logger: CentralLogger,
+        **kwargs
+    ):
         super().__init__(reward_envs[0])
         assert len(reward_envs) - 1 == len(transition_timings)
         self.episode_count = 0
@@ -26,6 +34,7 @@ class RewardTransitionWrapper(gymnasium.Wrapper):
         self.transition_timings = transition_timings
         self.env_idx = 0
         self.total_timesteps = 0
+        self.logger = logger
 
     def step(
         self, action: WrapperActType
@@ -39,5 +48,11 @@ class RewardTransitionWrapper(gymnasium.Wrapper):
         if self.env_idx < len(self.transition_timings):
             if self.total_timesteps >= self.transition_timings[self.env_idx]:
                 self.env_idx += 1
+                self.logger.log(
+                    {
+                        "updated_env_idx": 1,
+                        "update_episode_count": self.episode_count,
+                    }
+                )
         self.env = self.reward_envs[self.env_idx]
         return self.env.reset(**kwargs)

@@ -2,6 +2,8 @@ from typing import Dict, Any
 
 import wandb
 
+from cross_w2.experiments.global_settings import EVAL_EPISODES
+
 
 # Shared across environments; train and eval
 class CentralLogger:
@@ -85,26 +87,26 @@ class CentralLogger:
 
                     # Must have reset_count variable
                     reset_count = self.data["reset_count"]
-                    eval_group_idx = reset_count // 60
+                    eval_group_idx = reset_count // EVAL_EPISODES
                     self.data["group_idx"] = eval_group_idx
 
                     self.eval_time_tooks.append(self.data["time_took"])
                     self.eval_rewards.append(self.data["episode/reward"])
                     if self.data["reached_goal"] == 1:
                         self.eval_success_counts += 1
-                    if self.eval_count == 30:
+                    if self.eval_count == EVAL_EPISODES:
                         # Calculate eval_group_idx/{early}_mean_time_took
-                        assert len(self.eval_time_tooks) == 30
-                        early_mean_time_took = sum(self.eval_time_tooks) / 30
+                        assert len(self.eval_time_tooks) == EVAL_EPISODES
+                        early_mean_time_took = sum(self.eval_time_tooks) / EVAL_EPISODES
                         self.data[f"{early_str}/mean_time_took"] = early_mean_time_took
                         self.eval_time_tooks = []
                         # Calculate eval_group_idx/{early}_mean_reward
-                        assert len(self.eval_rewards) == 30
-                        early_mean_reward = sum(self.eval_rewards) / 30
+                        assert len(self.eval_rewards) == EVAL_EPISODES
+                        early_mean_reward = sum(self.eval_rewards) / EVAL_EPISODES
                         self.data[f"{early_str}/mean_reward"] = early_mean_reward
                         self.eval_rewards = []
                         # Calculate eval_group_idx/{early}_success_rate
-                        early_success_rate = self.eval_success_counts / 30
+                        early_success_rate = self.eval_success_counts / EVAL_EPISODES
                         self.data[f"{early_str}/success_rate"] = early_success_rate
                         self.eval_success_counts = 0
                         self.eval_count = 0
