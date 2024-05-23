@@ -29,7 +29,7 @@ class EpisodeLoggerWrapper(gymnasium.Wrapper):
             {
                 "episode/length": self.length,
                 "episode/reward": self.reward,
-                "episode/goal_idx": goal.idx,
+                "episode/goal_idx": goal.idx if goal else -1,
                 "episode": self.n_episodes,
             }
         )

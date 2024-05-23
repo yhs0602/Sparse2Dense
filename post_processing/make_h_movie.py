@@ -132,8 +132,8 @@ def create_video_from_positions(
             f"{int(position[0]), int(position[2])}", True, (255, 0, 0)
         )
         screen.blit(pos_txt, (0, 20))
-        time_txt = font.render(f"T:{time}", True, (255, 255, 0))
-        screen.blit(time_txt, (width - 60, 20))
+        time_txt = font.render(f"T:{time}", True, (255, 0, 255))
+        screen.blit(time_txt, (width - 40, 20))
         if dimension == 3:
             x, z, y = position
             yaw = 0
