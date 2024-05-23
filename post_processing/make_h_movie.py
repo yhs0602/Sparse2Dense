@@ -1,3 +1,4 @@
+import colorsys
 import subprocess
 from collections import deque
 from typing import List, Tuple
@@ -42,6 +43,8 @@ def create_video_from_positions(
     y_offset,
     positions,
     video_filename,
+    episode: int = 0,
+    reached_goal: int = 0,
     goals: List[Tuple[int, int]] = [(0, 0)],
     block_size=10,
     frame_rate=20,  # 20 TPS
@@ -52,7 +55,6 @@ def create_video_from_positions(
         maze_size_h + abs(y_offset)
     ) * block_size
     screen = pygame.display.set_mode((width, height))
-    clock = pygame.time.Clock()
 
     command = [
         "ffmpeg",
@@ -115,10 +117,12 @@ def create_video_from_positions(
         # Goal 좌표 출력
         text = font.render(f"{goal[0], goal[1]}", True, (0, 255, 0))
         background.blit(text, (idx * 30, 0))
-
+    # episode 출력
+    text = font.render(f"Ep.{episode}({reached_goal})", True, (0, 0, 255))
+    background.blit(text, (width - 60, 0))
     # 에이전트 위치를 기반으로 프레임 생성
-    last_n_poses = deque(maxlen=30)
-    for position in tqdm.tqdm(positions):
+    last_n_poses = deque(maxlen=len(positions))
+    for time, position in tqdm.tqdm(enumerate(positions)):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -128,6 +132,8 @@ def create_video_from_positions(
             f"{int(position[0]), int(position[2])}", True, (255, 0, 0)
         )
         screen.blit(pos_txt, (0, 20))
+        time_txt = font.render(f"T:{time}", True, (255, 255, 0))
+        screen.blit(time_txt, (width - 60, 20))
         if dimension == 3:
             x, z, y = position
             yaw = 0
@@ -197,14 +203,20 @@ def create_video_from_positions(
                 agent_radius,
             )  # 에이전트 그리기
         # 궤적 그리기, draw_lines
-        if len(last_n_poses) > 2:
-            pygame.draw.lines(
-                screen,
-                (0, 0, 255),
-                False,
-                list(last_n_poses),
-                2,
-            )
+        if len(last_n_poses) > 1:
+            for i in range(1, len(last_n_poses)):
+                start_pos = last_n_poses[i - 1]
+                end_pos = last_n_poses[i]
+                # hsv version
+                if True:
+                    hue = i / len(last_n_poses)  # hue 값은 0에서 1 사이
+                    color = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+                    color = tuple(int(c * 255) for c in color)  # RGB로 변환
+                # intensity version
+                else:
+                    color_intensity = int(255 * i / len(last_n_poses))
+                    color = (color_intensity, 0, 255 - color_intensity)
+                pygame.draw.line(screen, color, start_pos, end_pos, 2)
 
         # 프레임을 FFmpeg로 파이프
         frame = pygame.surfarray.array3d(screen)

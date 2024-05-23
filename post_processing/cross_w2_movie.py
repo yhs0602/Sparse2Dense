@@ -40,13 +40,22 @@ def make_cross_w2_movie():
     for run_name in run_names:
         run = api.run(run_name)
         # 로그 데이터 가져오기
-        data = run.history(keys=["episode/positions", "goal_idx"], pandas=False)
+        data = run.history(
+            keys=[
+                "eval_episode/positions",
+                "eval_goal_idx",
+                "eval_episode",
+                "eval_reached_goal",
+            ],
+            pandas=False,
+        )
         # 각 에피소드별로 동영상 생성
         n = 0
         for episode_id, episode_data in enumerate(data[::-1]):
-            positions = episode_data["episode/positions"]
+            positions = episode_data["eval_episode/positions"]
             print(episode_data.keys())
-            goal_idx = episode_data["goal_idx"]
+            goal_idx = episode_data["eval_goal_idx"]
+            reached_goal = episode_data["eval_reached_goal"]
             goal1 = CROSS_W2_GOALS_INSTANCES[goal_idx].pos[0]
             goal2 = CROSS_W2_GOALS_INSTANCES[goal_idx].pos[1]
             create_video_from_positions(
@@ -55,11 +64,15 @@ def make_cross_w2_movie():
                 0,
                 positions,
                 f"{run.id}_{episode_id}.mp4",
+                episode=episode_data["eval_episode"],
                 goals=[(goal1[0], goal1[2]), (goal2[0], goal2[2])],
+                reached_goal=reached_goal,
             )
             n += 1
             if n >= 3:
                 break
+        else:
+            print("No data")
 
 
 if __name__ == "__main__":

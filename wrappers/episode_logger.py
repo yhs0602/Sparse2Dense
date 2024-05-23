@@ -23,8 +23,8 @@ class EpisodeLoggerWrapper(gymnasium.Wrapper):
         return obs, reward, terminated, truncated, info
 
     def reset(self, **kwargs):
-        retv = self.env.reset(**kwargs)
         goal: Goal = self.get_wrapper_attr("maze_goal")
+        retv = self.env.reset(**kwargs)
         self.logger.log(
             {
                 "episode/length": self.length,

@@ -19,7 +19,7 @@ from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.log_flush_wrapper import LogFlushWrapper
 from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
 from wrappers.maze_selection_wrapper import MazeSelectionWrapper
-from wrappers.position_logger import PositionLoggingWrapper
+from wrappers.position_logger import PositionAndRewardLoggingWrapper
 from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
 
@@ -55,7 +55,7 @@ def cross_w2_random(port: int):
                         SparseRewardWrapper(
                             MazeReachCheckAndLogWrapper(
                                 MazeSelectionWrapper(
-                                    PositionLoggingWrapper(
+                                    PositionAndRewardLoggingWrapper(
                                         Turn90Wrapper(
                                             VisionWrapper(
                                                 base_env,
