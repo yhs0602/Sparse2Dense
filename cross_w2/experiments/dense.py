@@ -8,7 +8,7 @@ from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.vision import VisionWrapper
 from gymnasium.wrappers import TimeLimit
 from sb3_contrib import RecurrentPPO
-from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback
+from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
@@ -25,12 +25,9 @@ from cross_w2.experiments.global_settings import (
     LIVING_PENALTY_ABS,
     MAX_EPISODE_TIMESTEPS,
     TOTAL_TIMESTEPS,
-    PENALTY_RADIUS,
-    WRONG_PENALTY,
 )
 from cross_w2.experiments.sparse import (
     TrainGoalSelector,
-    EnableWrongGoalPenaltyAndEarlyStopProvider,
 )
 from define_metric import define_metrics
 from sb3_exts.episode_start_callback import EpisodeStartCallback
@@ -47,7 +44,6 @@ from wrappers.maze_selection_wrapper import MazeSelectionWrapper
 from wrappers.position_logger import PositionLoggingWrapper
 from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
-from wrappers.wrong_goal_penalty_wrapper import WrongGoalPenaltyWrapper
 
 
 # 실험 설명
@@ -90,20 +86,20 @@ def wrap_env(
         ),
         penalty_abs=LIVING_PENALTY_ABS,
     )
-    wrong_goal_penalty_env = WrongGoalPenaltyWrapper(
-        env=misc_env,
-        radius=PENALTY_RADIUS,
-        central_logger=central_logger,
-        cooldown=2,
-        reward=WRONG_PENALTY,
-        total_goals=CROSS_W2_GOALS_INSTANCES,
-    )
+    # wrong_goal_penalty_env = WrongGoalPenaltyWrapper(
+    #     env=misc_env,
+    #     radius=PENALTY_RADIUS,
+    #     central_logger=central_logger,
+    #     cooldown=2,
+    #     reward=WRONG_PENALTY,
+    #     total_goals=CROSS_W2_GOALS_INSTANCES,
+    # )
     env = LogFlushWrapper(
         FastResetWrapper(
             EpisodeLoggerWrapper(
                 # Truncate the episode if it takes too long
                 TimeLimit(
-                    wrong_goal_penalty_env,
+                    misc_env,
                     max_episode_steps=MAX_EPISODE_TIMESTEPS,
                 ),
                 logger=central_logger,
@@ -120,9 +116,9 @@ def wrap_env(
                 {
                     "goal": CROSS_W2_GOALS_INSTANCES[(reset_count - 1) % 3],
                     # 0, 1, 2, 0, 1, 2, ...
-                    "enabled_earlystop": ((reset_count - 1) // 30) % 2 == 0,
+                    "enabled_earlystop": False,  # ((reset_count - 1) // 30) % 2 == 0,
                     # True * 30, False * 30, ...
-                    "enabled_negative_reward": ((reset_count - 1) // 30) % 2 == 0,
+                    "enabled_negative_reward": False,  # ((reset_count - 1) // 30) % 2 == 0,
                     # True * 30, False * 30, ...
                 }
             ),
@@ -130,14 +126,14 @@ def wrap_env(
             central_logger=central_logger,
         )
         selection_env.variable_providers.append(eval_env)
-        wrong_goal_penalty_env.variable_providers.append(eval_env)
+        # wrong_goal_penalty_env.variable_providers.append(eval_env)
         return eval_env
     else:
         # Provide how to select goal for trainer
         selection_env.variable_providers.append(train_goal_selector)
-        wrong_goal_penalty_env.variable_providers.append(
-            EnableWrongGoalPenaltyAndEarlyStopProvider()
-        )
+        # wrong_goal_penalty_env.variable_providers.append(
+        #     EnableWrongGoalPenaltyAndEarlyStopProvider()
+        # )
         return env
 
 
@@ -234,6 +230,9 @@ def w2_maze_dense(
                 checkpoint_callback,
             ],
         )
+        # To properly flush the logs
+        env.reset()
+        eval_env.reset()
         model.save(f"ckpts/{group_name}_{run.id}_final.ckpt.zip")
 
     finally:

@@ -1,6 +1,7 @@
 import argparse
+import os
 import random
-from typing import Union
+from typing import Union, Optional
 
 import gymnasium
 import wandb
@@ -24,11 +25,10 @@ from cross_w2.experiments.global_settings import (
     LIVING_PENALTY_ABS,
     MAX_EPISODE_TIMESTEPS,
     TOTAL_TIMESTEPS,
-    PENALTY_RADIUS,
-    WRONG_PENALTY,
 )
 from define_metric import define_metrics
 from sb3_exts.episode_start_callback import EpisodeStartCallback
+from sb3_exts.last_checkpoint_callback import LastCheckpointCallback
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
 from wrappers.changing_eval_wrapper import (
@@ -44,7 +44,6 @@ from wrappers.maze_selection_wrapper import MazeSelectionWrapper
 from wrappers.position_logger import PositionLoggingWrapper
 from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
-from wrappers.wrong_goal_penalty_wrapper import WrongGoalPenaltyWrapper
 
 
 # 실험 설명
@@ -109,20 +108,20 @@ def wrap_env(
         ),
         penalty_abs=LIVING_PENALTY_ABS,
     )
-    wrong_goal_penalty_env = WrongGoalPenaltyWrapper(
-        env=misc_env,
-        radius=PENALTY_RADIUS,
-        central_logger=central_logger,
-        cooldown=2,
-        reward=WRONG_PENALTY,
-        total_goals=CROSS_W2_GOALS_INSTANCES,
-    )
+    # wrong_goal_penalty_env = WrongGoalPenaltyWrapper(
+    #     env=misc_env,
+    #     radius=PENALTY_RADIUS,
+    #     central_logger=central_logger,
+    #     cooldown=2,
+    #     reward=WRONG_PENALTY,
+    #     total_goals=CROSS_W2_GOALS_INSTANCES,
+    # )
     env = LogFlushWrapper(
         FastResetWrapper(
             EpisodeLoggerWrapper(
                 # Truncate the episode if it takes too long
                 TimeLimit(
-                    wrong_goal_penalty_env,
+                    misc_env,
                     max_episode_steps=MAX_EPISODE_TIMESTEPS,
                 ),
                 logger=central_logger,
@@ -140,9 +139,9 @@ def wrap_env(
                 {
                     "goal": CROSS_W2_GOALS_INSTANCES[(reset_count - 1) % 3],
                     # 0, 1, 2, 0, 1, 2, ...
-                    "enabled_earlystop": ((reset_count - 1) // 30) % 2 == 0,
+                    "enabled_earlystop": False,  # ((reset_count - 1) // 30) % 2 == 0,
                     # True * 30, False * 30, ...
-                    "enabled_negative_reward": ((reset_count - 1) // 30) % 2 == 0,
+                    "enabled_negative_reward": False,  # ((reset_count - 1) // 30) % 2 == 0,
                     # True * 30, False * 30, ...
                 }
             ),
@@ -150,14 +149,14 @@ def wrap_env(
             central_logger=central_logger,
         )
         selection_env.variable_providers.append(eval_env)
-        wrong_goal_penalty_env.variable_providers.append(eval_env)
+        # wrong_goal_penalty_env.variable_providers.append(eval_env)
         return eval_env
     else:
         # Provide how to select goal for trainer
         selection_env.variable_providers.append(train_goal_selector)
-        wrong_goal_penalty_env.variable_providers.append(
-            EnableWrongGoalPenaltyAndEarlyStopProvider()
-        )
+        # wrong_goal_penalty_env.variable_providers.append(
+        #     EnableWrongGoalPenaltyAndEarlyStopProvider()
+        # )
         return env
 
 
@@ -166,6 +165,8 @@ def sparse_cross_w2(
     port2: int = 8002,
     device_id: int = 0,
     omit_goal_idx: int = 0,
+    resume_id: Optional[str] = None,
+    context_path: str = None,
 ):
     group_name = f"v12-crossw2-sparse-{omit_goal_idx}"
     run = wandb.init(
@@ -177,6 +178,8 @@ def sparse_cross_w2(
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional
+        id=resume_id,  # resume_id가 있으면 해당 run을 resume합니다.
+        resume="must" if resume_id else "never",
     )
     central_logger = CentralLogger()
     define_metrics(CROSS_W2_GOALS_INSTANCES)
@@ -225,7 +228,18 @@ def sparse_cross_w2(
         n_steps=512,
     )
 
+    if resume_id and context_path:
+        if os.path.exists(context_path):
+            model.load(context_path)
+        else:
+            raise FileNotFoundError(f"Context file {context_path} not found")
+
     try:
+        checkpoint_callback = LastCheckpointCallback(
+            save_freq=100000,  # 약 18분 주기, 1%마다 # 100000
+            save_path=f"mid_ckpts/{run.name}",  # wandb run 이름을 사용하여 저장 경로 설정
+            name_prefix="model",
+        )
         model.learn(
             total_timesteps=TOTAL_TIMESTEPS,
             callback=[
@@ -236,12 +250,13 @@ def sparse_cross_w2(
                 ),
                 # EpisodeLogger(),
                 EpisodeStartCallback(eval_callback),
+                checkpoint_callback,
             ],
         )
         # To properly flush the logs
         env.reset()
         eval_env.reset()
-        model.save(f"ckpts/{group_name}_{run.id}.ckpt")
+        model.save(f"ckpts/{group_name}_{run.id}_final.ckpt.zip")
 
     finally:
         base_env.terminate()
@@ -258,10 +273,17 @@ if __name__ == "__main__":
         "--device-id", type=int, default=0, help="CUDA Device ID for training"
     )
     arg_parser.add_argument("--verbose", action="store_true", help="Verbose mode")
+    arg_parser.add_argument("--resume-run-id", type=str, help="Run id to resume")
+    arg_parser.add_argument("--context", type=str, help="Path to context file")
     args = arg_parser.parse_args()
     port1 = args.port1
     port2 = args.port2
     device_id = args.device_id
     sparse_cross_w2(
-        port1=port1, port2=port2, device_id=device_id, omit_goal_idx=args.goal
+        port1=port1,
+        port2=port2,
+        device_id=device_id,
+        omit_goal_idx=args.goal,
+        resume_id=args.resume_run_id,
+        context_path=args.context,
     )
