@@ -105,6 +105,7 @@ def wrap_env(
             transition_timings=[
                 transition_timing,
             ],
+            logger=central_logger,
         ),
         penalty_abs=LIVING_PENALTY_ABS,
     )
