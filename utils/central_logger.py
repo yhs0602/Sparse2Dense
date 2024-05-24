@@ -71,8 +71,10 @@ class CentralLogger:
                 if not skip_logging:
                     self.eval_count += 1
                     # check earlystop
-                    early_stop = self.data["enabled_earlystop"]
-                    enabled_negative_reward = self.data["enabled_negative_reward"]
+                    early_stop = self.data.get("enabled_earlystop", False)
+                    enabled_negative_reward = self.data.get(
+                        "enabled_negative_reward", False
+                    )
                     early_str = "Earlystop" if early_stop else "Nostop"
                     # Parse _time_took, _reward, _success_rate
                     self.data[f"{early_str}_time_took"] = self.data["time_took"]
