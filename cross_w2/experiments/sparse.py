@@ -170,7 +170,7 @@ def sparse_cross_w2(
     resume_id: Optional[str] = None,
     context_path: str = None,
 ):
-    group_name = f"v13-crossw2-sparse-{omit_goal_idx}"
+    group_name = f"v14-crossw2-sparse-{omit_goal_idx}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
