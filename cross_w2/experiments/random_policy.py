@@ -34,7 +34,7 @@ def cross_w2_random(port: int):
         project="craftground-sb3",
         entity="jourhyang123",
         # track hyperparameters and run metadata
-        group="v10-crossw2-random",
+        group="v20-crossw2-random",
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional

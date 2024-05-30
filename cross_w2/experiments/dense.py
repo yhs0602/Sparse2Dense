@@ -147,7 +147,7 @@ def w2_maze_dense(
     resume_id: Optional[str] = None,
     context_path: str = None,
 ):
-    group_name = f"v14-crossw2-dense-{omit_goal_idx}"
+    group_name = f"v20-crossw2-dense-{omit_goal_idx}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
