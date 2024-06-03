@@ -208,14 +208,18 @@ def create_video_from_positions(
                 start_pos = last_n_poses[i - 1]
                 end_pos = last_n_poses[i]
                 # hsv version
-                if True:
+                if False:
                     hue = i / len(last_n_poses)  # hue 값은 0에서 1 사이
                     color = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
                     color = tuple(int(c * 255) for c in color)  # RGB로 변환
                 # intensity version
                 else:
-                    color_intensity = int(255 * i / len(last_n_poses))
-                    color = (color_intensity, 0, 255 - color_intensity)
+                    color_intensity = max(int(255 * i / len(last_n_poses)), 40)
+                    color = (
+                        255 - color_intensity,
+                        255 - color_intensity,
+                        255 - color_intensity,
+                    )
                 pygame.draw.line(screen, color, start_pos, end_pos, 2)
 
         # 프레임을 FFmpeg로 파이프
