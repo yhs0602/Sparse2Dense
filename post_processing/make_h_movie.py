@@ -214,11 +214,14 @@ def create_video_from_positions(
                     color = tuple(int(c * 255) for c in color)  # RGB로 변환
                 # intensity version
                 else:
-                    color_intensity = max(int(255 * i / len(last_n_poses)), 40)
+                    # The recent, the more intense, exponentially
+                    recensity = (len(last_n_poses) - i) / len(last_n_poses)
+                    color_intensity = min(255 * (1 - 0.3 ** (recensity * 15)), 230)
+                    # Naive version: color_intensity = max(int(255 * i / len(last_n_poses)), 40)
                     color = (
-                        255 - color_intensity,
-                        255 - color_intensity,
-                        255 - color_intensity,
+                        color_intensity,
+                        color_intensity,
+                        color_intensity,
                     )
                 pygame.draw.line(screen, color, start_pos, end_pos, 2)
 
