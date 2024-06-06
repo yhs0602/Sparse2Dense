@@ -11,7 +11,11 @@ from gymnasium.wrappers import TimeLimit
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 
-from cross_w2.cross_w2_env import CROSS_W2_GOALS, make_cross_w2_env
+from cross_w2.cross_w2_env import (
+    CROSS_W2_GOALS,
+    make_cross_w2_env,
+    CROSS_W2_GOALS_INSTANCES,
+)
 from define_metric import define_metrics
 from utils.central_logger import CentralLogger
 from wrappers.episode_logger import EpisodeLoggerWrapper
@@ -34,18 +38,24 @@ def cross_w2_random(port: int):
         project="craftground-sb3",
         entity="jourhyang123",
         # track hyperparameters and run metadata
-        group="v20-crossw2-random",
+        group="v30-crossw2-random",
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional
     )
     central_logger = CentralLogger()
-    define_metrics(CROSS_W2_GOALS)
+    define_metrics(CROSS_W2_GOALS_INSTANCES)
 
     size_x = 114
     size_y = 64
     base_env, _ = make_cross_w2_env(
-        port=port, size_x=size_x, size_y=size_y, verbose=False
+        port=port,
+        size_x=size_x,
+        size_y=size_y,
+        verbose=True,
+        verbose_python=True,
+        verbose_gradle=True,
+        verbose_jvm=True,
     )
     env = LogFlushWrapper(
         FastResetWrapper(

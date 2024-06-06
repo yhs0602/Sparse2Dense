@@ -189,7 +189,15 @@ def sparse_cross_w2(
     size_y = 64
 
     # Setup train environment
-    base_env, _ = make_cross_w2_env(port1, size_x, size_y)
+    base_env, _ = make_cross_w2_env(
+        port1,
+        size_x,
+        size_y,
+        verbose=False,
+        verbose_python=False,
+        verbose_gradle=False,
+        verbose_jvm=False,
+    )
     env = wrap_env(
         base_env, size_x, size_y, central_logger, omit_goal_idx, is_eval=False
     )
