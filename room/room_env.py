@@ -20,6 +20,15 @@ map_path = os.path.join(nbts_path, "room.nbt")
 
 INITIAL_POSITION = [3.0, 2.0, 3.5, -90, 0]
 
+# Spawn point
+# z: 2.5 ~ 5.5
+# x: 2.5 ~ 5.5
+# y: 2.0
+
+# Goal point
+# x: 7.5 ~ 10.5
+# z: 14.5 ~ 18.5
+
 
 def make_room_env(
     port: int,
