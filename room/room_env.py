@@ -20,6 +20,18 @@ map_path = os.path.join(nbts_path, "room.nbt")
 
 INITIAL_POSITION = [3.0, 2.0, 3.5, -90, 0]
 
+
+GOAL_RANGE = {
+    "x": (7.5, 10.5),
+    "z": (14.5, 18.5),
+    "y": (2.0, 2.0),
+}
+
+SPAWN_RANGE = {
+    "x": (2.5, 5.5),
+    "z": (2.5, 5.5),
+    "y": (2.0, 2.0),
+}
 # Spawn point
 # z: 2.5 ~ 5.5
 # x: 2.5 ~ 5.5
@@ -28,6 +40,48 @@ INITIAL_POSITION = [3.0, 2.0, 3.5, -90, 0]
 # Goal point
 # x: 7.5 ~ 10.5
 # z: 14.5 ~ 18.5
+
+
+# right = +x (currently -z)
+# up = +z (currently -x)
+# t = terra cotta
+# a = acacia wood
+# g = gray wool
+# v = bell
+# b = blue carpet
+# w = white carpet
+# A = acasia wood slab
+# B = chiseled bookcase
+# c = chest
+# _ = empty
+# C = cherry wood
+# p = pot
+# d = doss (bed)
+# O = oak chair
+# K = cake
+# P = piston
+# i = iron trapdoor
+my_room_str = [
+    "ttttttttttttttttttt_",
+    "taaaaagvssssbBcccctt",
+    "taAAAaggssssbBggggCt",
+    "tgggggggbwbwbBggggCt",
+    "tggggggggggggBggggCt",
+    "tggggggggggggpggggCt",
+    "tggggggggggggggggggt",
+    "tgggggtggggggggggggt",
+    "tgggggtggggggggggggt",
+    "tgggggtOgKPgOgggddgt",
+    "tgggggtggPPgggggddgt",
+    "tgiiigtggggggggggggt",
+    "tttttttttttttttttttt",
+]
+real_room_str = [[row[::-1] for row in my_room_str[::-1]]]
+assert len(my_room_str) == 13
+# Then,
+# up = +x
+# right = +z
+assert len(real_room_str) == 13
 
 
 def make_room_env(
