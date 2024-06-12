@@ -48,7 +48,13 @@ def create_video_from_positions(
     goals: List[Tuple[int, int]] = [(0, 0)],
     block_size=10,
     frame_rate=20,  # 20 TPS
+    palette=None,
 ):
+    if palette is None:
+        palette = {
+            "o": (0, 0, 0),
+            "default": (255, 255, 255),
+        }
     pygame.init()
     maze_size_w, maze_size_h = len(maze[0]), len(maze)
     width, height = (maze_size_w + abs(x_offset)) * block_size, (
@@ -87,13 +93,15 @@ def create_video_from_positions(
 
     # cache maze surface and goal
     background = pygame.Surface((width, height))
-    background.fill((255, 255, 255))
+    default_color = palette["default"]
+    background.fill(default_color)
     for y, row in enumerate(maze):
         for x, cell in enumerate(row):
-            if cell == "o":
+            color = palette.get(cell, None)
+            if color is not None:
                 pygame.draw.rect(
                     background,
-                    (0, 0, 0),
+                    color,
                     (
                         (x + x_offset) * block_size,
                         (y + y_offset) * block_size,

@@ -20,7 +20,6 @@ map_path = os.path.join(nbts_path, "room.nbt")
 
 INITIAL_POSITION = [3.0, 2.0, 3.5, -90, 0]
 
-
 GOAL_RANGE = {
     "x": (7.5, 10.5),
     "z": (14.5, 18.5),
@@ -82,6 +81,26 @@ assert len(my_room_str) == 13
 # up = +x
 # right = +z
 assert len(real_room_str) == 13
+
+room_palette = {
+    "t": (255, 182, 193),  # Terra cotta (pinkish)
+    "a": (255, 127, 80),  # Acacia wood (coral)
+    "g": (169, 169, 169),  # Gray wool (dark gray)
+    "v": (255, 215, 0),  # Bell (gold)
+    "b": (0, 0, 255),  # Blue carpet (blue)
+    "w": (255, 255, 255),  # White carpet (white)
+    "A": (255, 127, 80),  # Acacia wood slab (same as acacia wood)
+    "B": (255, 182, 193),  # Chiseled bookcase (pinkish)
+    "c": (165, 42, 42),  # Chest (brown)
+    "_": (34, 139, 34),  # Empty (green)
+    "C": (220, 20, 60),  # Cherry wood (crimson)
+    "p": (128, 0, 0),  # Pot (maroon)
+    "d": (255, 255, 0),  # Doss (bed) (yellow)
+    "O": (139, 69, 19),  # Oak chair (saddle brown)
+    "K": (255, 20, 147),  # Cake (deep pink)
+    "P": (192, 192, 192),  # Piston (silver)
+    "i": (211, 211, 211),  # Iron trapdoor (light gray)
+}
 
 
 def make_room_env(
