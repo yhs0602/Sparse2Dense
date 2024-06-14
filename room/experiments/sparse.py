@@ -13,12 +13,12 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, VecVideoRecorder
 from wandb.integration.sb3 import WandbCallback
 
-from cross_w2.cross_w2_env import make_cross_w2_env
 from room.room_env import (
     select_goal_spawn,
     define_room_metrics,
     spawn_goal_command,
     remove_goal_command,
+    make_room_env,
 )
 from room.wrappers.room_episode_logger import RoomEpisodeLoggerWrapper
 from room.wrappers.room_goal_spawn_setup_wrapper import RoomGoalSelectionWrapper
@@ -105,7 +105,7 @@ def sparse_room(port1: int = 8001, device_id: int = 0):
     size_y = 64
 
     # Setup train environment
-    base_env, _ = make_cross_w2_env(port1, size_x, size_y)
+    base_env, _ = make_room_env(port1, size_x, size_y)
     env = wrap_env(base_env, size_x, size_y, central_logger)
     env = DummyVecEnv([lambda: env])
     env = Monitor(env)
@@ -116,7 +116,7 @@ def sparse_room(port1: int = 8001, device_id: int = 0):
         video_length=20000,
     )
     # Setup eval environment
-    # eval_base_env, _ = make_cross_w2_env(port2, size_x, size_y, verbose_gradle=True)
+    # eval_base_env, _ = make_room_env(port2, size_x, size_y, verbose_gradle=True)
     # eval_env = wrap_env(
     #     eval_base_env, size_x, size_y, central_logger, is_eval=True
     # )
