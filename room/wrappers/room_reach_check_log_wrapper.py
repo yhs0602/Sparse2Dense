@@ -23,6 +23,7 @@ class RoomReachCheckAndLogWrapper(ReachedGoalProvider, Wrapper):
         self.config_cooldown = cooldown
         self.cooldown = cooldown
         self._reached_goal = False
+        self.start_idx_counts = {}
         self.success_counts_by_start_idx = {}
         self.time_took = 0
         self.logger = central_logger
@@ -58,6 +59,10 @@ class RoomReachCheckAndLogWrapper(ReachedGoalProvider, Wrapper):
                         ],
                         f"{start_idx}/time_took": self.time_took,
                         f"goal": str(goal),
+                        f"{start_idx}/success_rate": (
+                            self.success_counts_by_start_idx[start_idx]
+                            / self.start_idx_counts[start_idx]
+                        ),
                     }
                 )
                 self.cooldown = self.config_cooldown
@@ -93,6 +98,8 @@ class RoomReachCheckAndLogWrapper(ReachedGoalProvider, Wrapper):
         self.cooldown = self.config_cooldown
         self.time_took = 0
         self._reached_goal = False
+        start_idx = self.env.room_settings["spawn_idx"]
+        self.start_idx_counts[start_idx] = self.start_idx_counts.get(start_idx, 0) + 1
         return obs, info
 
     @property
