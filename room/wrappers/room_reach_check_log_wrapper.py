@@ -82,11 +82,8 @@ class RoomReachCheckAndLogWrapper(ReachedGoalProvider, Wrapper):
         return any(self.check_goal(g, x, y, z) for g in goal)
 
     def check_goal(self, goal, x, y, z):
-        return (
-            goal[0] - self.radius <= x <= goal[0] + self.radius
-            and goal[1] - self.radius <= y <= goal[1] + self.radius
-            and goal[2] - self.radius <= z <= goal[2] + self.radius
-        )
+        distance2 = (goal[0] - x) ** 2 + (goal[1] - y) ** 2 + (goal[2] - z) ** 2
+        return distance2 <= self.radius**2
 
     def reset(
         self,
