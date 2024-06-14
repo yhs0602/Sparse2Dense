@@ -20,6 +20,9 @@
       <excludeFolder url="file://$MODULE_DIR$/cross_w2/experiments/videos" />
       <excludeFolder url="file://$MODULE_DIR$/cross_w2/experiments/wandb" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/room/experiments/models" />
+      <excludeFolder url="file://$MODULE_DIR$/room/experiments/runs" />
+      <excludeFolder url="file://$MODULE_DIR$/room/experiments/wandb" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

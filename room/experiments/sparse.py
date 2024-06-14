@@ -6,10 +6,11 @@ from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.vision import VisionWrapper
 from gymnasium.wrappers import TimeLimit
 from sb3_contrib import RecurrentPPO
+from stable_baselines3.common.monitor import Monitor
 
 # from stable_baselines3.common.callbacks import EvalCallback
 # from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.vec_env import DummyVecEnv, VecVideoRecorder
 from wandb.integration.sb3 import WandbCallback
 
 from cross_w2.cross_w2_env import make_cross_w2_env
@@ -19,6 +20,7 @@ from room.room_env import (
     spawn_goal_command,
     remove_goal_command,
 )
+from room.wrappers.room_episode_logger import RoomEpisodeLoggerWrapper
 from room.wrappers.room_goal_spawn_setup_wrapper import RoomGoalSelectionWrapper
 from room.wrappers.room_reach_check_log_wrapper import RoomReachCheckAndLogWrapper
 
@@ -41,7 +43,7 @@ from wrappers.turn_90_wrapper import Turn90Wrapper
 def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
     return LogFlushWrapper(
         FastResetWrapper(
-            EpisodeLoggerWrapper(
+            RoomEpisodeLoggerWrapper(
                 # Truncate the episode if it takes too long
                 TimeLimit(
                     # Living penalty
@@ -77,7 +79,6 @@ def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
                     max_episode_steps=20000,
                 ),
                 logger=central_logger,
-                goal_key="goal",
             )
         ),
         logger=central_logger,
@@ -107,7 +108,13 @@ def sparse_room(port1: int = 8001, device_id: int = 0):
     base_env, _ = make_cross_w2_env(port1, size_x, size_y)
     env = wrap_env(base_env, size_x, size_y, central_logger)
     env = DummyVecEnv([lambda: env])
-
+    env = Monitor(env)
+    env = VecVideoRecorder(
+        env,
+        f"videos/{run.id}",
+        record_video_trigger=lambda x: x % 20000 == 0,
+        video_length=20000,
+    )
     # Setup eval environment
     # eval_base_env, _ = make_cross_w2_env(port2, size_x, size_y, verbose_gradle=True)
     # eval_env = wrap_env(
