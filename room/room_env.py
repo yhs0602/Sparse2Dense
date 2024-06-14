@@ -2,6 +2,7 @@ import os.path
 import random
 from typing import Tuple
 
+import wandb
 from craftground import craftground
 from craftground.craftground import CraftGroundEnvironment
 from craftground.craftground.screen_encoding_modes import ScreenEncodingMode
@@ -90,7 +91,13 @@ def spawn_goal_command(position: Tuple[float, float, float]) -> str:
 
 
 def define_room_metrics():
-    pass
+    for i in range(4):
+        wandb.define_metric(f"{i}/success_count", step_metric="episode")
+        wandb.define_metric(f"{i}/time_took", step_metric="episode")
+        wandb.define_metric(f"{i}/reward", step_metric="episode")
+    wandb.define_metric("episode/length", step_metric="episode")
+    wandb.define_metric("episode/reward", step_metric="episode")
+    wandb.define_metric("episode/spawn_idx", step_metric="episode")
 
 
 # Spawn point

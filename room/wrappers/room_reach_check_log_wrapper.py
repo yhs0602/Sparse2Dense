@@ -53,10 +53,10 @@ class RoomReachCheckAndLogWrapper(ReachedGoalProvider, Wrapper):
                 goal_str = str(goal)
                 self.logger.log(
                     {
-                        f"{goal_str}/success_count": self.success_counts_by_start_idx[
+                        f"{start_idx}/success_count": self.success_counts_by_start_idx[
                             start_idx
                         ],
-                        f"{goal_str}/time_took": self.time_took,
+                        f"{start_idx}/time_took": self.time_took,
                         f"goal": str(goal),
                     }
                 )

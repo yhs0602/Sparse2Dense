@@ -30,6 +30,14 @@ class RoomEpisodeLoggerWrapper(gymnasium.Wrapper):
                     "episode/goal": goal,
                     "episode/spawn": spawn,
                     "episode/spawn_idx": spawn_idx,
+                    f"{spawn_idx}/time_took": self.length,
+                    f"{spawn_idx}/reward": self.reward,
+                    "episode/goal_x": goal[0],
+                    "episode/goal_y": goal[1],
+                    "episode/goal_z": goal[2],
+                    "episode/spawn_x": spawn[0],
+                    "episode/spawn_y": spawn[1],
+                    "episode/spawn_z": spawn[2],
                 }
             )
             self.length = 0
