@@ -1,4 +1,5 @@
 import os.path
+import random
 from typing import Tuple
 
 from craftground import craftground
@@ -16,7 +17,7 @@ from utils.check_vglrun import check_vglrun
 # ./nbt/room.nbt
 current_folder_path = os.path.dirname(os.path.abspath(__file__))
 nbts_path = os.path.join(current_folder_path, "nbt")
-map_path = os.path.join(nbts_path, "room.nbt")
+map_path = os.path.join(nbts_path, "room_nobell.nbt")
 
 INITIAL_POSITION = [3.0, 2.0, 3.5, -90, 0]
 
@@ -26,11 +27,72 @@ GOAL_RANGE = {
     "y": (2.0, 2.0),
 }
 
-SPAWN_RANGE = {
+SPAWN_RANGE_1 = {
     "x": (2.5, 5.5),
     "z": (2.5, 5.5),
     "y": (2.0, 2.0),
 }
+
+SPAWN_RANGE_2 = {
+    "x": (9.5, 11.5),
+    "z": (4.5, 6.5),
+    "y": (2.0, 2.0),
+}
+
+SPAWN_RANGE_3 = {
+    "x": (6.5, 8.5),
+    "z": (1.5, 3.5),
+    "y": (2.0, 2.0),
+}
+
+SPAWN_RANGE_4 = {
+    "x": (1.5, 2.5),
+    "z": (12.5, 13.5),
+    "y": (2.0, 2.0),
+}
+
+
+def select_goal_spawn():
+    spawn_candidates = [
+        SPAWN_RANGE_1,
+        SPAWN_RANGE_2,
+        SPAWN_RANGE_3,
+        SPAWN_RANGE_4,
+    ]
+    spawn_range_idx = random.randint(0, 3)
+    spawn_range = spawn_candidates[spawn_range_idx]
+    spawn_x = random.uniform(spawn_range["x"][0], spawn_range["x"][1])
+    spawn_z = random.uniform(spawn_range["z"][0], spawn_range["z"][1])
+    spawn_y = random.uniform(spawn_range["y"][0], spawn_range["y"][1])
+    goal_x = random.uniform(GOAL_RANGE["x"][0], GOAL_RANGE["x"][1])
+    goal_z = random.uniform(GOAL_RANGE["z"][0], GOAL_RANGE["z"][1])
+    goal_y = GOAL_RANGE["y"][0]
+    return {
+        "spawn_idx": spawn_range_idx,
+        "spawn": (spawn_x, spawn_y, spawn_z),
+        "goal": (goal_x, goal_y, goal_z),
+    }
+
+
+def remove_goal_command():
+    return "kill @e[type=minecraft:block_display]"
+
+
+def spawn_goal_command(position: Tuple[float, float, float]) -> str:
+    start_x, start_y, start_z = position
+    start_x -= 0.25
+    start_z -= 0.25
+    return (
+        f"/summon block_display {start_x} {start_y} {start_z} "
+        + "{transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],"
+        'translation:[0f,0f,0f],scale:[0.5f,0.5f,0.5f]},block_state:{Name:"minecraft:light_blue_glazed_terracotta"}}'
+    )
+
+
+def define_room_metrics():
+    pass
+
+
 # Spawn point
 # z: 2.5 ~ 5.5
 # x: 2.5 ~ 5.5
@@ -60,9 +122,10 @@ SPAWN_RANGE = {
 # K = cake
 # P = piston
 # i = iron trapdoor
+# s = sand stairs
 my_room_str = [
     "ttttttttttttttttttt_",
-    "taaaaagvssssbBcccctt",
+    "taaaaaggssssbBcccctt",
     "taAAAaggssssbBggggCt",
     "tgggggggbwbwbBggggCt",
     "tggggggggggggBggggCt",
@@ -75,7 +138,7 @@ my_room_str = [
     "tgiiigtggggggggggggt",
     "tttttttttttttttttttt",
 ]
-real_room_str = [[row[::-1] for row in my_room_str[::-1]]]
+real_room_str = [row[::-1] for row in my_room_str[::-1]]
 assert len(my_room_str) == 13
 # Then,
 # up = +x
@@ -100,6 +163,7 @@ room_palette = {
     "K": (255, 20, 147),  # Cake (deep pink)
     "P": (192, 192, 192),  # Piston (silver)
     "i": (211, 211, 211),  # Iron trapdoor (light gray)
+    "s": (210, 180, 140),  # Sand stairs (tan)
 }
 
 
@@ -134,7 +198,7 @@ def make_room_env(
             miscStatKeys=[],  # No stats
             initialExtraCommands=[
                 "time set noon",
-                "place template minecraft:room 0 0 0",
+                "place template minecraft:room_nobell 0 0 0",
                 f"tp @p {INITIAL_POSITION[0]} {INITIAL_POSITION[1]} {INITIAL_POSITION[2]} {INITIAL_POSITION[3]} {INITIAL_POSITION[4]}",
                 # "effect give @p minecraft:speed infinite 1 true",  # speed effect, particle hidden
             ],  # x y z yaw pitch

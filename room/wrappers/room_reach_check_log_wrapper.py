@@ -1,26 +1,18 @@
 from typing import SupportsFloat, Any, Optional
 
-import wandb
 from gymnasium.core import WrapperActType, WrapperObsType, Wrapper
 
+from room.wrappers.room_goal_spawn_setup_wrapper import RoomGoalSelectionWrapper
 from utils.central_logger import CentralLogger
-from wrappers.maze_selection_wrapper import MazeSelectionWrapper
 from wrappers.reached_goal_provider import ReachedGoalProvider
-
-# Expected structure:
-# MazeSuccessWrapper(
-# SparseMazeWrapper(
-#     MazeSelectionWrapper()
-# )
-# )
 
 COOLDOWN = 5
 
 
-class MazeReachCheckAndLogWrapper(ReachedGoalProvider, Wrapper):
+class RoomReachCheckAndLogWrapper(ReachedGoalProvider, Wrapper):
     def __init__(
         self,
-        env: MazeSelectionWrapper,
+        env: RoomGoalSelectionWrapper,
         radius: float,
         central_logger: CentralLogger,
         cooldown: int = COOLDOWN,
@@ -31,7 +23,7 @@ class MazeReachCheckAndLogWrapper(ReachedGoalProvider, Wrapper):
         self.config_cooldown = cooldown
         self.cooldown = cooldown
         self._reached_goal = False
-        self.success_counts = {}
+        self.success_counts_by_start_idx = {}
         self.time_took = 0
         self.logger = central_logger
         super().__init__(self.env)
@@ -48,17 +40,22 @@ class MazeReachCheckAndLogWrapper(ReachedGoalProvider, Wrapper):
         self.time_took += 1
         self._reached_goal = False
 
-        goal = self.env.maze_goal
+        goal = self.env.room_settings["goal"]
+        start_idx = self.env.room_settings["spawn_idx"]
         if self.cooldown <= 0:
             # square goal check
             if self.reached_goal_checker(goal, x, y, z):
                 self._reached_goal = True
                 print(f"Goal Reached in {self.time_took} steps")
-                self.success_counts[goal] = self.success_counts.get(goal, 0) + 1
+                self.success_counts_by_start_idx[start_idx] = (
+                    self.success_counts_by_start_idx.get(goal, 0) + 1
+                )
                 goal_str = str(goal)
                 self.logger.log(
                     {
-                        f"{goal_str}/success_count": self.success_counts[goal],
+                        f"{goal_str}/success_count": self.success_counts_by_start_idx[
+                            goal
+                        ],
                         f"{goal_str}/time_took": self.time_took,
                         f"goal": str(goal),
                     }

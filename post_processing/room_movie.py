@@ -6,7 +6,6 @@ from post_processing.movie import create_video_from_positions
 from room.room_env import real_room_str
 
 
-
 def make_room_movie():
     # W&B API 초기화
     api = wandb.Api(timeout=60)
@@ -44,7 +43,6 @@ def make_room_movie():
                 episode=episode_data["eval_episode"],
                 goals=[(goal1[0], goal1[2]), (goal2[0], goal2[2])],
                 reached_goal=reached_goal,
-
             )
             n += 1
             if n >= 3:

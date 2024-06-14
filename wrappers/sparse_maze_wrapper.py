@@ -3,6 +3,7 @@ from typing import SupportsFloat, Any, Optional
 from gymnasium.core import WrapperActType, WrapperObsType, Wrapper
 
 from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
+from wrappers.reached_goal_provider import ReachedGoalProvider
 
 
 # Expected structure:
@@ -14,7 +15,7 @@ from wrappers.maze_reach_wrapper import MazeReachCheckAndLogWrapper
 class SparseRewardWrapper(Wrapper):
     def __init__(
         self,
-        env: MazeReachCheckAndLogWrapper,
+        env: ReachedGoalProvider,
         reward: float,
         **kwargs,
     ):
