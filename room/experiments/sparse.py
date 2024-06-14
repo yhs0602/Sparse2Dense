@@ -77,6 +77,7 @@ def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
                     max_episode_steps=20000,
                 ),
                 logger=central_logger,
+                goal_key="goal",
             )
         ),
         logger=central_logger,
