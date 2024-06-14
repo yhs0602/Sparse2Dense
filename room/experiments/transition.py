@@ -20,6 +20,7 @@ from room.room_env import (
     remove_goal_command,
 )
 from room.wrappers.room_dense_wrapper import HomeDenseWrapper
+from room.wrappers.room_episode_logger import RoomEpisodeLoggerWrapper
 from room.wrappers.room_goal_spawn_setup_wrapper import RoomGoalSelectionWrapper
 from room.wrappers.room_reach_check_log_wrapper import RoomReachCheckAndLogWrapper
 
@@ -71,7 +72,7 @@ def wrap_env(
     )
     return LogFlushWrapper(
         FastResetWrapper(
-            EpisodeLoggerWrapper(
+            RoomEpisodeLoggerWrapper(
                 # Truncate the episode if it takes too long
                 TimeLimit(
                     # Living penalty
