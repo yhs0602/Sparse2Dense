@@ -18,7 +18,7 @@ from utils.check_vglrun import check_vglrun
 # ./nbt/room.nbt
 current_folder_path = os.path.dirname(os.path.abspath(__file__))
 nbts_path = os.path.join(current_folder_path, "nbt")
-map_path = os.path.join(nbts_path, "room_nobell.nbt")
+map_path = os.path.join(nbts_path, "room_with_item.nbt")
 
 INITIAL_POSITION = [3.0, 2.0, 3.5, -90, 0]
 
@@ -205,7 +205,7 @@ def make_room_env(
             miscStatKeys=[],  # No stats
             initialExtraCommands=[
                 "time set noon",
-                "place template minecraft:room_nobell 0 0 0",
+                "place template minecraft:room_with_item 0 0 0",
                 f"tp @p {INITIAL_POSITION[0]} {INITIAL_POSITION[1]} {INITIAL_POSITION[2]} {INITIAL_POSITION[3]} {INITIAL_POSITION[4]}",
                 # "effect give @p minecraft:speed infinite 1 true",  # speed effect, particle hidden
             ],  # x y z yaw pitch
