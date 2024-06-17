@@ -49,7 +49,7 @@ class RoomReachCheckAndLogWrapper(ReachedGoalProvider, Wrapper):
                 self._reached_goal = True
                 print(f"Goal Reached in {self.time_took} steps")
                 self.success_counts_by_start_idx[start_idx] = (
-                    self.success_counts_by_start_idx.get(goal, 0) + 1
+                    self.success_counts_by_start_idx.get(start_idx, 0) + 1
                 )
                 goal_str = str(goal)
                 self.logger.log(
