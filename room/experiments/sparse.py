@@ -86,7 +86,7 @@ def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
 
 def sparse_room(port1: int = 8001, device_id: int = 0):
     # setting = select_goal_spawn()
-    group_name = f"v30-room-v1-sparse"  # {setting['spawn_idx']}
+    group_name = f"v31-room-v1-sparse"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",

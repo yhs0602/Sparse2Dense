@@ -113,7 +113,7 @@ def room_transition(
     device_id: int,
     transition_timing: int,
 ):
-    group_name = f"v30-room-v1-transition-{transition_timing}"
+    group_name = f"v31-room-v1-transition-{transition_timing}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
