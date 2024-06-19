@@ -98,6 +98,7 @@ def define_room_metrics():
     wandb.define_metric("episode/length", step_metric="episode")
     wandb.define_metric("episode/reward", step_metric="episode")
     wandb.define_metric("episode/spawn_idx", step_metric="episode")
+    wandb.define_metric("episode", step_metric="global_step")
 
 
 # Spawn point
