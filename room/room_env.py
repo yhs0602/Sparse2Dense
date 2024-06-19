@@ -171,6 +171,7 @@ room_palette = {
     "P": (192, 192, 192),  # Piston (silver)
     "i": (211, 211, 211),  # Iron trapdoor (light gray)
     "s": (210, 180, 140),  # Sand stairs (tan)
+    "default": (255, 255, 255),  # Default (white)
 }
 
 
