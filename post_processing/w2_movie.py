@@ -67,10 +67,20 @@ assert len(cross_str) == 14
 def make_cross_w2_movie():
     # W&B API 초기화
     api = wandb.Api(timeout=60)
-
     # 특정 프로젝트와 run ID 지정
     run_names = [
-        "jourhyang123/craftground-sb3/r19yjutb",  # transition 1
+        "jourhyang123/craftground-sb3/ut8b91hh",  # Sparse 0
+        "jourhyang123/craftground-sb3/0ps4e1nn",  # Dense 0
+        "jourhyang123/craftground-sb3/jhhmgo0f"  # 300만 0
+        "jourhyang123/craftground-sb3/ktxlocs3",  # 200만 0
+        "jourhyang123/craftground-sb3/u0bwff7b",  # Sparse 1
+        "jourhyang123/craftground-sb3/0itxorpm",  # Dense 1
+        "jourhyang123/craftground-sb3/nk54yfnh",  # 300만 1
+        "jourhyang123/craftground-sb3/edsz2myn",  # 200만 1
+        "jourhyang123/craftground-sb3/3r4ctsay",  # Sparse 2
+        "jourhyang123/craftground-sb3/8ilqwrp5",  # Dense 2
+        "jourhyang123/craftground-sb3/wocxlma6",  # 300만 2
+        "jourhyang123/craftground-sb3/yxbvuc6o",  # 200만 2
     ]
     for run_name in run_names:
         run = api.run(run_name)
@@ -102,7 +112,7 @@ def make_cross_w2_movie():
                 1,
                 0,
                 positions,
-                f"{run.id}_{episode_id}.mp4",
+                f"{run.group}_{run.id}_{episode_id}.mp4",
                 episode=episode_data["eval_episode"],
                 goals=[(goal1[0], goal1[2]), (goal2[0], goal2[2])],
                 reached_goal=reached_goal,
