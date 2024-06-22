@@ -13,3 +13,5 @@ def define_metrics(goals):
     wandb.define_metric("eval_episode/reward", step_metric="eval_episode")
     wandb.define_metric("eval/mean_reward", step_metric="eval_episode")
     wandb.define_metric("eval/mean_length", step_metric="eval_episode")
+    wandb.define_metric("episode", step_metric="global_step")
+    wandb.define_metric("eval_episode", step_metric="global_step")
