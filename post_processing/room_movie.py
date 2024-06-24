@@ -8,7 +8,7 @@ from room.room_env import real_room_str, room_palette
 
 def make_room_movie():
     # W&B API 초기화
-    api = wandb.Api(timeout=60)
+    api = wandb.Api(timeout=120)
 
     # 특정 프로젝트와 run ID 지정
     run_names = [
