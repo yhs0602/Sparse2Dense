@@ -119,7 +119,10 @@ class GetPositionWrapper(gymnasium.Wrapper):
         obs, reward, terminated, truncated, info = self.env.step(action)
         info_obs = info["obs"]
         pos = (info_obs.x, info_obs.y, info_obs.z, info_obs.yaw)
-        wandb.log({"position": pos}, commit=False)
+        wandb.log(
+            {"position_x": pos[0], "position_z": pos[2], "position_yaw": pos[3]},
+            commit=False,
+        )
         return obs, reward, terminated, truncated, info
 
 
@@ -216,10 +219,11 @@ def main(checkpoint_path: str, port1: int, device_id: int):
     # Rollout
     try:
         obs = env.reset()
+        _state = None
         for i in range(1000):
             wandb.log({"step": i}, commit=True)
-            # TODO: recurrent state handling
-            action, _state = model.predict(obs, deterministic=True)
+            action, _state = model.predict(obs, deterministic=False, state=_state)
+            print(f"{_state=}")
             obs, reward, done, info = env.step(action)
     finally:
         env.close()
