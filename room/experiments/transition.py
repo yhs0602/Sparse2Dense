@@ -201,7 +201,7 @@ def room_transition(
                 # EpisodeStartCallback(eval_callback),
             ],
         )
-        model.save(f"{group_name}.ckpt")
+        model.save(f"ckpts/{group_name}-{run.name}.ckpt")
 
         run.finish()
     finally:

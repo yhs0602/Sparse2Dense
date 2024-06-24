@@ -167,7 +167,7 @@ def sparse_room(port1: int = 8001, device_id: int = 0):
                 # EpisodeStartCallback(eval_callback),
             ],
         )
-        model.save(f"{group_name}.ckpt")
+        model.save(f"ckpts/{group_name}-{run.name}.ckpt")
 
         run.finish()
     finally:

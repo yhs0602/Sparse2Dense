@@ -107,7 +107,10 @@ class GetPositionWrapper(gymnasium.Wrapper):
         obs, info = self.env.reset(seed=seed, options=options)
         info_obs = info["obs"]
         pos = (info_obs.x, info_obs.y, info_obs.z, info_obs.yaw)
-        wandb.log({"position": pos}, commit=False)
+        wandb.log(
+            {"position_x": pos[0], "position_z": pos[2], "position_yaw": pos[3]},
+            commit=False,
+        )
         return obs, info
 
     def step(
