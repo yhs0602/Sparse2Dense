@@ -220,11 +220,14 @@ def main(checkpoint_path: str, port1: int, device_id: int):
     try:
         obs = env.reset()
         _state = None
-        for i in range(1000):
+        for i in range(20000):
             wandb.log({"step": i}, commit=True)
             action, _state = model.predict(obs, deterministic=False, state=_state)
             print(f"{_state=}")
             obs, reward, done, info = env.step(action)
+            if done:
+                print(f"Done at {i}")
+                break
     finally:
         env.close()
         run.finish()
