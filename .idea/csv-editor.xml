@@ -3,6 +3,20 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="/post_processing/all_run_data/v30-crossw2-d2s-1000000-2/3tzxmoh0.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/post_processing/all_run_data/v30-crossw2-d2s-3000000-2/acui3xpf.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/post_processing/all_run_data/v30-crossw2-sparse-1/1ezz5e78.csv">
           <value>
             <Attribute>
