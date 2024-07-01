@@ -281,7 +281,6 @@ def main(port1: int, device_id: int):
                     print(f"Done at {i}")
                     break
             logger.flush()
-            break
     finally:
         env.close()
 
