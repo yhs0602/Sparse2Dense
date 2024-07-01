@@ -228,7 +228,9 @@ def main(port1: int, device_id: int):
     size_x = 114
     size_y = 64
 
+    current_path = os.path.dirname(os.path.abspath(__file__))
     checkpoint_dir = "./checkpoints"
+    checkpoint_dir = os.path.join(current_path, checkpoint_dir)
     # Setup train environment
     base_env, _ = make_room_env(
         port1,
