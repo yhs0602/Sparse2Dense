@@ -18,6 +18,7 @@ from sb3_contrib.common.recurrent.policies import RecurrentActorCriticPolicy
 from stable_baselines3.common.distributions import Distribution
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.vec_env import DummyVecEnv
+import gzip
 
 from room.room_env import (
     select_goal_spawn,
@@ -65,7 +66,7 @@ class Logger:
         self.base_dir = base_dir
         self.run_name = run_name
         self.data_dir = os.path.join(base_dir, "data")
-        self.data_json_path = os.path.join(self.data_dir, f"{self.run_name}.json")
+        self.data_json_path = os.path.join(self.data_dir, f"{self.run_name}.json.gz")
         self.images_dir = os.path.join(self.base_dir, "images", self.run_name)
         # self.pth_name = os.path.join(self.data_dir, "data.pth")
         os.makedirs(self.data_dir, exist_ok=True)
@@ -109,7 +110,7 @@ class Logger:
         # First flush json
         # [Row] -> json
         jsonized = [jsonize(row.__dict__) for row in self.rows]
-        with open(self.data_json_path, "w") as f:
+        with gzip.open(self.data_json_path, "wt") as f:
             json.dump(jsonized, f)
         # torch.save(self.rows, self.pth_name)
         # Then flush images
