@@ -71,9 +71,11 @@ def plot_groups(
             # ].ffill()
             # eval_episode에 대해 그룹화하고 가장 작은 값 선택
             if axis_y_name == "eval_episode":
-                group_data[i][axis_y_name] = group_data[i].groupby(axis_x_name, as_index=False).agg(
-                    {axis_y_name: "max"}
-                )[axis_y_name]
+                group_data[i][axis_y_name] = (
+                    group_data[i]
+                    .groupby(axis_x_name, as_index=False)
+                    .agg({axis_y_name: "max"})[axis_y_name]
+                )
             group_data[i].ffill(inplace=True)
             group_data[i].bfill(inplace=True)
             assert group_data[i][axis_y_name].isnull().sum() == 0
@@ -102,7 +104,7 @@ def plot_groups(
             avg_data[axis_x_name],
             avg_data[axis_y_name],
             label=f"group: {group_name}",
-            linewidth=2.0,
+            linewidth=4.0,
             color=color,
         )
         plt.fill_between(
