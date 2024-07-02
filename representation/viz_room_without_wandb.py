@@ -1,10 +1,11 @@
 import argparse
+import json
 import os
 from dataclasses import dataclass
 from typing import Tuple, Any, Optional, Dict, SupportsFloat
 
 import gymnasium
-import torch
+import numpy as np
 import torch as th
 from PIL import Image
 from PIL.Image import Transpose
@@ -17,7 +18,6 @@ from sb3_contrib.common.recurrent.policies import RecurrentActorCriticPolicy
 from stable_baselines3.common.distributions import Distribution
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.vec_env import DummyVecEnv
-from torchvision.utils import save_image
 
 from room.room_env import (
     select_goal_spawn,
@@ -32,6 +32,13 @@ from utils.get_device import get_device
 from wrappers.turn_90_wrapper import Turn90Wrapper
 
 
+# 변경사항
+# 이미지, pth분리해서 저장 → 되면 json으로 저장
+# 예시: images / 안에 run별로 이미지들
+# data안에 run_name.json들이 있음.
+# 데이터는 json으로 (텐서는 list로)
+
+
 @dataclass
 class Row:
     features: th.Tensor
@@ -44,13 +51,24 @@ class Row:
     image_idx: int
 
 
+def jsonize(the_dict: Dict):
+    for key, value in the_dict.items():
+        if isinstance(value, th.Tensor):
+            the_dict[key] = value.tolist()
+        if isinstance(value, np.ndarray):
+            the_dict[key] = value.tolist()
+    return the_dict
+
+
 class Logger:
     def __init__(self, base_dir: str, run_name: str):
         self.base_dir = base_dir
         self.run_name = run_name
-        self.data_dir = os.path.join(base_dir, run_name)
-        self.images_dir = os.path.join(self.data_dir, "images")
-        self.pth_name = os.path.join(self.data_dir, "data.pth")
+        self.data_dir = os.path.join(base_dir, "data")
+        self.data_json_path = os.path.join(self.data_dir, f"{self.run_name}.json")
+        self.images_dir = os.path.join(self.base_dir, "images", self.run_name)
+        # self.pth_name = os.path.join(self.data_dir, "data.pth")
+        os.makedirs(self.data_dir, exist_ok=True)
         os.makedirs(self.images_dir, exist_ok=True)
         self.rows = []
         self.idx = 0
@@ -77,7 +95,7 @@ class Logger:
         if not commit:
             self.image_buffer = rgb
         else:
-            image_path = os.path.join(self.images_dir, f"{self.idx:04d}.png")
+            image_path = os.path.join(self.images_dir, f"{self.idx:05d}.png")
             im = Image.fromarray(
                 self.image_buffer.squeeze().permute(1, 2, 0).cpu().numpy(), mode="RGB"
             )
@@ -88,8 +106,12 @@ class Logger:
             self.image_buffer = None
 
     def flush(self):
-        # First flush csv
-        torch.save(self.rows, self.pth_name)
+        # First flush json
+        # [Row] -> json
+        jsonized = [jsonize(row.__dict__) for row in self.rows]
+        with open(self.data_json_path, "w") as f:
+            json.dump(jsonized, f)
+        # torch.save(self.rows, self.pth_name)
         # Then flush images
         self.idx = 0
 
@@ -283,6 +305,7 @@ def main(port1: int, device_id: int):
                     print(f"Done at {i}")
                     break
             logger.flush()
+            break
     finally:
         env.close()
 

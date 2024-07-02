@@ -100,10 +100,12 @@ def plot_groups(
         else:
             raise ValueError(f"Unknown group: {group_name}")
 
-        plt.rcParams.update({
-            "font.size": 30,
-            "font.family": "Times new roman",
-        })
+        plt.rcParams.update(
+            {
+                "font.size": 30,
+                "font.family": "Times new roman",
+            }
+        )
 
         plt.plot(
             avg_data[axis_x_name],
