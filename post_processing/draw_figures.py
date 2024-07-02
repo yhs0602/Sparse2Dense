@@ -100,25 +100,30 @@ def plot_groups(
         else:
             raise ValueError(f"Unknown group: {group_name}")
 
+        plt.rcParams.update({
+            "font.size": 30,
+            "font.family": "Times new roman",
+        })
+
         plt.plot(
             avg_data[axis_x_name],
             avg_data[axis_y_name],
             label=f"group: {group_name}",
-            linewidth=4.0,
+            linewidth=5.0,
             color=color,
         )
         plt.fill_between(
             avg_data[axis_x_name],
             avg_data[axis_y_name] - std_data[axis_y_name],
             avg_data[axis_y_name] + std_data[axis_y_name],
-            alpha=0.2,
+            alpha=0.1,
             color=color,
         )
 
-    plt.xlabel(axis_x_name)
-    plt.ylabel(axis_y_name)
+    # plt.xlabel(axis_x_name)
+    # plt.ylabel(axis_y_name)
     # plt.legend()
-    plt.title(f"{axis_x_name} vs {axis_y_name}")
+    # plt.title(f"{axis_x_name} vs {axis_y_name}")
     y_max = 8000
     if "rate" in axis_y_name:
         y_max = 1
