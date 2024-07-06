@@ -1,14 +1,15 @@
 # 13 x 13
 import colorsys
 import json
-import math
 import os
 from collections import deque
-from typing import Tuple
+from typing import Tuple, List
 
 import pandas as pd
 import wandb
 from PIL import ImageDraw, Image, ImageChops
+from tqdm import tqdm
+from wandb.apis.public import Run
 
 
 # 0, 0 -> 12, 19
@@ -70,6 +71,9 @@ def create_trajectory_image(positions, filename, goals, min_x, max_x, min_z, max
     #         width=1,
     #     )
     # Goal 그리기
+    # Goal squeeze
+    goals = [(goal[0], goal[2]) if len(goal) == 3 else goal for goal in goals]
+
     image_goal_coords = [
         mc_coord_to_image_coord(goal[0], goal[1], max_x, max_z) for goal in goals
     ]
@@ -87,16 +91,6 @@ def create_trajectory_image(positions, filename, goals, min_x, max_x, min_z, max
             ],
             fill="red",
         )
-    # 시작점 그리기
-    draw.ellipse(
-        [
-            (image_positions[0][0] - agent_size_in_cell) * cell_size,
-            (image_positions[0][1] - agent_size_in_cell) * cell_size,
-            (image_positions[0][0] + agent_size_in_cell) * cell_size,
-            (image_positions[0][1] + agent_size_in_cell) * cell_size,
-        ],
-        fill="blue",
-    )
     # Trajectory 그리기
     # for pos in positions:
     #     tmp_img = Image.new(
@@ -140,7 +134,7 @@ def create_trajectory_image(positions, filename, goals, min_x, max_x, min_z, max
                 (image_positions[i + 1][1]) * cell_size,
             ],
             fill=get_color(
-                last_index - i, last_index, (255, 0, 0), 100
+                last_index - i, last_index, (255, 0, 0), 120
             ),  # (0, 255, 255, alpha),
             width=int(cell_size * agent_size_in_cell),
             joint="curve",
@@ -152,7 +146,9 @@ def create_trajectory_image(positions, filename, goals, min_x, max_x, min_z, max
             older_img = tmp_imgs[0]
             tmp_img = ImageChops.subtract(newer_img, older_img)
         elif len(tmp_imgs) == 3:
-            tmp_img = ImageChops.subtract(tmp_imgs[2], ImageChops.add(tmp_imgs[0], tmp_imgs[1]))
+            tmp_img = ImageChops.subtract(
+                tmp_imgs[2], ImageChops.add(tmp_imgs[0], tmp_imgs[1])
+            )
         else:
             tmp_img = tmp_imgs[0]
         img = Image.alpha_composite(img, tmp_img)
@@ -168,66 +164,121 @@ def create_trajectory_image(positions, filename, goals, min_x, max_x, min_z, max
         ],
         fill="green",
     )
+    # 시작점 그리기
+    draw.ellipse(
+        [
+            (image_positions[0][0] - agent_size_in_cell) * cell_size,
+            (image_positions[0][1] - agent_size_in_cell) * cell_size,
+            (image_positions[0][0] + agent_size_in_cell) * cell_size,
+            (image_positions[0][1] + agent_size_in_cell) * cell_size,
+        ],
+        fill="blue",
+    )
     img.save(filename)
 
 
-def get_run(api, run_path: str, run_id: str) -> pd.DataFrame:
+def get_run(run: Run, keys: List[str]) -> pd.DataFrame:
     cache_dir = "cache"
-    run_csv_path = os.path.join(cache_dir, f"{run_id}.csv")
+    run_csv_path = os.path.join(cache_dir, f"{run.id}.csv.gz")
     os.makedirs(cache_dir, exist_ok=True)
     if not os.path.exists(run_csv_path):
-        run = api.run(run_path)
-        data = run.history(
-            keys=[
-                "episode/positions",
-                "episode/spawn",
-                "episode",
-                # "eval_reached_goal",
-                "episode/goal",
-            ]
-        )
-        data.to_csv(run_csv_path)
+        data = run.history(keys=keys)
+        data.to_csv(run_csv_path, compression="gzip")
         return data
     else:
-        return pd.read_csv(run_csv_path)
+        return pd.read_csv(run_csv_path, compression="gzip")
 
 
 def make_room_trajectory():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    output_dir = os.path.join(current_dir, "trajectory_images")
+    os.makedirs(output_dir, exist_ok=True)
+
     # W&B API 초기화
     api = wandb.Api(timeout=180)
-
-    # 특정 프로젝트와 run ID 지정
-    run_names = [
-        "jourhyang123/craftground-sb3/fnsv0j1p",  # transition 200만
+    runs = api.runs("jourhyang123/craftground-sb3")
+    groups = [
+        "v30-crossw2-transition-2000000-0",
+        "v30-crossw2-d2s-3000000-0",
+        "v30-crossw2-dense-0",
+        "v30-crossw2-sparse-0",
+        "v30-crossw2-transition-2000000-1",
+        "v30-crossw2-d2s-2000000-1",
+        "v30-crossw2-dense-1",
+        "v30-crossw2-sparse-1",
+        "v30-crossw2-transition-2000000-2",
+        "v30-crossw2-d2s-2000000-2",
+        "v30-crossw2-dense-2",
+        "v30-crossw2-sparse-2",
+        "v31-room-v1-transition-3000000",
+        "v31-room-v1-d2s-3000000",
+        "v31-room-v1-sparse",
+        "v31-room-v1-dense",
     ]
-    for run_name in run_names:
+    group_runs = [run for run in runs if run.group in groups]
+    print(f"Found {len(group_runs)} runs")
+
+    for run in tqdm(group_runs):
+        # select keys, min_max based on the group
+        if "crossw2" in run.group:
+            keys = [
+                "episode/positions",
+                "episode",
+                "episode/goal",
+            ]
+            min_x = 1
+            max_x = 14
+            min_z = 0
+            max_z = 13
+        elif "room" in run.group:
+            keys = [
+                "episode/positions",
+                "episode/spawn",
+                "episode",
+                "episode/goal",
+            ]
+            min_x = 0
+            max_x = 12
+            min_z = 0
+            max_z = 19
+        else:
+            print(f"Unknown group: {run.group}")
+            continue
         # 로그 데이터 가져오기
-        data: pd.DataFrame
-        run = api.run(run_name)
-        data = get_run(api, run_name, run.id)
+        data: pd.DataFrame = get_run(run, keys)
         # 각 에피소드별로 동영상 생성
         n = 0
         for i in range(len(data) - 1, -1, -1):
             row = data.iloc[i]
-            episode_id = row["episode"]
-            positions = json.loads(row["episode/positions"])
-            goal1 = json.loads(row["episode/goal"])
+            episode_id = int(row["episode"])
+            positions = row["episode/positions"]
+            if not isinstance(positions, list):
+                positions = json.loads(positions)
+            goal1 = row["episode/goal"]
+            if not isinstance(goal1, (list, tuple)):
+                goal1 = json.loads(goal1)
             print(f"Goal:{goal1}")
             print(f"Start:{positions[0]}")
+            if not isinstance(goal1[0], list):
+                goal1 = [goal1]
+            out_filename = os.path.join(
+                output_dir, f"{run.group}_{run.id}_{episode_id}.png"
+            )
             create_trajectory_image(
                 positions,
-                f"{run.group}_{run.id}_{episode_id}.png",
-                goals=[(int(goal1[0]), int(goal1[2]))],
-                min_x=0,
-                min_z=0,
-                max_x=12,
-                max_z=19,
+                out_filename,
+                goals=goal1,
+                min_x=min_x,
+                min_z=min_z,
+                max_x=max_x,
+                max_z=max_z,
             )
             n += 1
             if n >= 3:
                 break
         else:
-            print("No data")
+            print(f"No data for run {run.id} in {run.group}")
+        break
 
 
 if __name__ == "__main__":
