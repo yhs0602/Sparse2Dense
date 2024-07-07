@@ -278,7 +278,6 @@ def make_room_trajectory():
                 break
         else:
             print(f"No data for run {run.id} in {run.group}")
-        break
 
 
 if __name__ == "__main__":
