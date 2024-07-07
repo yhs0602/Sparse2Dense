@@ -296,3 +296,6 @@ runs
 *.ckpt
 **/logs/
 *.csv
+cache/
+*.txz
+*.tgz
