@@ -6,7 +6,7 @@ import pandas as pd
 def main():
     # Read all_length.csv and select one row. Then save it to the output directory as json
     all_length = "all_lengths.csv"
-    output_file = "selected_trajectory.json"
+    output_file = "../representation/selected_trajectory.json"
     data = pd.read_csv(all_length)
     first_row = data.iloc[0]
     positions = json.loads(first_row["episode/positions"])
