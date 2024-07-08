@@ -247,6 +247,19 @@ def wrap_env(env, size_x, size_y, central_logger: CentralLogger) -> gymnasium.En
     )
 
 
+action_str_to_int = {
+    "MOVE_FORWARD": 0,
+    "TURN_LEFT_90": 1,
+    "TURN_RIGHT_90": 2,
+}
+
+action_int_to_str = {
+    0: "MOVE_FORWARD",
+    1: "TURN_LEFT_90",
+    2: "TURN_RIGHT_90",
+}
+
+
 def main(port1: int, device_id: int, trajectory_json: str):
     size_x = 114
     size_y = 64
@@ -293,7 +306,7 @@ def main(port1: int, device_id: int, trajectory_json: str):
             else:
                 raise FileNotFoundError(f"Context file {checkpoint_path} not found")
 
-            logger = Logger("./representation_data", checkpoint)
+            logger = Logger("./representation_data_fixed", checkpoint)
             # Patch RecurrentActorCriticPolicy.get_distribution
             # Rollout
             RecurrentActorCriticPolicy.get_distribution = patched_get_distribution
@@ -304,9 +317,21 @@ def main(port1: int, device_id: int, trajectory_json: str):
             _state = None
             for i in range(20000):
                 action, _state = model.predict(obs, deterministic=False, state=_state)
-                logger.log({"action": action, "step": i}, commit=True)
+                logger.log(
+                    {
+                        "action": action,
+                        "action_str": action_int_to_str[int(action)],
+                        "step": i,
+                        "actual_action_str": actions[i],
+                        "actual_action_int": action_str_to_int[actions[i]],
+                    },
+                    commit=True,
+                )
                 logger.log_image(None, commit=True)
-                obs, reward, done, info = env.step(action)
+                # Use fixed action, not the model's
+                action = actions[i]
+
+                obs, reward, done, info = env.step(action_str_to_int[action])
                 if done:
                     print(f"Done at {i}")
                     break
@@ -322,7 +347,9 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--device-id", type=int, default=0, help="CUDA Device ID for training"
     )
-    arg_parser.add_argument("--trajectory", type=str, default="trajectory.json")
+    arg_parser.add_argument(
+        "--trajectory", type=str, default="selected_trajectory.json"
+    )
     args = arg_parser.parse_args()
     main(
         port1=args.port,
