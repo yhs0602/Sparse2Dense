@@ -3,7 +3,7 @@ import gzip
 import json
 import os
 from dataclasses import dataclass
-from typing import Tuple, Any, Optional, Dict, SupportsFloat
+from typing import Tuple, Any, Optional, Dict, SupportsFloat, Union
 
 import gymnasium
 import numpy as np
@@ -32,6 +32,12 @@ from utils.central_logger import CentralLogger
 from utils.get_device import get_device
 from wrappers.turn_90_wrapper import Turn90Wrapper
 
+spawn_x = 0
+spawn_y = 0
+spawn_z = 0
+goal_x = 0
+goal_y = 0
+goal_z = 0
 
 # 변경사항
 # 이미지, pth분리해서 저장 → 되면 json으로 저장
@@ -215,6 +221,14 @@ class GetPositionWrapper(gymnasium.Wrapper):
         return obs, reward, terminated, truncated, info
 
 
+def fixed_select_goal_spawn() -> Dict[str, Union[int, Tuple[float, float, float]]]:
+    return {
+        "spawn_idx": 0,
+        "spawn": (spawn_x, spawn_y, spawn_z),
+        "goal": (goal_x, goal_y, goal_z),
+    }
+
+
 def wrap_env(env, size_x, size_y, central_logger: CentralLogger) -> gymnasium.Env:
     return FastResetWrapper(
         # Truncate the episode if it takes too long
@@ -233,7 +247,7 @@ def wrap_env(env, size_x, size_y, central_logger: CentralLogger) -> gymnasium.En
                         )
                     ),
                     logger=central_logger,
-                    goal_selector=select_goal_spawn,
+                    goal_selector=fixed_select_goal_spawn,
                     goal_set_command_provider=spawn_goal_command,
                     goal_remove_command_provider=remove_goal_command,
                 ),
@@ -270,6 +284,18 @@ def main(port1: int, device_id: int, trajectory_json: str):
 
     trajectory_json = os.path.join(current_path, trajectory_json)
     actions = json.loads(open(trajectory_json).read())["actions"]
+    positions = json.loads(open(trajectory_json).read())["positions"]
+    global spawn_x, spawn_y, spawn_z
+    global goal_x, goal_y, goal_z
+    spawn_x, spawn_y, spawn_z, _yaw = positions[0]
+
+    # Answer: su80k2nq.csv.gz's 22 ; 3111
+    # Goal = [8.741072837046506, 2, 17.98566927436925]
+    # Length = 2647
+    goal_x, goal_y, goal_z = 8.741072837046506, 2, 17.98566927436925
+
+    print(f"{goal_x=} {goal_y=} {goal_z=} {spawn_x=} {spawn_y=} {spawn_z=}")
+
     print(f"{len(actions)=}")
 
     # Setup train environment
@@ -333,8 +359,7 @@ def main(port1: int, device_id: int, trajectory_json: str):
 
                 obs, reward, done, info = env.step([action_str_to_int[action]])
                 if done:
-                    print(f"Done at {i}")
-                    break
+                    print(f"Done at {i}!!!!!!!")
             logger.flush()
             # break
     finally:
