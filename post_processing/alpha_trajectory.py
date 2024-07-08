@@ -89,7 +89,7 @@ def create_trajectory_image(positions, filename, goals, min_x, max_x, min_z, max
                 (goal[0] + goal_size_in_cell) * cell_size,
                 (goal[1] + goal_size_in_cell) * cell_size,
             ],
-            fill="red",
+            fill="green",
         )
     # Trajectory 그리기
     # for pos in positions:
@@ -134,7 +134,7 @@ def create_trajectory_image(positions, filename, goals, min_x, max_x, min_z, max
                 (image_positions[i + 1][1]) * cell_size,
             ],
             fill=get_color(
-                last_index - i, last_index, (255, 0, 0), 120
+                last_index - i, last_index, (0, 255, 0), 120
             ),  # (0, 255, 255, alpha),
             width=int(cell_size * agent_size_in_cell),
             joint="curve",
@@ -162,7 +162,7 @@ def create_trajectory_image(positions, filename, goals, min_x, max_x, min_z, max
             (image_positions[-1][0] + agent_size_in_cell) * cell_size,
             (image_positions[-1][1] + agent_size_in_cell) * cell_size,
         ],
-        fill="green",
+        fill="red",
     )
     # 시작점 그리기
     draw.ellipse(
