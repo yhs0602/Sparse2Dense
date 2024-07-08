@@ -315,7 +315,7 @@ def main(port1: int, device_id: int, trajectory_json: str):
             # Rollout
             obs = env.reset()
             _state = None
-            for i in range(20000):
+            for i in range(len(actions)):
                 action, _state = model.predict(obs, deterministic=False, state=_state)
                 logger.log(
                     {
@@ -331,12 +331,12 @@ def main(port1: int, device_id: int, trajectory_json: str):
                 # Use fixed action, not the model's
                 action = actions[i]
 
-                obs, reward, done, info = env.step(action_str_to_int[action])
+                obs, reward, done, info = env.step([action_str_to_int[action]])
                 if done:
                     print(f"Done at {i}")
                     break
             logger.flush()
-            break
+            # break
     finally:
         env.close()
 
