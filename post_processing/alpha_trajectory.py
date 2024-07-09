@@ -133,9 +133,7 @@ def create_trajectory_image(positions, filename, goals, min_x, max_x, min_z, max
                 (image_positions[i + 1][0]) * cell_size,
                 (image_positions[i + 1][1]) * cell_size,
             ],
-            fill=get_color(
-                i, last_index, (0, 255, 0), 120
-            ),  # (0, 255, 255, alpha),
+            fill=get_color(i, last_index, (0, 255, 0), 120),  # (0, 255, 255, alpha),
             width=int(cell_size * agent_size_in_cell),
             joint="curve",
         )

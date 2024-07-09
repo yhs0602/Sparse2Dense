@@ -106,6 +106,8 @@ def plot_groups(
                 "font.family": "Times new roman",
             }
         )
+        plt.rcParams.update({"axes.linewidth": 3})
+        plt.rcParams["font.weight"] = "bold"
 
         plt.plot(
             avg_data[axis_x_name],
@@ -118,7 +120,7 @@ def plot_groups(
             avg_data[axis_x_name],
             avg_data[axis_y_name] - std_data[axis_y_name],
             avg_data[axis_y_name] + std_data[axis_y_name],
-            alpha=0.1,
+            alpha=0.3,
             color=color,
         )
 
@@ -136,12 +138,13 @@ def plot_groups(
     plt.ylim(bottom=0)  # , top=y_max
     plt.xlim(left=0)
     plt.grid(True)
+
     # plt.show()
 
     axis_x_name = axis_x_name.replace("/", "_")
     axis_y_name = axis_y_name.replace("/", "_")
     figure_path = f"./figures/{groups_name}-{axis_x_name}_{axis_y_name}.png"
-    plt.savefig(figure_path)
+    plt.savefig(figure_path, dpi=450)
 
 
 # 메인 함수
