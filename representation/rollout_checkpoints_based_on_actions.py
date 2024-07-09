@@ -329,10 +329,12 @@ def main(port1: int, device_id: int, trajectory_json: str):
             checkpoint_path = os.path.join(checkpoint_dir, checkpoint)
             if os.path.exists(checkpoint_path):
                 model.load(checkpoint_path)
+                print(f"Loaded checkpoint {checkpoint_path}")
             else:
                 raise FileNotFoundError(f"Context file {checkpoint_path} not found")
 
             logger = Logger("./representation_data_fixed", checkpoint)
+            print(f"Created logger for {logger.run_name}")
             # Patch RecurrentActorCriticPolicy.get_distribution
             # Rollout
             RecurrentActorCriticPolicy.get_distribution = patched_get_distribution
