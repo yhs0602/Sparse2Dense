@@ -284,7 +284,7 @@ def main(port1: int, device_id: int):
         for checkpoint in os.listdir(checkpoint_dir):
             checkpoint_path = os.path.join(checkpoint_dir, checkpoint)
             if os.path.exists(checkpoint_path):
-                model.load(checkpoint_path)
+                model = RecurrentPPO.load(checkpoint_path)
             else:
                 raise FileNotFoundError(f"Context file {checkpoint_path} not found")
 
