@@ -21,7 +21,6 @@ from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 from room.room_env import (
-    select_goal_spawn,
     spawn_goal_command,
     remove_goal_command,
     make_room_env,
@@ -274,7 +273,7 @@ action_int_to_str = {
 }
 
 
-def main(port1: int, device_id: int, trajectory_json: str):
+def main(port1: int, device_id: int):
     size_x = 114
     size_y = 64
 
@@ -282,12 +281,8 @@ def main(port1: int, device_id: int, trajectory_json: str):
     checkpoint_dir = "checkpoints"
     checkpoint_dir = os.path.join(current_path, checkpoint_dir)
 
-    trajectory_json = os.path.join(current_path, trajectory_json)
-    actions = json.loads(open(trajectory_json).read())["actions"]
-    positions = json.loads(open(trajectory_json).read())["positions"]
     global spawn_x, spawn_y, spawn_z
     global goal_x, goal_y, goal_z
-    spawn_x, spawn_y, spawn_z, _yaw = positions[0]
 
     # Answer: su80k2nq.csv.gz's 22 ; 3111
     # Goal = [8.741072837046506, 2, 17.98566927436925]
@@ -295,8 +290,6 @@ def main(port1: int, device_id: int, trajectory_json: str):
     goal_x, goal_y, goal_z = 8.741072837046506, 2, 17.98566927436925
 
     print(f"{goal_x=} {goal_y=} {goal_z=} {spawn_x=} {spawn_y=} {spawn_z=}")
-
-    print(f"{len(actions)=}")
 
     # Setup train environment
     base_env, _ = make_room_env(
@@ -343,23 +336,19 @@ def main(port1: int, device_id: int, trajectory_json: str):
             # Rollout
             obs = env.reset()
             _state = None
-            for i in range(len(actions)):
+            for i in range(20000):
                 action, _state = model.predict(obs, deterministic=False, state=_state)
                 logger.log(
                     {
                         "action": action,
                         "action_str": action_int_to_str[int(action)],
                         "step": i,
-                        "actual_action_str": actions[i],
-                        "actual_action_int": action_str_to_int[actions[i]],
                     },
                     commit=True,
                 )
                 logger.log_image(None, commit=True)
-                # Use fixed action, not the model's
-                action = actions[i]
-
-                obs, reward, done, info = env.step([action_str_to_int[action]])
+                # Use the model's action
+                obs, reward, done, info = env.step(action)
                 if done:
                     print(f"Done at {i}!!!!!!!")
             logger.flush()
@@ -374,12 +363,8 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--device-id", type=int, default=0, help="CUDA Device ID for training"
     )
-    arg_parser.add_argument(
-        "--trajectory", type=str, default="selected_trajectory.json"
-    )
     args = arg_parser.parse_args()
     main(
         port1=args.port,
         device_id=args.device_id,
-        trajectory_json=args.trajectory,
     )

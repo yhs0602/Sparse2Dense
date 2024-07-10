@@ -206,7 +206,7 @@ def main(checkpoint_path: str, port1: int, device_id: int):
     )
 
     if os.path.exists(checkpoint_path):
-        model.load(checkpoint_path)
+        model = RecurrentPPO.load(checkpoint_path)
     else:
         raise FileNotFoundError(f"Context file {checkpoint_path} not found")
     # Patch RecurrentActorCriticPolicy.get_distribution
