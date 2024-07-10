@@ -284,6 +284,7 @@ def main(port1: int, device_id: int):
     global spawn_x, spawn_y, spawn_z
     global goal_x, goal_y, goal_z
 
+    spawn_x, spawn_y, spawn_z = 3.0980000033676625, 2, 3.5
     # Answer: su80k2nq.csv.gz's 22 ; 3111
     # Goal = [8.741072837046506, 2, 17.98566927436925]
     # Length = 2647
@@ -326,7 +327,7 @@ def main(port1: int, device_id: int):
             else:
                 raise FileNotFoundError(f"Context file {checkpoint_path} not found")
 
-            logger = Logger("./representation_data_fixed", checkpoint)
+            logger = Logger("./representation_data_use_model_actions", checkpoint)
             print(f"Created logger for {logger.run_name}")
             # Patch RecurrentActorCriticPolicy.get_distribution
             # Rollout
@@ -351,6 +352,7 @@ def main(port1: int, device_id: int):
                 obs, reward, done, info = env.step(action)
                 if done:
                     print(f"Done at {i}!!!!!!!")
+                    break
             logger.flush()
             # break
     finally:
