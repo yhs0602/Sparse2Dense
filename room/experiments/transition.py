@@ -23,22 +23,17 @@ from room.wrappers.room_dense_wrapper import HomeDenseWrapper
 from room.wrappers.room_episode_logger import RoomEpisodeLoggerWrapper
 from room.wrappers.room_goal_spawn_setup_wrapper import RoomGoalSelectionWrapper
 from room.wrappers.room_reach_check_log_wrapper import RoomReachCheckAndLogWrapper
+from sb3_exts.custom_checkpoint_callback import CustomCheckpointCallback
 
 # from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
-from wrappers.episode_logger import EpisodeLoggerWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.log_flush_wrapper import LogFlushWrapper
 from wrappers.position_logger import PositionLoggingWrapper
 from wrappers.reward_transition import RewardTransitionWrapper
 from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
-
-
-# 실험 설명
-# 학습할 때는 저 Goals 중 두 개를 랜덤하게 선택해서 학습합니다.
-# 학습이 끝나면 3개의 Goals에 대해 전부 테스트합니다.
 
 
 def wrap_env(
@@ -113,7 +108,7 @@ def room_transition(
     device_id: int,
     transition_timing: int,
 ):
-    group_name = f"v31-room-v1-transition-{transition_timing}"
+    group_name = f"v32-room-v1-transition-{transition_timing}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -188,6 +183,22 @@ def room_transition(
         n_steps=512,
     )
 
+    checkpoint_steps = [
+        1000000,
+        2000000,
+        2500000,
+        3000000,
+        3500000,
+        4000000,
+        5000000,
+        6000000,
+        7000000,
+        8000000,
+    ]
+    checkpoint_callback = CustomCheckpointCallback(
+        steps=checkpoint_steps, save_path=f"models/{run.id}", verbose=1
+    )
+
     try:
         model.learn(
             total_timesteps=10_000_000,
@@ -197,6 +208,7 @@ def room_transition(
                     model_save_path=f"models/{run.id}",
                     verbose=2,
                 ),
+                checkpoint_callback,
                 # EpisodeLogger(),
                 # EpisodeStartCallback(eval_callback),
             ],
