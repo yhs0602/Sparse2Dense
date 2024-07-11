@@ -24,6 +24,7 @@ from room.wrappers.room_dense_wrapper import HomeDenseWrapper
 from room.wrappers.room_episode_logger import RoomEpisodeLoggerWrapper
 from room.wrappers.room_goal_spawn_setup_wrapper import RoomGoalSelectionWrapper
 from room.wrappers.room_reach_check_log_wrapper import RoomReachCheckAndLogWrapper
+from sb3_exts.custom_checkpoint_callback import CustomCheckpointCallback
 
 # from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
@@ -91,7 +92,7 @@ def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
 
 def sparse_room(port1: int = 8001, device_id: int = 0):
     # setting = select_goal_spawn()
-    group_name = f"v31-room-v1-dense"  # {setting['spawn_idx']}
+    group_name = f"v32-room-v1-dense"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -154,6 +155,22 @@ def sparse_room(port1: int = 8001, device_id: int = 0):
         n_steps=512,
     )
 
+    checkpoint_steps = [
+        1000000,
+        2000000,
+        2500000,
+        3000000,
+        3500000,
+        4000000,
+        5000000,
+        6000000,
+        7000000,
+        8000000,
+    ]
+    checkpoint_callback = CustomCheckpointCallback(
+        steps=checkpoint_steps, save_path=f"models/{run.id}", verbose=1
+    )
+
     try:
         model.learn(
             total_timesteps=10_000_000,
@@ -163,6 +180,7 @@ def sparse_room(port1: int = 8001, device_id: int = 0):
                     model_save_path=f"models/{run.id}",
                     verbose=2,
                 ),
+                checkpoint_callback,
                 # EpisodeLogger(),
                 # EpisodeStartCallback(eval_callback),
             ],
