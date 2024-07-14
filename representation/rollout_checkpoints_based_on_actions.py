@@ -279,7 +279,7 @@ def main(port1: int, device_id: int, trajectory_json: str):
     size_y = 64
 
     current_path = os.path.dirname(os.path.abspath(__file__))
-    checkpoint_dir = "checkpoints"
+    checkpoint_dir = "intermediate_checkpoints"
     checkpoint_dir = os.path.join(current_path, checkpoint_dir)
 
     trajectory_json = os.path.join(current_path, trajectory_json)
@@ -325,45 +325,52 @@ def main(port1: int, device_id: int, trajectory_json: str):
 
     global logger
     try:
-        for checkpoint in os.listdir(checkpoint_dir):
-            checkpoint_path = os.path.join(checkpoint_dir, checkpoint)
-            if os.path.exists(checkpoint_path):
-                model = RecurrentPPO.load(checkpoint_path)
-                print(f"Loaded checkpoint {checkpoint_path}")
-            else:
-                raise FileNotFoundError(f"Context file {checkpoint_path} not found")
+        for run_name in os.listdir(checkpoint_dir):
+            run_dir = os.path.join(checkpoint_dir, run_name)
+            for checkpoint in os.listdir(run_dir):
+                checkpoint_path = os.path.join(run_dir, checkpoint)
+                if os.path.exists(checkpoint_path):
+                    model = RecurrentPPO.load(checkpoint_path)
+                    print(f"Loaded checkpoint {checkpoint_path}")
+                else:
+                    raise FileNotFoundError(f"Context file {checkpoint_path} not found")
 
-            logger = Logger("./representation_data_fixed", checkpoint)
-            print(f"Created logger for {logger.run_name}")
-            # Patch RecurrentActorCriticPolicy.get_distribution
-            # Rollout
-            RecurrentActorCriticPolicy.get_distribution = patched_get_distribution
-            RecurrentActorCriticPolicy._predict = patched__predict
-
-            # Rollout
-            obs = env.reset()
-            _state = None
-            for i in range(len(actions)):
-                action, _state = model.predict(obs, deterministic=False, state=_state)
-                logger.log(
-                    {
-                        "action": action,
-                        "action_str": action_int_to_str[int(action)],
-                        "step": i,
-                        "actual_action_str": actions[i],
-                        "actual_action_int": action_str_to_int[actions[i]],
-                    },
-                    commit=True,
+                logger = Logger(
+                    "./representation_data_intermediate_checkpoints",
+                    f"{run_name}__{checkpoint}",
                 )
-                logger.log_image(None, commit=True)
-                # Use fixed action, not the model's
-                action = actions[i]
+                print(f"Created logger for {logger.run_name}")
+                # Patch RecurrentActorCriticPolicy.get_distribution
+                # Rollout
+                RecurrentActorCriticPolicy.get_distribution = patched_get_distribution
+                RecurrentActorCriticPolicy._predict = patched__predict
 
-                obs, reward, done, info = env.step([action_str_to_int[action]])
-                if done:
-                    print(f"Done at {i}!!!!!!!")
-            logger.flush()
-            # break
+                # Rollout
+                obs = env.reset()
+                _state = None
+                for i in range(len(actions)):
+                    action, _state = model.predict(
+                        obs, deterministic=False, state=_state
+                    )
+                    logger.log(
+                        {
+                            "action": action,
+                            "action_str": action_int_to_str[int(action)],
+                            "step": i,
+                            "actual_action_str": actions[i],
+                            "actual_action_int": action_str_to_int[actions[i]],
+                        },
+                        commit=True,
+                    )
+                    logger.log_image(None, commit=True)
+                    # Use fixed action, not the model's
+                    action = actions[i]
+
+                    obs, reward, done, info = env.step([action_str_to_int[action]])
+                    if done:
+                        print(f"Done at {i}!!!!!!!")
+                logger.flush()
+                # break
     finally:
         env.close()
 
