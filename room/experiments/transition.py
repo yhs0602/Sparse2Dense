@@ -109,7 +109,7 @@ def room_transition(
     transition_timing: int,
     extended: bool,
 ):
-    group_name = f"v32-room-v1-transition-{transition_timing}"
+    group_name = f"v33-room-v1-transition-{transition_timing}-{extended}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -197,7 +197,7 @@ def room_transition(
         8000000,
     ]
     checkpoint_callback = CustomCheckpointCallback(
-        steps=checkpoint_steps, save_path=f"models/{run.id}", verbose=1
+        steps=checkpoint_steps, save_path=f"models/{extended}/s2d/{run.id}", verbose=1
     )
 
     try:

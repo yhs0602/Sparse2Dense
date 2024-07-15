@@ -23,6 +23,7 @@ from room.wrappers.room_dense_wrapper import HomeDenseWrapper
 from room.wrappers.room_episode_logger import RoomEpisodeLoggerWrapper
 from room.wrappers.room_goal_spawn_setup_wrapper import RoomGoalSelectionWrapper
 from room.wrappers.room_reach_check_log_wrapper import RoomReachCheckAndLogWrapper
+from sb3_exts.custom_checkpoint_callback import CustomCheckpointCallback
 
 # from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
@@ -113,7 +114,7 @@ def room_d2s(
     transition_timing: int,
     extended: bool,
 ):
-    group_name = f"v31-room-v1-d2s-{transition_timing}"
+    group_name = f"v33-room-v1-d2s-{transition_timing}-{extended}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -188,6 +189,22 @@ def room_d2s(
         n_steps=512,
     )
 
+    checkpoint_steps = [
+        1000000,
+        2000000,
+        2500000,
+        3000000,
+        3500000,
+        4000000,
+        5000000,
+        6000000,
+        7000000,
+        8000000,
+    ]
+    checkpoint_callback = CustomCheckpointCallback(
+        steps=checkpoint_steps, save_path=f"models/{extended}/d2s/{run.id}", verbose=1
+    )
+
     try:
         model.learn(
             total_timesteps=10_000_000,
@@ -197,6 +214,7 @@ def room_d2s(
                     model_save_path=f"models/{run.id}",
                     verbose=2,
                 ),
+                checkpoint_callback,
                 # EpisodeLogger(),
                 # EpisodeStartCallback(eval_callback),
             ],

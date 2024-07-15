@@ -92,7 +92,7 @@ def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
 
 def sparse_room(port1: int = 8001, device_id: int = 0, extended: bool = False):
     # setting = select_goal_spawn()
-    group_name = f"v32-room-v1-dense"  # {setting['spawn_idx']}
+    group_name = f"v33-room-v1-dense-{extended}"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project="craftground-sb3",
@@ -168,7 +168,7 @@ def sparse_room(port1: int = 8001, device_id: int = 0, extended: bool = False):
         8000000,
     ]
     checkpoint_callback = CustomCheckpointCallback(
-        steps=checkpoint_steps, save_path=f"models/{run.id}", verbose=1
+        steps=checkpoint_steps, save_path=f"models/{extended}/dense/{run.id}", verbose=1
     )
 
     try:
