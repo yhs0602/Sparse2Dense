@@ -34,7 +34,7 @@ def cross_w2_random(port: int):
         project="craftground-sb3",
         entity="jourhyang123",
         # track hyperparameters and run metadata
-        group="v10-crossw2-random",
+        group="v100-crossw2-random",
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional
@@ -42,8 +42,8 @@ def cross_w2_random(port: int):
     central_logger = CentralLogger()
     define_metrics(CROSS_W2_GOALS)
 
-    size_x = 114
-    size_y = 64
+    size_x = 640
+    size_y = 360
     base_env, _ = make_cross_w2_env(
         port=port, size_x=size_x, size_y=size_y, verbose=False
     )
