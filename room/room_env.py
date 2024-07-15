@@ -18,7 +18,8 @@ from utils.check_vglrun import check_vglrun
 # ./nbt/room.nbt
 current_folder_path = os.path.dirname(os.path.abspath(__file__))
 nbts_path = os.path.join(current_folder_path, "nbt")
-map_path = os.path.join(nbts_path, "room_with_item.nbt")
+normal_map_path = os.path.join(nbts_path, "room_with_item.nbt")
+extended_map_path = os.path.join(nbts_path, "room_v3.nbt")
 
 INITIAL_POSITION = [3.0, 2.0, 3.5, -90, 0]
 
@@ -187,6 +188,7 @@ def make_room_env(
     verbose_jvm: bool = False,
 ) -> Tuple[CraftGroundEnvironment, list[str]]:
     template_name = "room_v3" if extended else "room_with_item"
+    map_path = extended_map_path if extended else normal_map_path
     return (
         craftground.make(
             port=port,
