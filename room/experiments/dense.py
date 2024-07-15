@@ -90,7 +90,7 @@ def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
     )
 
 
-def sparse_room(port1: int = 8001, device_id: int = 0):
+def sparse_room(port1: int = 8001, device_id: int = 0, extended: bool = False):
     # setting = select_goal_spawn()
     group_name = f"v32-room-v1-dense"  # {setting['spawn_idx']}
     run = wandb.init(
@@ -110,7 +110,7 @@ def sparse_room(port1: int = 8001, device_id: int = 0):
     size_y = 64
 
     # Setup train environment
-    base_env, _ = make_room_env(port1, size_x, size_y)
+    base_env, _ = make_room_env(port1, size_x, size_y, extended=extended)
     env = wrap_env(base_env, size_x, size_y, central_logger)
     env = DummyVecEnv([lambda: env])
     env = Monitor(env)
@@ -202,8 +202,15 @@ if __name__ == "__main__":
         "--device-id", type=int, default=0, help="CUDA Device ID for training"
     )
     arg_parser.add_argument("--verbose", action="store_true", help="Verbose mode")
+    arg_parser.add_argument(
+        "--extended",
+        type=bool,
+        default=False,
+        action="store_true",
+        help="Use extended room environment",
+    )
     args = arg_parser.parse_args()
     port1 = args.port1
     # port2 = args.port2
     device_id = args.device_id
-    sparse_room(port1=port1, device_id=device_id)
+    sparse_room(port1=port1, device_id=device_id, extended=args.extended)

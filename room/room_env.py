@@ -180,11 +180,13 @@ def make_room_env(
     port: int,
     size_x: int,
     size_y: int,
+    extended: bool,
     verbose: bool = False,
     verbose_python: bool = False,
     verbose_gradle: bool = False,
     verbose_jvm: bool = False,
 ) -> Tuple[CraftGroundEnvironment, list[str]]:
+    template_name = "room_v3" if extended else "room_with_item"
     return (
         craftground.make(
             port=port,
@@ -207,7 +209,7 @@ def make_room_env(
             miscStatKeys=[],  # No stats
             initialExtraCommands=[
                 "time set noon",
-                "place template minecraft:room_with_item 0 0 0",
+                f"place template minecraft:{template_name} 0 0 0",
                 f"tp @p {INITIAL_POSITION[0]} {INITIAL_POSITION[1]} {INITIAL_POSITION[2]} {INITIAL_POSITION[3]} {INITIAL_POSITION[4]}",
                 # "effect give @p minecraft:speed infinite 1 true",  # speed effect, particle hidden
             ],  # x y z yaw pitch

@@ -27,7 +27,6 @@ from room.wrappers.room_reach_check_log_wrapper import RoomReachCheckAndLogWrapp
 # from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
-from wrappers.episode_logger import EpisodeLoggerWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.log_flush_wrapper import LogFlushWrapper
 from wrappers.position_logger import PositionLoggingWrapper
@@ -112,6 +111,7 @@ def room_d2s(
     port1: int,
     device_id: int,
     transition_timing: int,
+    extended: bool,
 ):
     group_name = f"v31-room-v1-d2s-{transition_timing}"
     run = wandb.init(
@@ -131,7 +131,7 @@ def room_d2s(
     size_y = 64
 
     # Setup train environment
-    base_env, _ = make_room_env(port1, size_x, size_y)
+    base_env, _ = make_room_env(port1, size_x, size_y, extended=extended)
     env = wrap_env(
         base_env,
         size_x,
@@ -225,6 +225,13 @@ if __name__ == "__main__":
         default=250,
         help="Reward transition timing in timesteps S->D; 10_000_000; 2000000, 3000000, 4000000",
     )
+    arg_parser.add_argument(
+        "--extended",
+        type=bool,
+        default=False,
+        action="store_true",
+        help="Use extended room environment",
+    )
     args = arg_parser.parse_args()
     port1 = args.port1
     # port2 = args.port2
@@ -234,4 +241,5 @@ if __name__ == "__main__":
         port1=port1,
         device_id=device_id,
         transition_timing=transition_timing,
+        extended=args.extended,
     )

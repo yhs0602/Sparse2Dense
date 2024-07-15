@@ -177,6 +177,7 @@ def main(checkpoint_path: str, port1: int, device_id: int):
         port1,
         size_x,
         size_y,
+        extended=False,
         verbose=False,
         verbose_python=False,
         verbose_gradle=False,

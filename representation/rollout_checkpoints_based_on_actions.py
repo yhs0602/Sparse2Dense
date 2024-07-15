@@ -303,6 +303,7 @@ def main(port1: int, device_id: int, trajectory_json: str):
         port1,
         size_x,
         size_y,
+        extended=False,
         verbose=False,
         verbose_python=False,
         verbose_gradle=False,
