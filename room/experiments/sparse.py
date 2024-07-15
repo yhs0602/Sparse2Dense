@@ -181,7 +181,6 @@ if __name__ == "__main__":
     arg_parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     arg_parser.add_argument(
         "--extended",
-        type=bool,
         default=False,
         action="store_true",
         help="Use extended room environment",
