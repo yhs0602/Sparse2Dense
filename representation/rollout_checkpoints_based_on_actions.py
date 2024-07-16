@@ -336,7 +336,7 @@ def main(port1: int, device_id: int, trajectory_json: str, extended: bool):
             for algo in os.listdir(algos_dir):  # dense, s2d, d2s, sparse
                 algo_dir = os.path.join(algos_dir, algo)
                 for run_name in os.listdir(algo_dir):  # abcdef
-                    run_dir = os.path.join(checkpoint_dir, run_name)
+                    run_dir = os.path.join(algo_dir, run_name)
                     for checkpoint in os.listdir(run_dir):
                         checkpoint_path = os.path.join(run_dir, checkpoint)
                         if os.path.exists(checkpoint_path):
