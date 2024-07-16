@@ -304,7 +304,7 @@ def main(port1: int, device_id: int, trajectory_json: str, extended: bool):
         size_y,
         extended=extended,
         verbose=False,
-        verbose_python=Falseb,
+        verbose_python=False,
         verbose_gradle=False,
         verbose_jvm=False,
     )
