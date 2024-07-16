@@ -273,7 +273,7 @@ action_int_to_str = {
 }
 
 
-def main(port1: int, device_id: int, trajectory_json: str):
+def main(port1: int, device_id: int, trajectory_json: str, extended: bool):
     size_x = 114
     size_y = 64
 
@@ -302,9 +302,9 @@ def main(port1: int, device_id: int, trajectory_json: str):
         port1,
         size_x,
         size_y,
-        extended=False,
+        extended=extended,
         verbose=False,
-        verbose_python=False,
+        verbose_python=Falseb,
         verbose_gradle=False,
         verbose_jvm=False,
     )
@@ -326,6 +326,12 @@ def main(port1: int, device_id: int, trajectory_json: str):
     global logger
     try:
         for extended in os.listdir(checkpoint_dir):  # extended, not_extended
+            if extended == "extended" and not extended:
+                print("Skipping extended")
+                continue
+            if extended == "not_extended" and extended:
+                print("Skipping not_extended")
+                continue
             algos_dir = os.path.join(checkpoint_dir, extended)
             for algo in os.listdir(algos_dir):  # dense, s2d, d2s, sparse
                 algo_dir = os.path.join(algos_dir, algo)
@@ -395,9 +401,16 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--trajectory", type=str, default="selected_trajectory.json"
     )
+    arg_parser.add_argument(
+        "--extended",
+        default=False,
+        action="store_true",
+        help="Use extended room environment",
+    )
     args = arg_parser.parse_args()
     main(
         port1=args.port,
         device_id=args.device_id,
         trajectory_json=args.trajectory,
+        extended=args.extended,
     )
