@@ -1,11 +1,15 @@
-from collections import deque
+import subprocess
 
-from PIL import ImageDraw, Image, ImageChops
+import pygame
+from pygame import Rect
 
 from post_processing.alpha_trajectory import mc_coord_to_image_coord, get_color
 
 
-def create_trajectory_movie(positions, filename, goals, min_x, max_x, min_z, max_z):
+def create_trajectory_movie(
+    positions, filename, goals, min_x, max_x, min_z, max_z, frame_rate=20
+):
+    pygame.init()
     cell_size = 20
     agent_size_in_cell = 0.3
     goal_size_in_cell = 0.1
@@ -16,29 +20,36 @@ def create_trajectory_movie(positions, filename, goals, min_x, max_x, min_z, max
     grid_z_length = max_x - min_x
 
     print(f"{grid_x_length} x {grid_z_length}")
+    width = grid_x_length * cell_size + 2
+    height = grid_z_length * cell_size + 2
+    screen = pygame.display.set_mode((width, height))
 
-    # PIL로 Image 생성
-    img = Image.new(
-        "RGBA",
-        (grid_x_length * cell_size + 1, grid_z_length * cell_size + 1),
-        color="white",
-    )
-    img.putalpha(0)
-    # Grid 그리기
-    draw = ImageDraw.Draw(img, "RGBA")
+    command = [
+        "ffmpeg",
+        "-y",  # 기존 파일 덮어쓰기
+        "-f",
+        "rawvideo",  # 입력 형식
+        "-vcodec",
+        "rawvideo",  # 입력 코덱
+        "-s",
+        f"{width}x{height}",  # 입력 크기
+        "-pix_fmt",
+        "rgb24",  # 입력 픽셀 포맷
+        "-r",
+        str(frame_rate),  # 입력 프레임레이트
+        "-i",
+        "-",  # stdin을 통해 입력
+        "-an",  # 오디오 무시
+        "-vcodec",
+        "mpeg4",  # 출력 코덱
+        "-b:v",
+        "5000k",  # 비트레이트 설정
+        filename,
+    ]
 
-    # for x in range(grid_x_length + 1):
-    #     draw.line(
-    #         [(x * cell_size, 0), (x * cell_size, grid_z_length * cell_size)],
-    #         fill="black",
-    #         width=1,
-    #     )
-    # for z in range(grid_z_length + 1):
-    #     draw.line(
-    #         [(0, z * cell_size), (grid_x_length * cell_size, z * cell_size)],
-    #         fill="black",
-    #         width=1,
-    #     )
+    # FFmpeg 프로세스 시작
+    process = subprocess.Popen(command, stdin=subprocess.PIPE)
+
     # Goal 그리기
     # Goal squeeze
     goals = [(goal[0], goal[2]) if len(goal) == 3 else goal for goal in goals]
@@ -51,94 +62,57 @@ def create_trajectory_movie(positions, filename, goals, min_x, max_x, min_z, max
     ]
     print(f"goal: {goals} -> {image_goal_coords}")
     for goal in image_goal_coords:
-        draw.ellipse(
-            [
-                (goal[0] - goal_size_in_cell) * cell_size,
-                (goal[1] - goal_size_in_cell) * cell_size,
-                (goal[0] + goal_size_in_cell) * cell_size,
-                (goal[1] + goal_size_in_cell) * cell_size,
-            ],
-            fill="green",
+        goal_coord_in_image = (goal[0] * cell_size, goal[1] * cell_size)
+        pygame.draw.ellipse(
+            screen,
+            "green",
+            Rect(
+                goal_coord_in_image[0],
+                goal_coord_in_image[1],
+                10,
+                10,
+            ),
         )
-    # Trajectory 그리기
-    # for pos in positions:
-    #     tmp_img = Image.new(
-    #         "RGBA",
-    #         (grid_x_length * cell_size + 1, grid_z_length * cell_size + 1),
-    #     )
-    #     tmp_img.putalpha(0)
-    #     tmp_draw = ImageDraw.Draw(tmp_img, "RGBA")
-    #     tmp_draw.ellipse(
-    #         [
-    #             (pos[0] - grid_min_x - agent_size_in_cell) * cell_size,
-    #             (pos[1] - grid_min_z - agent_size_in_cell) * cell_size,
-    #             (pos[0] - grid_min_x + agent_size_in_cell) * cell_size,
-    #             (pos[1] - grid_min_z + agent_size_in_cell) * cell_size,
-    #         ],
-    #         fill=(117, 0, 0, 10),
-    #     )
-    #     img = Image.alpha_composite(img, tmp_img)
-    #     del tmp_img, tmp_draw
     # 알파값은 최근일수록 255, 이전일수록 0
     last_index = len(positions) - 1
-    tmp_imgs = deque(maxlen=3)
     for i in range(len(positions) - 1):
-        # alpha = max(int(255 * i / last_index), 20)
-        # k = 3
-        # alpha = min(
-        #     max(int(255 * (math.exp(k * i / last_index) - 1) / (math.exp(1) - 1)), 20),
-        #     255,
-        # )
-        tmp_img = Image.new(
-            "RGBA",
-            (grid_x_length * cell_size + 1, grid_z_length * cell_size + 1),
-        )
-        tmp_img.putalpha(0)
-        tmp_draw = ImageDraw.Draw(tmp_img, "RGBA")
-        tmp_draw.line(
+        pygame.draw.line(
+            screen,
+            get_color(i, last_index, (0, 255, 0), 120),  # (0, 255, 255, alpha),
+            [(image_positions[i][0]) * cell_size, (image_positions[i][1]) * cell_size],
             [
-                (image_positions[i][0]) * cell_size,
-                (image_positions[i][1]) * cell_size,
                 (image_positions[i + 1][0]) * cell_size,
                 (image_positions[i + 1][1]) * cell_size,
             ],
-            fill=get_color(i, last_index, (0, 255, 0), 120),  # (0, 255, 255, alpha),
             width=int(cell_size * agent_size_in_cell),
-            joint="curve",
         )
-        tmp_imgs.append(tmp_img)
-        # AB + BC - (AB ^ BC) 해야 함.
-        if len(tmp_imgs) == 2:
-            newer_img = tmp_imgs[1]
-            older_img = tmp_imgs[0]
-            tmp_img = ImageChops.subtract(newer_img, older_img)
-        elif len(tmp_imgs) == 3:
-            tmp_img = ImageChops.subtract(
-                tmp_imgs[2], ImageChops.add(tmp_imgs[0], tmp_imgs[1])
-            )
-        else:
-            tmp_img = tmp_imgs[0]
-        img = Image.alpha_composite(img, tmp_img)
-        del tmp_img, tmp_draw
-    # 끝점 그리기
-    draw = ImageDraw.Draw(img, "RGBA")
-    draw.ellipse(
-        [
-            (image_positions[-1][0] - agent_size_in_cell) * cell_size,
-            (image_positions[-1][1] - agent_size_in_cell) * cell_size,
-            (image_positions[-1][0] + agent_size_in_cell) * cell_size,
-            (image_positions[-1][1] + agent_size_in_cell) * cell_size,
-        ],
-        fill="red",
-    )
-    # 시작점 그리기
-    draw.ellipse(
-        [
-            (image_positions[0][0] - agent_size_in_cell) * cell_size,
-            (image_positions[0][1] - agent_size_in_cell) * cell_size,
-            (image_positions[0][0] + agent_size_in_cell) * cell_size,
-            (image_positions[0][1] + agent_size_in_cell) * cell_size,
-        ],
-        fill="blue",
-    )
-    img.save(filename)
+        # 끝점 그리기
+        pygame.draw.ellipse(
+            screen,
+            "red",
+            Rect(
+                int((image_positions[-1][0] - agent_size_in_cell) * cell_size),
+                int((image_positions[-1][1] - agent_size_in_cell) * cell_size),
+                agent_size_in_cell * cell_size,
+                agent_size_in_cell * cell_size,
+            ),
+        )
+        # 시작점 그리기
+        pygame.draw.ellipse(
+            screen,
+            "blue",
+            Rect(
+                int((image_positions[0][0] - agent_size_in_cell) * cell_size),
+                int((image_positions[0][1] - agent_size_in_cell) * cell_size),
+                agent_size_in_cell * cell_size,
+                agent_size_in_cell * cell_size,
+            ),
+        )
+        frame = pygame.surfarray.array3d(screen)
+        frame = frame.swapaxes(0, 1)  # Pygame과 일반 이미지 포맷 간의 축 변경
+        process.stdin.write(frame.tobytes())  # 프레임 데이터를 바이트로 변환 후 FFmpeg에 전송
+
+        pygame.display.flip()
+    process.stdin.close()
+    process.wait()
+    pygame.quit()
