@@ -1,7 +1,9 @@
 import json
 import os
 
-from post_processing.final_movies.movie_without_bg import create_trajectory_movie
+from post_processing.final_movies.pil_movie_without_bg import (
+    create_trajectory_video_using_pil,
+)
 
 current_folder = os.path.dirname(os.path.abspath(__file__))
 room_media_folder = os.path.join(current_folder, "room_media")
@@ -17,11 +19,15 @@ def main():
             max_x = 14
             min_z = 0
             max_z = 13
+            background_image = "cross_bg.png"
+            ratio_hw = (0.94, 0.9398496241)
         elif "room" in json_file:
             min_x = 0
             max_x = 12
             min_z = 0
             max_z = 19
+            background_image = "room_bg.png"
+            ratio_hw = (0.9343853821, 0.9564983888)
         else:
             print(f"Unknown group: {json_file}")
             continue
@@ -32,9 +38,18 @@ def main():
         # get the goals
         goals = content["goal"]
         # create the trajectory movie
-        traj_file_name = os.path.join(room_media_folder, f"{json_file}.mp4")
-        create_trajectory_movie(
-            positions, traj_file_name, goals, min_x, max_x, min_z, max_z
+        traj_file_name = os.path.join(room_media_folder, f"{json_file}.webm")
+
+        create_trajectory_video_using_pil(
+            positions,
+            traj_file_name,
+            goals,
+            min_x,
+            max_x,
+            min_z,
+            max_z,
+            background_image_path=os.path.join(room_media_folder, background_image),
+            scale_factor_hw=ratio_hw,
         )
 
 
