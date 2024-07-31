@@ -278,7 +278,7 @@ def main(port1: int, device_id: int, trajectory_json: str, extended: bool):
     size_y = 64
 
     current_path = os.path.dirname(os.path.abspath(__file__))
-    checkpoint_dir = "0718_checkpoints"
+    checkpoint_dir = "0731_checkpoints"
     checkpoint_dir = os.path.join(current_path, checkpoint_dir)
 
     trajectory_json = os.path.join(current_path, trajectory_json)
