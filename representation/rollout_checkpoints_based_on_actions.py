@@ -278,7 +278,7 @@ def main(port1: int, device_id: int, trajectory_json: str, extended: bool):
     size_y = 64
 
     current_path = os.path.dirname(os.path.abspath(__file__))
-    checkpoint_dir = "0717_checkpoints"
+    checkpoint_dir = "0718_checkpoints"
     checkpoint_dir = os.path.join(current_path, checkpoint_dir)
 
     trajectory_json = os.path.join(current_path, trajectory_json)
@@ -325,14 +325,14 @@ def main(port1: int, device_id: int, trajectory_json: str, extended: bool):
 
     global logger
     try:
-        for extended in os.listdir(checkpoint_dir):  # extended, not_extended
-            if extended == "extended" and not extended:
-                print("Skipping extended")
+        for extended_dir in os.listdir(checkpoint_dir):  # extended, not_extended
+            if extended_dir == "extended" and not extended:
+                print(f"Skipping extended as {extended}")
                 continue
-            if extended == "not_extended" and extended:
+            if extended_dir == "not_extended" and extended:
                 print("Skipping not_extended")
                 continue
-            algos_dir = os.path.join(checkpoint_dir, extended)
+            algos_dir = os.path.join(checkpoint_dir, extended_dir)
             for algo in os.listdir(algos_dir):  # dense, s2d, d2s, sparse
                 algo_dir = os.path.join(algos_dir, algo)
                 for run_name in os.listdir(algo_dir):  # abcdef
@@ -347,7 +347,7 @@ def main(port1: int, device_id: int, trajectory_json: str, extended: bool):
                                 f"Context file {checkpoint_path} not found"
                             )
                         base_dir = "./representation_data_intermediate_checkpoints"
-                        log_dir = os.path.join(base_dir, extended, algo)
+                        log_dir = os.path.join(base_dir, extended_dir, algo)
                         logger = Logger(
                             log_dir,
                             f"{run_name}__{checkpoint}",
