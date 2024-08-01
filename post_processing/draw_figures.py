@@ -5,7 +5,7 @@ from typing import Tuple, List, Dict
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import scipy.stats as stats
+from scipy.stats import stats
 
 
 # 러닝 애버리지 계산 함수
@@ -177,44 +177,28 @@ def main():
 
     useful_groupnames = {
         "cross_0-global_step_episode": (
-            # "v30-crossw2-transition-2000000-0",
-            "v30-crossw2-transition-1000000-0",
-            "v30-crossw2-transition-3000000-0",
-            # "v30-crossw2-d2s-3000000-0",
-            "v30-crossw2-d2s-2000000-0",
-            "v30-crossw2-d2s-1000000-0",
-            # "v30-crossw2-dense-0",
-            # "v30-crossw2-sparse-0",
+            "v30-crossw2-transition-2000000-0",
+            "v30-crossw2-d2s-3000000-0",
+            "v30-crossw2-dense-0",
+            "v30-crossw2-sparse-0",
         ),
         "cross_1-global_step_episode": (
-            "v30-crossw2-transition-1000000-1",
-            "v30-crossw2-transition-3000000-1",
-            # "v30-crossw2-transition-2000000-1",
-            # "v30-crossw2-d2s-2000000-1",
-            "v30-crossw2-d2s-1000000-1",
-            "v30-crossw2-d2s-3000000-1",
-            # "v30-crossw2-dense-1",
-            # "v30-crossw2-sparse-1",
+            "v30-crossw2-transition-2000000-1",
+            "v30-crossw2-d2s-2000000-1",
+            "v30-crossw2-dense-1",
+            "v30-crossw2-sparse-1",
         ),
         "cross_2-global_step_episode": (
-            # "v30-crossw2-transition-2000000-2",
-            "v30-crossw2-transition-1000000-2",
-            "v30-crossw2-transition-3000000-2",
-            # "v30-crossw2-d2s-2000000-2",
-            "v30-crossw2-d2s-1000000-2",
-            "v30-crossw2-d2s-3000000-2",
-            # "v30-crossw2-dense-2",
-            # "v30-crossw2-sparse-2",
+            "v30-crossw2-transition-2000000-2",
+            "v30-crossw2-d2s-2000000-2",
+            "v30-crossw2-dense-2",
+            "v30-crossw2-sparse-2",
         ),
         "room": (
-            "v31-room-v1-transition-1000000",
-            "v31-room-v1-transition-2000000",
-            # "v31-room-v1-transition-3000000",
-            # "v31-room-v1-d2s-3000000",
-            "v31-room-v1-d2s-2000000",
-            "v31-room-v1-d2s-1000000",
-            # "v31-room-v1-sparse",
-            # "v31-room-v1-dense",
+            "v31-room-v1-transition-3000000",
+            "v31-room-v1-d2s-3000000",
+            "v31-room-v1-sparse",
+            "v31-room-v1-dense",
         ),
     }
     flatten_groupnames = [
