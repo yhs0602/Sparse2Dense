@@ -131,12 +131,18 @@ def plot_groups(
             # print(f"{avg_data[axis_y_name]=}")
             avg_data[axis_y_name] *= 100000
             # Report the slope and its std using the last point
-            slope, intercept = np.polyfit(avg_data[axis_x_name], avg_data[axis_y_name], 1)
+            slope, intercept = np.polyfit(
+                avg_data[axis_x_name], avg_data[axis_y_name], 1
+            )
             # 2. 기울기의 표준 편차 계산
-            regression_result = stats.linregress(avg_data[axis_x_name], avg_data[axis_y_name])
+            regression_result = stats.linregress(
+                avg_data[axis_x_name], avg_data[axis_y_name]
+            )
             slope_std = regression_result.stderr
             # print(f"{groups_name}/{group_name};{axis_x_name}/{axis_y_name}: slope={slope:.2f}±{slope_std:.2f}")
-            print(f"{groups_name}/{group_name};{axis_y_name}:        {slope:.2f}\\stdv{{{slope_std:.2f}}}")
+            print(
+                f"{groups_name}/{group_name};{axis_y_name}:        {slope:.2f}\\stdv{{{slope_std:.2f}}}"
+            )
 
     # plt.xlabel(axis_x_name)
     # plt.ylabel(axis_y_name)
