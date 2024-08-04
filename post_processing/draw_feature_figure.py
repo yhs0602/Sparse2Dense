@@ -3,7 +3,7 @@ import numpy as np
 
 if __name__ == "__main__":
     plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 20
+    plt.rcParams["font.size"] = 18
     plt.rcParams.update({"axes.linewidth": 2})
     plt.rcParams["font.weight"] = "bold"
     plt.figure(figsize=(7, 4.5))
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     ]
     colors = [(r / 255, g / 255, b / 255) for r, g, b in colors]
 
-    styles = ["-", "-.", "-", "-."]
+    styles = ["-", "--", "--", "--"]
 
     data_mean = list(map(lambda x: np.mean(x, 0), data))
     data_std = list(map(lambda x: np.std(x, 0), data))
@@ -213,20 +213,22 @@ if __name__ == "__main__":
         )
         plt.fill_between(
             data_x,
-            data_mean[i] - data_std[i],
+            np.maximum(data_mean[i] - data_std[i], 0),  # Ensure no negative values
             data_mean[i] + data_std[i],
             color=colors[i],
             alpha=0.1,
             label=labels[i],
         )
 
-    plt.ylim([0, 10])
-    plt.xlim([1, 8])
+    plt.ylim([-1, 10])
+    plt.xlim([0, 10])
+    plt.yticks(np.arange(-1, 11, 1))  # Set y-axis ticks to be integers with a step of 1
+
     plt.grid(True)
-    plt.vlines(3, ymin=0, ymax=10, linestyle=":", color="black", linewidth=2)
-    plt.vlines(5, ymin=0, ymax=10, linestyle=":", color="black", linewidth=2)
+    # plt.vlines(3, ymin=-1, ymax=10, linestyle="--", color="black", linewidth=1.5)
+    # plt.vlines(5, ymin=-1, ymax=10, linestyle="--", color="black", linewidth=1.5)
     # plt.legend(handles=line_list)
-    plt.xlabel("Number of steps (M)")
+    # plt.xlabel("Number of steps (M)")
 
     # plt.savefig()
     plt.tight_layout()
