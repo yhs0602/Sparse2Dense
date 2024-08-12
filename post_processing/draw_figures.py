@@ -3,7 +3,9 @@ import os
 from typing import Tuple, List, Dict
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import scipy.stats as stats
 
 
 # 러닝 애버리지 계산 함수
@@ -124,6 +126,24 @@ def plot_groups(
             color=color,
         )
 
+        if "global_step" in axis_x_name and "episode" in axis_y_name:
+            # print(f"{avg_data[axis_x_name]=}")
+            # print(f"{avg_data[axis_y_name]=}")
+            avg_data[axis_y_name] *= 100000
+            # Report the slope and its std using the last point
+            slope, intercept = np.polyfit(
+                avg_data[axis_x_name], avg_data[axis_y_name], 1
+            )
+            # 2. 기울기의 표준 편차 계산
+            regression_result = stats.linregress(
+                avg_data[axis_x_name], avg_data[axis_y_name]
+            )
+            slope_std = regression_result.stderr
+            # print(f"{groups_name}/{group_name};{axis_x_name}/{axis_y_name}: slope={slope:.2f}±{slope_std:.2f}")
+            print(
+                f"{groups_name}/{group_name};{axis_y_name}:        {slope:.2f}\\stdv{{{slope_std:.2f}}}"
+            )
+
     # plt.xlabel(axis_x_name)
     # plt.ylabel(axis_y_name)
     # plt.legend()
@@ -157,28 +177,44 @@ def main():
 
     useful_groupnames = {
         "cross_0-global_step_episode": (
-            "v30-crossw2-transition-2000000-0",
-            "v30-crossw2-d2s-3000000-0",
-            "v30-crossw2-dense-0",
-            "v30-crossw2-sparse-0",
+            # "v30-crossw2-transition-2000000-0",
+            "v30-crossw2-transition-1000000-0",
+            "v30-crossw2-transition-3000000-0",
+            # "v30-crossw2-d2s-3000000-0",
+            "v30-crossw2-d2s-2000000-0",
+            "v30-crossw2-d2s-1000000-0",
+            # "v30-crossw2-dense-0",
+            # "v30-crossw2-sparse-0",
         ),
         "cross_1-global_step_episode": (
-            "v30-crossw2-transition-2000000-1",
-            "v30-crossw2-d2s-2000000-1",
-            "v30-crossw2-dense-1",
-            "v30-crossw2-sparse-1",
+            "v30-crossw2-transition-1000000-1",
+            "v30-crossw2-transition-3000000-1",
+            # "v30-crossw2-transition-2000000-1",
+            # "v30-crossw2-d2s-2000000-1",
+            "v30-crossw2-d2s-1000000-1",
+            "v30-crossw2-d2s-3000000-1",
+            # "v30-crossw2-dense-1",
+            # "v30-crossw2-sparse-1",
         ),
         "cross_2-global_step_episode": (
-            "v30-crossw2-transition-2000000-2",
-            "v30-crossw2-d2s-2000000-2",
-            "v30-crossw2-dense-2",
-            "v30-crossw2-sparse-2",
+            # "v30-crossw2-transition-2000000-2",
+            "v30-crossw2-transition-1000000-2",
+            "v30-crossw2-transition-3000000-2",
+            # "v30-crossw2-d2s-2000000-2",
+            "v30-crossw2-d2s-1000000-2",
+            "v30-crossw2-d2s-3000000-2",
+            # "v30-crossw2-dense-2",
+            # "v30-crossw2-sparse-2",
         ),
         "room": (
-            "v31-room-v1-transition-3000000",
-            "v31-room-v1-d2s-3000000",
-            "v31-room-v1-sparse",
-            "v31-room-v1-dense",
+            "v31-room-v1-transition-1000000",
+            "v31-room-v1-transition-2000000",
+            # "v31-room-v1-transition-3000000",
+            # "v31-room-v1-d2s-3000000",
+            "v31-room-v1-d2s-2000000",
+            "v31-room-v1-d2s-1000000",
+            # "v31-room-v1-sparse",
+            # "v31-room-v1-dense",
         ),
     }
     flatten_groupnames = [
