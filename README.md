@@ -98,7 +98,7 @@ You may try other experiments settings in the following directories also:
 - `h_maze`: The H-shaped maze environment.
 - `h_maze_w2`: The H-shaped maze environment, but the width of the corridor is 2.
 
-# Post processing scripts
+## Post processing scripts
 
 To automatically generate figures and tables, we used the post-processing scripts in the `post_processing` directory.
 This directory primarily contains the following files:
@@ -127,4 +127,9 @@ This directory primarily contains the following files:
 - `add_backgrounds.py`: A script that overlays the trajectory images on the background image, such as `room_bg.png`
   and `cross_bg.png`.
 
-## Miscellaneous
+### Miscellaneous
+
+## Management scripts
+
+The `management` directory contains the old scripts to generate trajectory images. Usually these scripts are only used
+to fix the typos in the experiment scripts.
