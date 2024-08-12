@@ -151,8 +151,6 @@ features from the Minecraft Toddler Playroom environment.
 
 `profile` directory contains the scripts for profiling the environment's performance.
 
-- `fix_lines.py`:
-- `flame.py`:
-- `log_flame.py`:
-- `merge.py`:
-- `visualize_log.py`:
+- `fix_lines.py`: A script for separating mixed lines in the log files.
+- `log_flame.py`: A script for generating a gantt chart from the log files.
+- `merge.py`: A script for merging the log files.
