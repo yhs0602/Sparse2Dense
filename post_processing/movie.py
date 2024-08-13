@@ -21,7 +21,7 @@ maze_str = [
     "oxoxxxxxxxxxxoxo",
     "oxoxxxxxxxxxxoxo",
     "oxooooooooooooxo",
-    "oxxxxxxxxxxxxxxo",  # 통로
+    "oxxxxxxxxxxxxxxo",  # Aisle
     "oxooooooooooooxo",
     "oxoxxxxxxxxxxoxo",
     "oxoxxxxxxxxxxoxo",
@@ -87,7 +87,7 @@ def create_video_from_positions(
         video_filename,
     ]
 
-    # FFmpeg 프로세스 시작
+    # Start the FFmpeg process
     process = subprocess.Popen(command, stdin=subprocess.PIPE)
 
     pos0 = positions[0]
@@ -124,20 +124,20 @@ def create_video_from_positions(
             ),
             int(block_size / 2),
         )
-        # Goal 좌표 출력
+        # Outputting Goal coordinates
         text = font.render(f"{goal[0], goal[1]}", True, (0, 255, 0))
         background.blit(text, (idx * 30, 0))
-    # episode 출력
+    # Outputting an episode
     text = font.render(f"Ep.{episode}({reached_goal})", True, (0, 0, 255))
     background.blit(text, (width - 60, 0))
-    # Agent 위치를 기반으로 프레임 생성
+    # Generate frames based on Agent location
     last_n_poses = deque(maxlen=len(positions))
     for time, position in tqdm.tqdm(enumerate(positions)):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-        screen.blit(background, (0, 0))  # 배경 Draw
+        screen.blit(background, (0, 0))  # Background Draw
         pos_txt = font.render(
             f"{int(position[0]), int(position[2])}", True, (255, 0, 0)
         )
@@ -219,9 +219,9 @@ def create_video_from_positions(
                 end_pos = last_n_poses[i]
                 # hsv version
                 if False:
-                    hue = i / len(last_n_poses)  # hue 값은 0에서 1 사이
+                    hue = i / len(last_n_poses)  # The hue value is between 0 and 1
                     color = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
-                    color = tuple(int(c * 255) for c in color)  # RGB로 변환
+                    color = tuple(int(c * 255) for c in color)  # Convert to RGB
                 # intensity version
                 else:
                     # The recent, the more intense, exponentially
@@ -235,15 +235,14 @@ def create_video_from_positions(
                     )
                 pygame.draw.line(screen, color, start_pos, end_pos, 2)
 
-        # 프레임을 FFmpeg로 파이프
+        # Pipe frames to FFmpeg
         frame = pygame.surfarray.array3d(screen)
-        frame = frame.swapaxes(0, 1)  # Pygame과 일반 이미지 포맷 간의 축 변경
-        process.stdin.write(frame.tobytes())  # 프레임 데이터를 바이트로 변환 후 FFmpeg에 전송
+        frame = frame.swapaxes(0, 1)  # Changing axes between Pygame and regular image formats
+        process.stdin.write(frame.tobytes())  # Convert frame data to bytes and send to FFmpeg
 
         pygame.display.flip()
-        # clock.tick(frame_rate)  # 프레임 레이트 설정
 
-    # FFmpeg와 Pygame 정리
+    # Cleaning up FFmpeg and Pygame
     process.stdin.close()
     process.wait()
     pygame.quit()

@@ -2,11 +2,11 @@ import wandb
 
 from wandb_envs import WANDB_ENTITY, WANDB_PROJECT
 
-# 이벨류에이션 마지막
-# 마지막 지점으로부터 3개 평균값으로
-#   에피소드랭스,
-#   평균리워드 ,
-#   서세스레이트
+# evolution last
+# average 3 values from the last point
+# episodic,
+# average reward ,
+# Success rate
 groups = [
     "v30-crossw2-sparse-2",
     "v30-crossw2-dense-0",

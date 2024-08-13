@@ -16,13 +16,13 @@ def generate_colors(N):
 
 
 def visualize():
-    # 로그 데이터 불러오기
+    # Importing log data
     df = pd.read_csv("merged_log.csv")
     print("Read log data")
-    # 'time' 열을 datetime으로 변환
+    # Convert 'time' column to datetime
     df["time"] = pd.to_datetime(df["time"])
 
-    # Gantt 차트에 사용할 데이터 준비
+    # Preparing data for Gantt charts
     gantt_data = []
     processed = 0
     # Key: event name, Value: last start event buffer
@@ -40,18 +40,18 @@ def visualize():
         .drop("type", axis=1)
     )
 
-    # 시작과 종료 이벤트 결합
+    # Combining start and end events
     merged_df = pd.merge(start_df, end_df, on="event")
 
-    # 각 이벤트의 지속 시간 계산
+    # Calculate the duration of each event
     merged_df["duration"] = (
         merged_df["end_time"] - merged_df["start_time"]
     ).dt.total_seconds()
 
-    # 이벤트별 평균 지속 시간 계산
+    # Calculate average duration per event
     average_durations = merged_df.groupby("event")["duration"].mean().reset_index()
 
-    # 결과 출력
+    # Output the result
     pd.set_option("display.max_colwidth", None)
     pd.set_option("display.max_rows", None)
     average_durations_sorted = average_durations.sort_values(
@@ -82,7 +82,7 @@ def visualize():
     unique_groups = sliced_df["event"].nunique()
     print(f"Unique colors: {unique_groups}")
     colors_hex = generate_colors(unique_groups)
-    # Gantt 차트 생성
+    # Create a Gantt chart
     fig = ff.create_gantt(
         gantt_data,
         index_col="Resource",
@@ -92,7 +92,6 @@ def visualize():
         colors=colors_hex,
     )
 
-    # 차트 보기
     fig.show()
 
 

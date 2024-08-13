@@ -38,11 +38,11 @@ goal_x = 0
 goal_y = 0
 goal_z = 0
 
-# 변경사항
-# 이미지, pth분리해서 저장 → 되면 json으로 저장
-# 예시: images / 안에 run별로 이미지들
-# data안에 run_name.json들이 있음.
-# 데이터는 json으로 (텐서는 list로)
+# Changes.
+# image, pth separately → save as json when available
+# Example: images / has images per run
+# run_name.json in data.
+# data as json (tensor as list)
 
 
 @dataclass
@@ -105,7 +105,7 @@ class Logger:
             im = Image.fromarray(
                 self.image_buffer.squeeze().permute(1, 2, 0).cpu().numpy(), mode="RGB"
             )
-            im = im.transpose(Transpose.ROTATE_270)  # 이미지를 270도 회전하여 정상 방향으로 맞춤
+            im = im.transpose(Transpose.ROTATE_270)  # Rotate the image 270 degrees to fit in normal orientation
             im.save(image_path)
             self.rows[-1].image_idx = self.idx
             self.idx += 1

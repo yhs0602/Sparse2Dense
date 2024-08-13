@@ -12,7 +12,7 @@ class AsyncVideoRecorder(VideoRecorder):
         super().__init__(*args, **kwargs)
         self.executor = ThreadPoolExecutor(max_workers=4)
         self.lock = threading.Lock()
-        self.close_future = asyncio.Future()  # 작업 완료를 위한 Future 객체
+        self.close_future = asyncio.Future()  # Future object for task completion
 
     def capture_frame(self):
         """Render the given `env` and add the resulting frame to the video."""
@@ -48,12 +48,12 @@ class AsyncVideoRecorder(VideoRecorder):
 
     # Override
     def close(self):
-        # `close_async`를 즉시 반환하고 태스크를 스케줄링합니다.
+        # Returns `close_async` immediately and schedules the task.
         asyncio.create_task(self._close_async())
 
     async def _close_async(self):
         if not self.enabled or self._closed:
-            self.close_future.set_result(None)  # 이미 닫혔다면 결과 설정
+            self.close_future.set_result(None)  # If it's already closed, set the result
             return
 
         with self.lock:
@@ -66,7 +66,7 @@ class AsyncVideoRecorder(VideoRecorder):
 
         self.write_metadata()
         self._closed = True
-        self.close_future.set_result(None)  # 작업 완료를 알림
+        self.close_future.set_result(None)  # Notify task completion
 
     def _save_video(self, frames):
         from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
@@ -76,5 +76,5 @@ class AsyncVideoRecorder(VideoRecorder):
         clip.write_videofile(self.path, logger=moviepy_logger)
 
     async def wait_until_closed(self):
-        """이 메서드를 사용하여 비디오 레코더의 모든 작업이 완료될 때까지 외부에서 기다립니다."""
+        # Use this method to wait externally for all operations in the video recorder to complete.
         await self.close_future

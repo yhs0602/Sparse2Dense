@@ -85,10 +85,9 @@ data = {
 }
 
 if __name__ == "__main__":
-    # 데이터프레임 생성
     df = pd.DataFrame.from_dict(data, orient="index")
 
-    # CSV 파일로 저장
+    # Save as CSV file
     csv_file = "./experiment_results.csv"
     df.to_csv(csv_file)
 

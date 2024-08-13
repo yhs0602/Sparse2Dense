@@ -47,7 +47,7 @@ def create_trajectory_movie(
         filename,
     ]
 
-    # FFmpeg 프로세스 시작
+    # Start the FFmpeg process
     process = subprocess.Popen(command, stdin=subprocess.PIPE)
 
     # Goal Draw
@@ -73,7 +73,7 @@ def create_trajectory_movie(
                 10,
             ),
         )
-    # 알파값은 최근일수록 255, 이전일수록 0
+    # The alpha value is 255 for the most recent and 0 for the oldest.
     last_index = len(positions) - 1
     for i in range(len(positions) - 1):
         pygame.draw.line(
@@ -109,8 +109,8 @@ def create_trajectory_movie(
             ),
         )
         frame = pygame.surfarray.array3d(screen)
-        frame = frame.swapaxes(0, 1)  # Pygame과 일반 이미지 포맷 간의 축 변경
-        process.stdin.write(frame.tobytes())  # 프레임 데이터를 바이트로 변환 후 FFmpeg에 전송
+        frame = frame.swapaxes(0, 1)  # Changing axes between Pygame and regular image formats
+        process.stdin.write(frame.tobytes())  # Convert frame data to bytes and send to FFmpeg
 
         pygame.display.flip()
     process.stdin.close()

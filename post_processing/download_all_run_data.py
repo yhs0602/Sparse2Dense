@@ -81,6 +81,5 @@ def main():
         download_wandb_file(run, "./all_run_data")
 
 
-# 사용 예시
 if __name__ == "__main__":
     main()

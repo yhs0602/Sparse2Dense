@@ -84,10 +84,10 @@ def create_trajectory_video_using_pil(
         "5000k",  # Set bitrate
         filename,
     ]
-    # FFmpeg 프로세스 시작
+    # Start the FFmpeg process
     process = subprocess.Popen(command, stdin=subprocess.PIPE)
 
-    # 백그라운드 이미지 준비
+    # Prepare a background image
     background_image = Image.open(background_image_path)
     background_image = background_image.resize((width, height))
     new_size = (
@@ -95,7 +95,6 @@ def create_trajectory_video_using_pil(
         int(background_image.height * scale_factor_hw[0]),
     )
 
-    # PIL로 Image 생성
     img = Image.new(
         "RGBA",
         (width, height),
@@ -126,7 +125,7 @@ def create_trajectory_video_using_pil(
             ],
             fill="green",
         )
-    # 알파값은 최근일수록 255, 이전일수록 0
+    # The alpha value is 255 for the most recent and 0 for the oldest.
     last_index = len(positions) - 1
     tmp_imgs = deque(maxlen=3)
     for i in range(len(positions) - 1):
@@ -149,7 +148,7 @@ def create_trajectory_video_using_pil(
             joint="curve",
         )
         tmp_imgs.append(tmp_img)
-        # AB + BC - (AB ^ BC) 해야 함.
+        # AB + BC - should be (AB ^ BC).
         if len(tmp_imgs) == 2:
             newer_img = tmp_imgs[1]
             older_img = tmp_imgs[0]

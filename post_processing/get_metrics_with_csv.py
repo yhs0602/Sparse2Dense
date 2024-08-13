@@ -4,11 +4,11 @@ from wandb.apis.public import HistoryScan
 
 from wandb_envs import WANDB_ENTITY, WANDB_PROJECT
 
-# 이벨류에이션 마지막
-# 마지막 지점으로부터 3개 평균값으로
-#   에피소드랭스,
-#   평균리워드 ,
-#   서세스레이트
+# evolution last
+# average 3 values from the last point
+# episodic,
+# average reward ,
+# Success rate
 groups = [
     "v30-crossw2-sparse-2",
     "v30-crossw2-dense-0",
@@ -66,23 +66,6 @@ def main():
                 "eval_((7, 1, 1), (8, 1, 1))/success_count",
                 "eval_((8, 1, 12), (7, 1, 12))/success_count",
             ]
-            latest_values = {}
-            # for column in columns_to_check:
-            #     # 마지막 행부터 시작하여 값을 찾습니다.
-            #     for value in eval_history[column][::-1]:
-            #         if pd.notna(value):
-            #             latest_values[column] = value
-            #             break
-            #     else:
-            #         # 값이 전혀 없을 경우
-            #         if column in [
-            #             "eval_((13, 1, 6), (13, 1, 7))/success_count",
-            #             "eval_((7, 1, 1), (8, 1, 1))/success_count",
-            #             "eval_((8, 1, 12), (7, 1, 12))/success_count",
-            #         ]:
-            #             latest_values[column] = 0
-            #         else:
-            #             latest_values[column] = None
             latest_values = {column: run.summary[column] for column in columns_to_check}
             if None in latest_values.values():
                 print(

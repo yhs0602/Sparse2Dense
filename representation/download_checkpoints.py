@@ -37,7 +37,7 @@ def main():
         )
     ]
     print(f"Found {len(group_runs)} runs")
-    # 해당 run들에 대해서, checkpoint를 다운로드.
+    # For those runs, download the checkpoints.
     for run in tqdm(group_runs):
         download_checkpoint(run, "./checkpoints")
 

@@ -28,4 +28,4 @@ class CentralLogger:
                 }
                 self.data = prepended_dict
             wandb.log(self.data)
-            self.data = {}  # 로그 후 데이터 초기화
+            self.data = {}  # Wiping data after logging

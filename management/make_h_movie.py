@@ -18,7 +18,7 @@ maze_str = [
     "oxoxxxxxxxxxxoxo",
     "oxoxxxxxxxxxxoxo",
     "oxooooooooooooxo",
-    "oxxxxxxxxxxxxxxo",  # 통로
+    "oxxxxxxxxxxxxxxo",  # Aisle
     "oxooooooooooooxo",
     "oxoxxxxxxxxxxoxo",
     "oxoxxxxxxxxxxoxo",

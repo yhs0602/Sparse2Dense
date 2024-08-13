@@ -50,7 +50,7 @@ def create_trajectory_image(positions, filename, goals, min_x, max_x, min_z, max
 
     print(f"{grid_x_length} x {grid_z_length}")
 
-    # PIL로 Image 생성
+    # Create an Image with PIL
     img = Image.new(
         "RGBA",
         (grid_x_length * cell_size + 1, grid_z_length * cell_size + 1),
@@ -112,7 +112,7 @@ def create_trajectory_image(positions, filename, goals, min_x, max_x, min_z, max
     #     )
     #     img = Image.alpha_composite(img, tmp_img)
     #     del tmp_img, tmp_draw
-    # 알파값은 최근일수록 255, 이전일수록 0
+    # alpha values are 255 for most recent and 0 for oldest.
     last_index = len(positions) - 1
     tmp_imgs = deque(maxlen=3)
     for i in range(len(positions) - 1):
@@ -140,7 +140,7 @@ def create_trajectory_image(positions, filename, goals, min_x, max_x, min_z, max
             joint="curve",
         )
         tmp_imgs.append(tmp_img)
-        # AB + BC - (AB ^ BC) 해야 함.
+        # AB + BC - should be (AB ^ BC).
         if len(tmp_imgs) == 2:
             newer_img = tmp_imgs[1]
             older_img = tmp_imgs[0]
