@@ -13,7 +13,7 @@ class EpisodeLogger(BaseCallback):
         wandb.define_metric("episode_length", step_metric="episode")
 
     def _on_step(self) -> bool:
-        # 에피소드가 종료될 때마다 실행
+        # Run every time an episode ends
         # print(self.locals.keys())
         reward = self.locals.get("rewards")
         if reward is not None:

@@ -13,9 +13,9 @@ def create_trajectory_movie(
     cell_size = 20
     agent_size_in_cell = 0.3
     goal_size_in_cell = 0.1
-    # grid 사이즈 구함
-    # Mc: (min_x, min_z) Left bottom ~ (max_x, max_z) Right top 에서 돌아다니면
-    # Image에서는 (min_z, max_x - min_x) ~ (max_z, 0) 에서 돌아다님
+    # get grid size
+    # for Mc: traverse from (min_x, min_z) Left bottom to (max_x, max_z) Right top
+    # Image: (min_z, max_x - min_x) ~ (max_z, 0) to navigate around
     grid_x_length = max_z - min_z
     grid_z_length = max_x - min_x
 
@@ -26,31 +26,31 @@ def create_trajectory_movie(
 
     command = [
         "ffmpeg",
-        "-y",  # 기존 파일 덮어쓰기
+        "-y",  # Replace the older file
         "-f",
-        "rawvideo",  # 입력 형식
+        "rawvideo",  # Input format
         "-vcodec",
-        "rawvideo",  # 입력 코덱
+        "rawvideo",  # Input codec
         "-s",
-        f"{width}x{height}",  # 입력 크기
+        f"{width}x{height}",  # Input resolution
         "-pix_fmt",
-        "rgb24",  # 입력 픽셀 포맷
+        "rgb24",  # Input pixel format
         "-r",
-        str(frame_rate),  # 입력 프레임레이트
+        str(frame_rate),  # Input framerate
         "-i",
-        "-",  # stdin을 통해 입력
-        "-an",  # 오디오 무시
+        "-",  # Input from stdin
+        "-an",  # No audio
         "-vcodec",
-        "mpeg4",  # 출력 코덱
+        "mpeg4",  # Output codec
         "-b:v",
-        "5000k",  # 비트레이트 설정
+        "5000k",  # Set bitrate
         filename,
     ]
 
     # FFmpeg 프로세스 시작
     process = subprocess.Popen(command, stdin=subprocess.PIPE)
 
-    # Goal 그리기
+    # Goal Draw
     # Goal squeeze
     goals = [(goal[0], goal[2]) if len(goal) == 3 else goal for goal in goals]
 
@@ -86,7 +86,7 @@ def create_trajectory_movie(
             ],
             width=int(cell_size * agent_size_in_cell),
         )
-        # 끝점 그리기
+        # 끝점 Draw
         pygame.draw.ellipse(
             screen,
             "red",
@@ -97,7 +97,7 @@ def create_trajectory_movie(
                 agent_size_in_cell * cell_size,
             ),
         )
-        # 시작점 그리기
+        # 시작점 Draw
         pygame.draw.ellipse(
             screen,
             "blue",

@@ -15,9 +15,9 @@ map_path = os.path.join(nbts_path, "cross.nbt")
 INITIAL_POSITION = [2, 2, 6, -90, 0]
 
 CROSS_GOALS = [
-    (7, 2, 1),  # 왼쪽
-    (12, 2, 6),  # 앞쪽
-    (7, 2, 11),  # 오른쪽
+    (7, 2, 1),  # left
+    (12, 2, 6),  # front
+    (7, 2, 11),  # right
 ]
 
 

@@ -34,17 +34,17 @@ def main():
         "d2s-0-2": ["btlv4am1", 6219],
         "d2s-1-0": ["cb3fhbdg", 5482],
         "d2s-2-1": ["yg310psi", 4945],
-        "dense-0-1": ["xy8clqb9", 5601],  # 직진
-        # "dense-0-2": ["7557y1ep", 4882],  # 오른쪽
+        "dense-0-1": ["xy8clqb9", 5601],  # forward
+        # "dense-0-2": ["7557y1ep", 4882],  # right
         "dense-1-2": ["i03plgdq", 6384],
         "dense-2-0": ["df334mix", 4128],  #
-        "sparse-0-0": ["ngk59t0e", 6024],  # 왼쪽
-        # "sparse-0-1": ["rn06swvu", 6146], # 직진
-        "sparse-1-2": ["1ezz5e78", 5184],  # 오른쪽
-        "sparse-2-1": ["3r4ctsay", 5700],  # 직진
-        "s2d-0-1": ["p6fa3bvp", 5627],  # 200만, 앞쪽
-        "s2d-1-2": ["edsz2myn", 8563],  # 200만, 오른쪽
-        "s2d-2-0": ["yxbvuc6o", 7038],  # 200만, 왼쪽
+        "sparse-0-0": ["ngk59t0e", 6024],  # left
+        # "sparse-0-1": ["rn06swvu", 6146], # forward
+        "sparse-1-2": ["1ezz5e78", 5184],  # right
+        "sparse-2-1": ["3r4ctsay", 5700],  # forward
+        "s2d-0-1": ["p6fa3bvp", 5627],  # 2M, front
+        "s2d-1-2": ["edsz2myn", 8563],  # 2M, right
+        "s2d-2-0": ["yxbvuc6o", 7038],  # 2M, left
     }
 
     api = wandb.Api(timeout=180)

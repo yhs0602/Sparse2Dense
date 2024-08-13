@@ -3,11 +3,11 @@ from typing import SupportsFloat, Any, Optional
 from gymnasium.core import WrapperActType, WrapperObsType, Wrapper
 
 
-# Goal 지점으로부터 일정 거리까지 (거리 5 이내) dense reward를 주고, 에피소드 종료
-#
-# - Reward 계산: Potential Based
-#     - Taxicab distance로 계산한 거리 이용
-#     - 스텝 당 리워드: 멀어졌으면 -0.01, 가까워졌으면 0.01
+# Give a dense reward to a certain distance from the goal point (within distance 5), end episode
+# - Reward calculation
+# - Reward calculation: Potential Based
+# # - Use distance calculated by Taxicab distance
+# - Reward per step: -0.01 for farther, 0.01 for closer
 class DenseMazeWrapper(Wrapper):
     def __init__(
         self,

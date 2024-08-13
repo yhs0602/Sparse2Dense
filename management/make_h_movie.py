@@ -6,7 +6,7 @@ import wandb
 
 from wandb_envs import WANDB_PROJECT
 
-# 21 x 16 미로
+# 21 x 16 Maze
 maze_str = [
     "oooxxxxxxxxxxooo",
     "oxoxxxxxxxxxxoxo",
@@ -57,28 +57,28 @@ def create_video_from_positions(
     video_filename = f"episode_{episode_id}.mp4"
     command = [
         "ffmpeg",
-        "-y",  # 기존 파일 덮어쓰기
+        "-y",  # Replace the older file
         "-f",
-        "rawvideo",  # 입력 형식
+        "rawvideo",  # Input format
         "-vcodec",
-        "rawvideo",  # 입력 코덱
+        "rawvideo",  # Input codec
         "-s",
-        f"{width}x{height}",  # 입력 크기
+        f"{width}x{height}",  # Input resolution
         "-pix_fmt",
-        "rgb24",  # 입력 픽셀 포맷
+        "rgb24",  # Input pixel format
         "-r",
-        str(frame_rate),  # 입력 프레임레이트
+        str(frame_rate),  # Input framerate
         "-i",
-        "-",  # stdin을 통해 입력
-        "-an",  # 오디오 무시
+        "-",  # Input from stdin
+        "-an",  # No audio
         "-vcodec",
-        "mpeg4",  # 출력 코덱
+        "mpeg4",  # Output codec
         "-b:v",
-        "5000k",  # 비트레이트 설정
+        "5000k",  # Set bitrate
         video_filename,
     ]
 
-    # FFmpeg 프로세스 시작
+    # Start FFmpeg process
     process = subprocess.Popen(command, stdin=subprocess.PIPE)
 
     pos0 = positions[0]
@@ -100,7 +100,7 @@ def create_video_from_positions(
                         block_size,
                     ),
                 )
-    # Goal 그리기
+    # Goal Draw
     goal_x, goal_y = goal
     pygame.draw.circle(
         background,
@@ -112,13 +112,13 @@ def create_video_from_positions(
         int(block_size / 2),
     )
 
-    # 에이전트 위치를 기반으로 프레임 생성
+    # Based on Agent positions generate frames
     for position in tqdm.tqdm(positions):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-        screen.blit(background, (0, 0))  # 배경 그리기
+        screen.blit(background, (0, 0))  # Background Draw
         # TODO: Cache maze surface
         for y, row in enumerate(maze):
             for x, cell in enumerate(row):
@@ -197,34 +197,38 @@ def create_video_from_positions(
                     int(y * block_size) + agent_radius,
                 ),
                 agent_radius,
-            )  # 에이전트 그리기
+            )  # Agent Draw
 
-        # 프레임을 FFmpeg로 파이프
+        # Pipe the frame to ffmpeg
         frame = pygame.surfarray.array3d(screen)
-        frame = frame.swapaxes(0, 1)  # Pygame과 일반 이미지 포맷 간의 축 변경
-        process.stdin.write(frame.tobytes())  # 프레임 데이터를 바이트로 변환 후 FFmpeg에 전송
+        frame = frame.swapaxes(
+            0, 1
+        )  # Changing axes between Pygame and regular image formats
+        process.stdin.write(
+            frame.tobytes()
+        )  # Convert frame data to bytes and send to FFmpeg
 
         pygame.display.flip()
-        # clock.tick(frame_rate)  # 프레임 레이트 설정
+        # clock.tick(frame_rate)  # Setting the frame rate
 
-    # FFmpeg와 Pygame 정리
+    # Cleaning up FFmpeg and Pygame
     process.stdin.close()
     process.wait()
     pygame.quit()
 
 
 def make_movie():
-    # W&B API 초기화
+    # Initialize W&B API
     api = wandb.Api(timeout=30)
 
-    # 특정 프로젝트와 run ID 지정
+    # Select the project and run
     project_name = WANDB_PROJECT
     run_id = "zypbugn5"
     run = api.run(f"{project_name}/{run_id}")
 
-    # 로그 데이터 가져오기
+    # Get the log data
     data = run.history(keys=["episode/positions"], pandas=False)
-    # 각 에피소드별로 동영상 생성
+    # Generate videos for each episode
     n = 0
     for episode_id, episode_data in enumerate(data):
         positions = episode_data["episode/positions"]

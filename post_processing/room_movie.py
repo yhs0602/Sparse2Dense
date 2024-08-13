@@ -8,16 +8,16 @@ from wandb_envs import WANDB_PROJECT, WANDB_ENTITY
 
 
 def make_room_movie():
-    # W&B API 초기화
+    # Initialize W&B API
     api = wandb.Api(timeout=120)
 
-    # 특정 프로젝트와 run ID 지정
+    # Select the project and run
     run_names = [
         f"{WANDB_ENTITY}/{WANDB_PROJECT}/fnsv0j1p",  # transition 2M
     ]
     for run_name in run_names:
         run = api.run(run_name)
-        # 로그 데이터 가져오기
+        # Get the log data
         data = run.history(
             keys=[
                 "episode/positions",
@@ -28,7 +28,7 @@ def make_room_movie():
             ],
             pandas=False,
         )
-        # 각 에피소드별로 동영상 생성
+        # Generate videos for each episode
         n = 0
         for episode_id, episode_data in enumerate(data[::-1]):
             positions = episode_data["episode/positions"]

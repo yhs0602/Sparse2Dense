@@ -10,7 +10,7 @@ def create_maze_image_pygame(maze, cell_size=40):
     height = len(maze) * cell_size
     surface = pygame.Surface((width, height))
 
-    # 미로 그리기
+    # Maze Draw
     for y, row in enumerate(maze):
         for x, cell in enumerate(row):
             color = (0, 0, 0) if cell == "o" else (255, 255, 255)

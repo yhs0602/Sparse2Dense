@@ -30,9 +30,9 @@ from wrappers.turn_90_wrapper import Turn90Wrapper
 current_path = os.path.dirname(os.path.abspath(__file__))
 map_path = os.path.join(current_path, "hmaze1_colored.nbt")
 
-# 실험 설명
-# 학습할 때는 저 Goals 중 두 개를 랜덤하게 선택해서 학습합니다.
-# 학습이 끝나면 3개의 Goals에 대해 전부 테스트합니다.
+# Experiment Description
+# When training, randomly select two of the Goals to train.
+# After training, test all 3 goals.
 
 TEST_GOAL_IDX = 2
 TRAIN_GOALS = [goal for i, goal in enumerate(CROSS_GOALS) if i != TEST_GOAL_IDX]

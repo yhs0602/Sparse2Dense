@@ -10,45 +10,45 @@ def draw_maze_and_agent(maze, position, direction):
     ax.set_xlim([0, maze_x_size])
     ax.set_ylim([0, maze_z_size])
 
-    # 미로 그리기
+    # Maze Draw
     for z in range(maze_z_size):
         for x in range(maze_x_size):
             if maze[z][x] == "o":
                 rect = plt.Rectangle((x, maze_z_size - z - 1), 1, 1, color="black")
                 ax.add_patch(rect)
 
-    # 에이전트 위치와 방향 계산
+    # Calculating agent location and orientation
     x, z = position
-    z = maze_z_size - z - 1  # y축 반전
+    z = maze_z_size - z - 1  # Invert y-axis
 
-    # 에이전트의 방향을 기반으로 삼각형의 꼭짓점 계산
+    # Calculate the vertices of a triangle based on the Agent's orientation
     triangle_size = 0.3
-    if direction == "N":  # 북
+    if direction == "N":  # North
         vertices = [
             (x, z + triangle_size),
             (x - triangle_size, z - triangle_size),
             (x + triangle_size, z - triangle_size),
         ]
-    elif direction == "S":  # 남
+    elif direction == "S":  # South
         vertices = [
             (x, z - triangle_size),
             (x - triangle_size, z + triangle_size),
             (x + triangle_size, z + triangle_size),
         ]
-    elif direction == "E":  # 동
+    elif direction == "E":  # East
         vertices = [
             (x + triangle_size, z),
             (x - triangle_size, z + triangle_size),
             (x - triangle_size, z - triangle_size),
         ]
-    elif direction == "W":  # 서
+    elif direction == "W":  # West
         vertices = [
             (x - triangle_size, z),
             (x + triangle_size, z + triangle_size),
             (x + triangle_size, z - triangle_size),
         ]
 
-    # 삼각형 그리기
+    # Triangle Draw
     triangle = plt.Polygon(vertices, closed=True, color="red")
     ax.add_patch(triangle)
 
@@ -56,7 +56,7 @@ def draw_maze_and_agent(maze, position, direction):
     plt.show()
 
 
-# 예시 미로 데이터
+# Example Maze Data
 maze = [
     "oooxxxxooo",
     "oxoxxxxoxo",
@@ -68,9 +68,9 @@ maze = [
 ]
 
 if __name__ == "__main__":
-    # 에이전트 위치 및 방향
+    # Agent location and orientation
     position = (5, 3)  # (x, z)
-    direction = "N"  # 방향: North (북)
+    direction = "N"  # North
     start_time = time.time_ns()
     draw_maze_and_agent(maze, position, direction)
     end_time = time.time_ns()

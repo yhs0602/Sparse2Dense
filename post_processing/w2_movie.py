@@ -29,9 +29,9 @@ class Goal:
 
 
 CROSS_W2_GOALS = [
-    ((7, 1, 1), (8, 1, 1)),  # 왼쪽
-    ((13, 1, 6), (13, 1, 7)),  # 앞쪽
-    ((8, 1, 12), (7, 1, 12)),  # 오른쪽
+    ((7, 1, 1), (8, 1, 1)),  # left
+    ((13, 1, 6), (13, 1, 7)),  # front
+    ((8, 1, 12), (7, 1, 12)),  # right
 ]
 
 CROSS_W2_GOALS_INSTANCES = [
@@ -66,26 +66,26 @@ assert len(cross_str) == 14
 
 
 def make_cross_w2_movie():
-    # W&B API 초기화
+    # Initialize W&B API
     api = wandb.Api(timeout=60)
-    # 특정 프로젝트와 run ID 지정
+    # Select the project and run
     run_names = [
         f"{WANDB_ENTITY}/{WANDB_PROJECT}/ut8b91hh",  # Sparse 0
         f"{WANDB_ENTITY}/{WANDB_PROJECT}/0ps4e1nn",  # Dense 0
-        f"{WANDB_ENTITY}/{WANDB_PROJECT}/jhhmgo0f"  # 300만 0
-        f"{WANDB_ENTITY}/{WANDB_PROJECT}/ktxlocs3",  # 200만 0
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/jhhmgo0f"  # 3M 0
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/ktxlocs3",  # 2M 0
         f"{WANDB_ENTITY}/{WANDB_PROJECT}/u0bwff7b",  # Sparse 1
         f"{WANDB_ENTITY}/{WANDB_PROJECT}/0itxorpm",  # Dense 1
-        f"{WANDB_ENTITY}/{WANDB_PROJECT}/nk54yfnh",  # 300만 1
-        f"{WANDB_ENTITY}/{WANDB_PROJECT}/edsz2myn",  # 200만 1
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/nk54yfnh",  # 3M 1
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/edsz2myn",  # 2M 1
         f"{WANDB_ENTITY}/{WANDB_PROJECT}/3r4ctsay",  # Sparse 2
         f"{WANDB_ENTITY}/{WANDB_PROJECT}/8ilqwrp5",  # Dense 2
-        f"{WANDB_ENTITY}/{WANDB_PROJECT}/wocxlma6",  # 300만 2
-        f"{WANDB_ENTITY}/{WANDB_PROJECT}/yxbvuc6o",  # 200만 2
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/wocxlma6",  # 3M 2
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/yxbvuc6o",  # 2M 2
     ]
     for run_name in run_names:
         run = api.run(run_name)
-        # 로그 데이터 가져오기
+        # Get the log data
         data = run.history(
             keys=[
                 "eval_episode/positions",
@@ -96,7 +96,7 @@ def make_cross_w2_movie():
             ],
             pandas=False,
         )
-        # 각 에피소드별로 동영상 생성
+        # Generate videos for each episode
         n = 0
         for episode_id, episode_data in enumerate(data[::-1]):
             positions = episode_data["eval_episode/positions"]

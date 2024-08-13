@@ -37,9 +37,9 @@ from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
 
 
-# 그러면 트레이닝 시 저 4개의 영역에서 무작위로 시작하고
-# 골도 저 영역안에서 생겨나되
-# 4개중에 어디인지 랑 시작좌표 로깅해둘게요
+# then the training will randomly start in those four areas.
+# and the goals will also occur within those zones.
+# I'll log the starting coordinates and which one of the four it is.
 
 
 def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:

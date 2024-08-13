@@ -3,8 +3,8 @@ from typing import SupportsFloat, Any, Optional, Tuple
 from gymnasium.core import WrapperActType, WrapperObsType, Wrapper
 
 
-# PBRS 가정을 만족.
-# Origin으로부터 멀어지면 보상을 주고, 가까워지면 보상을 줄인다.
+# Satisfy PBRS assumptions.
+# Reward for moving away from origin, reduce reward for moving closer.
 
 
 class ExplorationWrapper(Wrapper):

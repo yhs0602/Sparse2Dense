@@ -27,17 +27,17 @@ assert len(cross_str) == 13
 
 
 def make_cross_movie():
-    # W&B API 초기화
+    # Initialize W&B API
     api = wandb.Api(timeout=30)
 
-    # 특정 프로젝트와 run ID 지정
+    # Select the project and run
     project_name = WANDB_PROJECT
     run_id = "af0auegt"  # 5lf40vyr: s2d
     run = api.run(f"{project_name}/{run_id}")
 
-    # 로그 데이터 가져오기
+    # Get the log data
     data = run.history(keys=["episode/positions"], pandas=False)
-    # 각 에피소드별로 동영상 생성
+    # Generate videos for each episode
     n = 0
     for episode_id, episode_data in enumerate(data[::-1]):
         positions = episode_data["episode/positions"]

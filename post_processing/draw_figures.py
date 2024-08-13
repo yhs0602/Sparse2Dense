@@ -8,17 +8,17 @@ import pandas as pd
 import scipy.stats as stats
 
 
-# 러닝 애버리지 계산 함수
+# Running Averaging Calculation Functions
 def running_average(data, window_size: int):
     return data.rolling(window=window_size, min_periods=1).mean()
 
 
-# 표준 편차 계산 함수
+# Standard deviation calculation functions
 def running_std(data, window_size):
     return data.rolling(window=window_size, min_periods=1).mean()
 
 
-# 그룹별 데이터 로드
+# Loading data by group
 def load_group_data(group_dir) -> List[pd.DataFrame]:
     group_data = []
     for root, _, files in os.walk(group_dir):
@@ -30,7 +30,7 @@ def load_group_data(group_dir) -> List[pd.DataFrame]:
     return group_data
 
 
-# 그룹별 평균 데이터 계산
+# Calculate average data by group
 def calculate_group_average(
     group_data: List[pd.DataFrame], x_axis: str, y_axis: str
 ) -> pd.DataFrame:
@@ -39,7 +39,7 @@ def calculate_group_average(
     return grouped
 
 
-# 그룹별 standard error 계산
+# Calculate standard error by group
 def calculate_group_std(
     group_data: List[pd.DataFrame], x_axis: str, y_axis: str
 ) -> pd.DataFrame:
@@ -49,7 +49,7 @@ def calculate_group_std(
     return grouped
 
 
-# 시각화 함수, std err
+# Visualisation functions, std err
 def plot_groups(
     groups: Dict[str, List[pd.DataFrame]],
     groups_name: str,
@@ -71,7 +71,7 @@ def plot_groups(
             # group_data[i].loc[:, [axis_x_name, axis_y_name]] = group_data[i].loc[
             #     :, [axis_x_name, axis_y_name]
             # ].ffill()
-            # eval_episode에 대해 그룹화하고 가장 작은 값 선택
+            # Group for eval_episode and select smallest value
             if axis_y_name == "eval_episode":
                 group_data[i][axis_y_name] = (
                     group_data[i]
@@ -167,7 +167,6 @@ def plot_groups(
     plt.savefig(figure_path, dpi=450)
 
 
-# 메인 함수
 def main():
     all_run_data_dir = "./all_run_data"
     cross_0_groups = {}
@@ -244,7 +243,7 @@ def main():
                 raise ValueError(f"Unknown group: {group_dir}")
     # Plot
     # cross:
-    # 그룹의 끝 번호를 기반으로 그룹핑.
+    # Grouping based on the end number of the group.
     # episode -> episode/length
     # global_step -> episode
     # eval_episode -> eval_episode/length

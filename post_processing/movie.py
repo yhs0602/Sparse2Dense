@@ -9,7 +9,7 @@ import wandb
 
 from wandb_envs import WANDB_PROJECT
 
-# 21 x 16 미로
+# 21 x 16 Maze
 maze_str = [
     "oooxxxxxxxxxxooo",
     "oxoxxxxxxxxxxoxo",
@@ -66,24 +66,24 @@ def create_video_from_positions(
 
     command = [
         "ffmpeg",
-        "-y",  # 기존 파일 덮어쓰기
+        "-y",  # Replace the older file
         "-f",
-        "rawvideo",  # 입력 형식
+        "rawvideo",  # Input format
         "-vcodec",
-        "rawvideo",  # 입력 코덱
+        "rawvideo",  # Input codec
         "-s",
-        f"{width}x{height}",  # 입력 크기
+        f"{width}x{height}",  # Input resolution
         "-pix_fmt",
-        "rgb24",  # 입력 픽셀 포맷
+        "rgb24",  # Input pixel format
         "-r",
-        str(frame_rate),  # 입력 프레임레이트
+        str(frame_rate),  # Input framerate
         "-i",
-        "-",  # stdin을 통해 입력
-        "-an",  # 오디오 무시
+        "-",  # Input from stdin
+        "-an",  # No audio
         "-vcodec",
-        "mpeg4",  # 출력 코덱
+        "mpeg4",  # Output codec
         "-b:v",
-        "5000k",  # 비트레이트 설정
+        "5000k",  # Set bitrate
         video_filename,
     ]
 
@@ -111,7 +111,7 @@ def create_video_from_positions(
                         block_size,
                     ),
                 )
-    # Goal 그리기
+    # Goal Draw
     font = pygame.font.Font(None, 18)
     for idx, goal in enumerate(goals):
         goal_x, goal_y = goal
@@ -130,14 +130,14 @@ def create_video_from_positions(
     # episode 출력
     text = font.render(f"Ep.{episode}({reached_goal})", True, (0, 0, 255))
     background.blit(text, (width - 60, 0))
-    # 에이전트 위치를 기반으로 프레임 생성
+    # Agent 위치를 기반으로 프레임 생성
     last_n_poses = deque(maxlen=len(positions))
     for time, position in tqdm.tqdm(enumerate(positions)):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-        screen.blit(background, (0, 0))  # 배경 그리기
+        screen.blit(background, (0, 0))  # 배경 Draw
         pos_txt = font.render(
             f"{int(position[0]), int(position[2])}", True, (255, 0, 0)
         )
@@ -211,8 +211,8 @@ def create_video_from_positions(
                     int(y * block_size) + agent_radius,
                 ),
                 agent_radius,
-            )  # 에이전트 그리기
-        # 궤적 그리기, draw_lines
+            )  # Agent Draw
+        # 궤적 Draw, draw_lines
         if len(last_n_poses) > 1:
             for i in range(1, len(last_n_poses)):
                 start_pos = last_n_poses[i - 1]
@@ -250,17 +250,17 @@ def create_video_from_positions(
 
 
 def make_movie():
-    # W&B API 초기화
+    # Initialize W&B API
     api = wandb.Api(timeout=30)
 
-    # 특정 프로젝트와 run ID 지정
+    # Select the project and run
     project_name = WANDB_PROJECT
     run_id = "zypbugn5"
     run = api.run(f"{project_name}/{run_id}")
 
-    # 로그 데이터 가져오기
+    # Get the log data
     data = run.history(keys=["episode/positions"], pandas=False)
-    # 각 에피소드별로 동영상 생성
+    # Generate videos for each episode
     n = 0
     for episode_id, episode_data in enumerate(data):
         positions = episode_data["episode/positions"]

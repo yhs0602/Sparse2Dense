@@ -21,7 +21,7 @@ class CentralLogger:
         self.data.update(log_dict)
 
     def end_episode(self, is_eval: bool = False):
-        if self.data:  # 로깅할 데이터가 있는지 확인
+        if self.data:  # Make sure you have data to log
             if is_eval:
                 prepended_dict = {
                     f"eval_{key}": value for key, value in self.data.items()
