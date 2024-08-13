@@ -12,7 +12,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 
 from cross_w2.cross_w2_env import CROSS_W2_GOALS, make_cross_w2_env
-from define_metric import define_metrics
+from cross_w2.define_metric import define_metrics
 from utils.central_logger import CentralLogger
 from wrappers.episode_logger import EpisodeLoggerWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
