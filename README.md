@@ -30,6 +30,15 @@ Usage of Conda is recommended, and the current installation guide is centered ar
 
 ## Running experiments
 
+Before running the experiment scripts, you need to create a `.env` file with the following content:
+
+```shell
+WANDB_ENTITY=your_wandb_username
+WANDB_PROJECT=your_wandb_project_name
+```
+
+It is used for logging the experiment results to the Weights and Biases service.
+
 There are two experiment packages in this repository, `room` and `cross_w2`. Both of them have the same structure, and
 the structure is as follows:
 
@@ -92,13 +101,11 @@ The options are as follows:
 
 ## Other experiments
 
-You may try other experiments settings in the following directories also:
+You may try other experiments settings in the following directory also:
 
 - `cross`: The cross maze environment, but the width of the corridor is 1.
-- `h_maze`: The H-shaped maze environment.
-- `h_maze_w2`: The H-shaped maze environment, but the width of the corridor is 2.
 
-## Post processing scripts
+## Post-processing scripts
 
 To automatically generate figures and tables, we used the post-processing scripts in the `post_processing` directory.
 This directory primarily contains the following files:
@@ -128,7 +135,6 @@ This directory primarily contains the following files:
 
 - `change_step_metric.py`: A script that changes the step metric of the trajectory data.
 - `find_run.py`: A handy script for finding a run with 3111 steps.
-
 
 ## Management scripts
 
