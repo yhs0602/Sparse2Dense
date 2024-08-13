@@ -17,6 +17,7 @@ from cross_w2.define_metric import define_metrics
 from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
+from wandb_envs import WANDB_PROJECT, WANDB_ENTITY
 from wrappers.dense_maze_wrapper import DenseMazeWrapper
 from wrappers.episode_logger import EpisodeLoggerWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
@@ -129,8 +130,8 @@ def cross_w2_transition(
     group_name = f"v30-crossw2-transition-{transition_timing}-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
-        project="craftground-sb3",
-        entity="jourhyang123",
+        project=WANDB_PROJECT,
+        entity=WANDB_ENTITY,
         # track hyperparameters and run metadata
         group=group_name,
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics

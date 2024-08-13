@@ -7,6 +7,7 @@ from tqdm import tqdm
 from wandb.apis.public import Run
 
 from post_processing.alpha_trajectory import create_trajectory_image
+from wandb_envs import WANDB_ENTITY, WANDB_PROJECT
 
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
 room_out_dir = os.path.join(current_file_dir, "room_media")
@@ -53,7 +54,7 @@ def main():
     for reward, run_tuple in tqdm(total_runs.items()):
         run_id = run_tuple[0]
         episode = run_tuple[1]
-        run = api.run(f"jourhyang123/craftground-sb3/{run_id}")
+        run = api.run(f"{WANDB_ENTITY}/{WANDB_PROJECT}/{run_id}")
         if "crossw2" in run.group:
             keys = [
                 "episode/positions",

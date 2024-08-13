@@ -2,6 +2,8 @@ import pandas as pd
 import wandb
 from wandb.apis.public import HistoryScan
 
+from wandb_envs import WANDB_ENTITY, WANDB_PROJECT
+
 # 이벨류에이션 마지막
 # 마지막 지점으로부터 3개 평균값으로
 #   에피소드랭스,
@@ -24,7 +26,7 @@ def main():
     api = wandb.Api()
     results = {}
     for group in groups:
-        runs = api.runs("jourhyang123/craftground-sb3", filters={"group": group})
+        runs = api.runs(f"{WANDB_ENTITY}/{WANDB_PROJECT}", filters={"group": group})
         lengths = []
         rewards = []
         eval_episodes = []

@@ -16,6 +16,7 @@ from cross.cross_env import CROSS_GOALS, make_cross_env
 from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
+from wandb_envs import WANDB_PROJECT, WANDB_ENTITY
 from wrappers.episode_logger import EpisodeLoggerWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.log_flush_wrapper import LogFlushWrapper
@@ -98,8 +99,8 @@ def sparse_cross(port1: int = 8001, port2: int = 8002, device_id: int = 0):
     group_name = f"v1-cross-sparse-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
-        project="craftground-sb3",
-        entity="jourhyang123",
+        project=WANDB_PROJECT,
+        entity=WANDB_ENTITY,
         # track hyperparameters and run metadata
         group=group_name,
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics

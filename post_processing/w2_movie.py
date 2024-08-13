@@ -4,6 +4,7 @@ from typing import Union, Tuple, Iterable
 import wandb
 
 from post_processing.movie import create_video_from_positions
+from wandb_envs import WANDB_PROJECT, WANDB_ENTITY
 
 
 class Goal:
@@ -69,18 +70,18 @@ def make_cross_w2_movie():
     api = wandb.Api(timeout=60)
     # 특정 프로젝트와 run ID 지정
     run_names = [
-        "jourhyang123/craftground-sb3/ut8b91hh",  # Sparse 0
-        "jourhyang123/craftground-sb3/0ps4e1nn",  # Dense 0
-        "jourhyang123/craftground-sb3/jhhmgo0f"  # 300만 0
-        "jourhyang123/craftground-sb3/ktxlocs3",  # 200만 0
-        "jourhyang123/craftground-sb3/u0bwff7b",  # Sparse 1
-        "jourhyang123/craftground-sb3/0itxorpm",  # Dense 1
-        "jourhyang123/craftground-sb3/nk54yfnh",  # 300만 1
-        "jourhyang123/craftground-sb3/edsz2myn",  # 200만 1
-        "jourhyang123/craftground-sb3/3r4ctsay",  # Sparse 2
-        "jourhyang123/craftground-sb3/8ilqwrp5",  # Dense 2
-        "jourhyang123/craftground-sb3/wocxlma6",  # 300만 2
-        "jourhyang123/craftground-sb3/yxbvuc6o",  # 200만 2
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/ut8b91hh",  # Sparse 0
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/0ps4e1nn",  # Dense 0
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/jhhmgo0f"  # 300만 0
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/ktxlocs3",  # 200만 0
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/u0bwff7b",  # Sparse 1
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/0itxorpm",  # Dense 1
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/nk54yfnh",  # 300만 1
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/edsz2myn",  # 200만 1
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/3r4ctsay",  # Sparse 2
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/8ilqwrp5",  # Dense 2
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/wocxlma6",  # 300만 2
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/yxbvuc6o",  # 200만 2
     ]
     for run_name in run_names:
         run = api.run(run_name)

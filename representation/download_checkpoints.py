@@ -4,6 +4,8 @@ import wandb
 from tqdm import tqdm
 from wandb.apis.public import Run, File
 
+from wandb_envs import WANDB_ENTITY, WANDB_PROJECT
+
 
 def download_checkpoint(run: Run, download_dir) -> str:
     # check if the file already exists
@@ -21,7 +23,7 @@ def download_checkpoint(run: Run, download_dir) -> str:
 
 def main():
     api = wandb.Api(timeout=120)
-    runs = api.runs("jourhyang123/craftground-sb3")
+    runs = api.runs(f"{WANDB_ENTITY}/{WANDB_PROJECT}")
     group_runs = [
         run
         for run in runs

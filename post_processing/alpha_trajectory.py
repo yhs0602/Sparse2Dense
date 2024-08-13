@@ -11,6 +11,8 @@ from PIL import ImageDraw, Image, ImageChops
 from tqdm import tqdm
 from wandb.apis.public import Run
 
+from wandb_envs import WANDB_ENTITY, WANDB_PROJECT
+
 
 # 0, 0 -> 12, 19
 # 6.0, ~, 9.5
@@ -194,7 +196,7 @@ def make_room_trajectory():
 
     # W&B API 초기화
     api = wandb.Api(timeout=180)
-    runs = api.runs("jourhyang123/craftground-sb3")
+    runs = api.runs(f"{WANDB_ENTITY}/{WANDB_PROJECT}")
     groups = [
         "v30-crossw2-transition-2000000-0",
         "v30-crossw2-d2s-3000000-0",

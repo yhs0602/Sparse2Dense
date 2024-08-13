@@ -13,6 +13,7 @@ from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 
 from cross.cross_env import CROSS_GOALS, make_cross_env
 from utils.central_logger import CentralLogger
+from wandb_envs import WANDB_PROJECT, WANDB_ENTITY
 from wrappers.episode_logger import EpisodeLoggerWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.log_flush_wrapper import LogFlushWrapper
@@ -30,8 +31,8 @@ def select_goal():
 def cross_random(port: int):
     run = wandb.init(
         # set the wandb project where this run will be logged
-        project="craftground-sb3",
-        entity="jourhyang123",
+        project=WANDB_PROJECT,
+        entity=WANDB_ENTITY,
         # track hyperparameters and run metadata
         group="v1-cross-random",
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics

@@ -4,6 +4,8 @@ import pygame
 import tqdm
 import wandb
 
+from wandb_envs import WANDB_PROJECT
+
 # 21 x 16 미로
 maze_str = [
     "oooxxxxxxxxxxooo",
@@ -216,7 +218,7 @@ def make_movie():
     api = wandb.Api(timeout=30)
 
     # 특정 프로젝트와 run ID 지정
-    project_name = "craftground-sb3"
+    project_name = WANDB_PROJECT
     run_id = "zypbugn5"
     run = api.run(f"{project_name}/{run_id}")
 

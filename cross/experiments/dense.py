@@ -110,8 +110,8 @@ def generalized_refactored_hmaze(
     group_name = f"v1-cross-dense-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
-        project="craftground-sb3",
-        entity="jourhyang123",
+        project=WANDB_PROJECT,
+        entity=WANDB_ENTITY,
         # track hyperparameters and run metadata
         group=group_name,
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics

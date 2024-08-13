@@ -3,6 +3,7 @@ import wandb
 from wandb.apis.public import Run, File
 
 from post_processing.final_movies.movie_without_bg import create_trajectory_movie
+from wandb_envs import WANDB_ENTITY, WANDB_PROJECT
 
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
 cross_dir = os.path.join(current_file_dir, "cross")
@@ -12,31 +13,31 @@ room_dir = os.path.join(current_file_dir, "room")
 def main():
     cross_runs = {
         "sparse": [
-            "jourhyang123/craftground-sb3/ludeknjz",
-            "jourhyang123/craftground-sb3/3tvmsrec",
-            "jourhyang123/craftground-sb3/gvkoowlj",
+            f"{WANDB_ENTITY}/{WANDB_PROJECT}/ludeknjz",
+            f"{WANDB_ENTITY}/{WANDB_PROJECT}/3tvmsrec",
+            f"{WANDB_ENTITY}/{WANDB_PROJECT}/gvkoowlj",
         ],
         "dense": [
-            "jourhyang123/craftground-sb3/xy8clqb9",
-            "jourhyang123/craftground-sb3/0itxorpm",
-            "jourhyang123/craftground-sb3/9gcgf7pj",
+            f"{WANDB_ENTITY}/{WANDB_PROJECT}/xy8clqb9",
+            f"{WANDB_ENTITY}/{WANDB_PROJECT}/0itxorpm",
+            f"{WANDB_ENTITY}/{WANDB_PROJECT}/9gcgf7pj",
         ],
         "d2s": [
-            "jourhyang123/craftground-sb3/b596dbfe",
-            "jourhyang123/craftground-sb3/js96zfgu",
-            "jourhyang123/craftground-sb3/5iv05pfx",
+            f"{WANDB_ENTITY}/{WANDB_PROJECT}/b596dbfe",
+            f"{WANDB_ENTITY}/{WANDB_PROJECT}/js96zfgu",
+            f"{WANDB_ENTITY}/{WANDB_PROJECT}/5iv05pfx",
         ],
         "s2d": [
-            "jourhyang123/craftground-sb3/jp71xuyn",
-            "jourhyang123/craftground-sb3/nk54yfnh",
-            "jourhyang123/craftground-sb3/83r3f8hi",
+            f"{WANDB_ENTITY}/{WANDB_PROJECT}/jp71xuyn",
+            f"{WANDB_ENTITY}/{WANDB_PROJECT}/nk54yfnh",
+            f"{WANDB_ENTITY}/{WANDB_PROJECT}/83r3f8hi",
         ],
     }
     room_runs = {
-        "sparse": "jourhyang123/craftground-sb3/3l88j5yt",
-        "dense": "jourhyang123/craftground-sb3/frc5sa1s",
-        "d2s": "jourhyang123/craftground-sb3/7z2q9oli",
-        "s2d": "jourhyang123/craftground-sb3/fgt7xdhv",
+        "sparse": f"{WANDB_ENTITY}/{WANDB_PROJECT}/3l88j5yt",
+        "dense": f"{WANDB_ENTITY}/{WANDB_PROJECT}/frc5sa1s",
+        "d2s": f"{WANDB_ENTITY}/{WANDB_PROJECT}/7z2q9oli",
+        "s2d": f"{WANDB_ENTITY}/{WANDB_PROJECT}/fgt7xdhv",
     }
 
     api = wandb.Api(timeout=120)

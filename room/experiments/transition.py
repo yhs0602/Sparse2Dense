@@ -28,6 +28,7 @@ from sb3_exts.custom_checkpoint_callback import CustomCheckpointCallback
 # from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
+from wandb_envs import WANDB_PROJECT, WANDB_ENTITY
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.log_flush_wrapper import LogFlushWrapper
 from wrappers.position_logger import PositionLoggingWrapper
@@ -112,8 +113,8 @@ def room_transition(
     group_name = f"v33-room-v1-transition-{transition_timing}-{extended}"
     run = wandb.init(
         # set the wandb project where this run will be logged
-        project="craftground-sb3",
-        entity="jourhyang123",
+        project=WANDB_PROJECT,
+        entity=WANDB_ENTITY,
         # track hyperparameters and run metadata
         group=group_name,
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics

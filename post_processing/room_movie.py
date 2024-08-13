@@ -4,6 +4,7 @@ import wandb
 
 from post_processing.movie import create_video_from_positions
 from room.room_env import real_room_str, room_palette
+from wandb_envs import WANDB_PROJECT, WANDB_ENTITY
 
 
 def make_room_movie():
@@ -12,7 +13,7 @@ def make_room_movie():
 
     # 특정 프로젝트와 run ID 지정
     run_names = [
-        "jourhyang123/craftground-sb3/fnsv0j1p",  # transition 200만
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/fnsv0j1p",  # transition 2M
     ]
     for run_name in run_names:
         run = api.run(run_name)

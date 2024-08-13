@@ -5,6 +5,8 @@ import wandb
 from tqdm import tqdm
 from wandb.apis.public import Run
 
+from wandb_envs import WANDB_ENTITY, WANDB_PROJECT
+
 
 def download_wandb_file(run: Run, download_dir):
     run_id = run.id
@@ -64,7 +66,7 @@ def main():
     # Get all the runs from groups
 
     api = wandb.Api(timeout=120)
-    runs = api.runs("jourhyang123/craftground-sb3")
+    runs = api.runs(f"{WANDB_ENTITY}/{WANDB_PROJECT}")
     group_runs = [
         run
         for run in runs

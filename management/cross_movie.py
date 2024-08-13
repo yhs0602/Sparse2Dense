@@ -2,6 +2,7 @@
 import wandb
 
 from management.make_h_movie import create_video_from_positions
+from wandb_envs import WANDB_PROJECT
 
 cross_str = [
     "xxxxxoooxxxxx",
@@ -30,7 +31,7 @@ def make_cross_movie():
     api = wandb.Api(timeout=30)
 
     # 특정 프로젝트와 run ID 지정
-    project_name = "craftground-sb3"
+    project_name = WANDB_PROJECT
     run_id = "af0auegt"  # 5lf40vyr: s2d
     run = api.run(f"{project_name}/{run_id}")
 

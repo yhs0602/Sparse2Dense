@@ -1,5 +1,7 @@
 import wandb
 
+from wandb_envs import WANDB_ENTITY, WANDB_PROJECT
+
 if __name__ == "__main__":
     # Define the groups to move and the new group name
     groups_to_move = [
@@ -17,7 +19,7 @@ if __name__ == "__main__":
     # Move the runs to the new group
     api = wandb.Api()
     for group, new_group in groups_to_move:
-        runs = api.runs("jourhyang123/craftground-sb3", filters={"group": group})
+        runs = api.runs(f"{WANDB_ENTITY}/{WANDB_PROJECT}", filters={"group": group})
         for run in runs:
             run.group = new_group
             run.update()
