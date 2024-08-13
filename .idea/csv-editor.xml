@@ -24,13 +24,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="/post_processing/cache/v30-crossw2-sparse-2_gvkoowlj.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="/post_processing/experiment_results.csv">
           <value>
             <Attribute>

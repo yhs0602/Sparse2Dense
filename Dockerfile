@@ -3,8 +3,37 @@ FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu18.04
 # Set environment variable to avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
+ADD busybox-static_1.30.1-4_amd64.deb /tmp
+
+# install busybox from deb
+RUN dpkg -i /tmp/busybox-static_1.30.1-4_amd64.deb
+
+# https://forums.developer.nvidia.com/t/notice-cuda-linux-repository-key-rotation/212772
+RUN apt-key del 7fa2af80
+RUN rm -rf /var/lib/apt/lists/*
+# Remove 'Signed-By' and NVIDIA repository entries from the sources lists
+RUN sed -i '/Signed-By/d' /etc/apt/sources.list.d/cuda.list \
+    && sed -i '/developer\.download\.nvidia\.com\/compute\/cuda\/repos/d' /etc/apt/sources.list
+RUN sed -i '/developer\.download\.nvidia\.com\/compute\/cuda\/repos/d' /etc/apt/sources.list.d/*
+RUN sed -i '/developer\.download\.nvidia\.com\/compute\/machine-learning\/repos/d' /etc/apt/sources.list.d/*
+
+RUN rm -rf /var/lib/apt/lists/*
+RUN rm -rf /etc/apt/sources.list.d/*
+RUN rm -rf /etc/apt/sources.list
+
+# Add Ubuntu 18.04 (Bionic Beaver) default repositories
+RUN echo "deb http://archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse" > /etc/apt/sources.list \
+    && echo "deb http://archive.ubuntu.com/ubuntu/ bionic-updates main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "deb http://archive.ubuntu.com/ubuntu/ bionic-backports main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "deb http://archive.ubuntu.com/ubuntu/ bionic-security main restricted universe multiverse" >> /etc/apt/sources.list
+
+RUN /bin/busybox wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-keyring_1.0-1_all.deb
+RUN dpkg -i cuda-keyring_1.0-1_all.deb
+
+
+# https://askubuntu.com/a/1228775/901082
 # Install necessary packages
-RUN apt-get update && apt-get install -y \
+RUN apt-get update -o Acquire::CompressionTypes::Order::=gz --fix-missing && apt-get install -y \
     libglew-dev \
     cmake \
     libpng-dev \
@@ -32,11 +61,13 @@ RUN conda install -c conda-forge openjdk=21 -y
 RUN conda update -n base -c defaults conda -y
 # Copy requirements file and install Python packages
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt # --no-cache-dir
 # Install PyTorch and CUDA 11.8 support using conda
 RUN conda install -c pytorch -c nvidia pytorch torchvision torchaudio pytorch-cuda=11.8 -y
 
 # Install and configure VirtualGL
+RUN apt update && apt install xserver-xorg-core x11-xserver-utils libxtst6 libxv1 libegl1 -y
+
 RUN wget -O vgl3.1.deb https://sourceforge.net/projects/virtualgl/files/3.1/virtualgl_3.1_amd64.deb/download
 RUN dpkg -i vgl3.1.deb
 RUN vglserver_config -config +s +f -y
