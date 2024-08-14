@@ -11,6 +11,11 @@ RUN dpkg -i /tmp/busybox-static_1.30.1-4_amd64.deb
 # https://forums.developer.nvidia.com/t/notice-cuda-linux-repository-key-rotation/212772
 RUN apt-key del 7fa2af80
 RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get clean
+# https://stackoverflow.com/a/76092743/8614565
+RUN echo "Acquire::http::Pipeline-Depth 0;" > /etc/apt/apt.conf.d/99custom && \
+    echo "Acquire::http::No-Cache true;" >> /etc/apt/apt.conf.d/99custom && \
+    echo "Acquire::BrokenProxy    true;" >> /etc/apt/apt.conf.d/99custom
 # Remove 'Signed-By' and NVIDIA repository entries from the sources lists
 RUN sed -i '/Signed-By/d' /etc/apt/sources.list.d/cuda.list \
     && sed -i '/developer\.download\.nvidia\.com\/compute\/cuda\/repos/d' /etc/apt/sources.list
@@ -60,29 +65,44 @@ RUN conda install -c conda-forge openjdk=21 -y
 # Update conda
 RUN conda update -n base -c defaults conda -y
 # Copy requirements file and install Python packages
-COPY requirements.txt .
-RUN pip install -r requirements.txt # --no-cache-dir
+ADD requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 # Install PyTorch and CUDA 11.8 support using conda
 RUN conda install -c pytorch -c nvidia pytorch torchvision torchaudio pytorch-cuda=11.8 -y
 
 # Install and configure VirtualGL
-RUN apt update && apt install xserver-xorg-core x11-xserver-utils libxtst6 libxv1 libegl1 -y
+RUN apt-get install xserver-common libgl1 libglx-mesa0 libegl1 libglvnd0 libglx0 libgles2 libglvnd-dev  \
+    libgl1-mesa-dev libglvnd-dev mesa-common-dev libglvnd-dev -y
 
+RUN rm -rf /var/lib/apt/lists/*
+RUN rm -rf /etc/apt/sources.list.d/*
+RUN rm -rf /etc/apt/sources.list
+
+# Add Ubuntu 18.04 (Bionic Beaver) default repositories
+RUN echo "deb http://archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse" > /etc/apt/sources.list \
+    && echo "deb http://archive.ubuntu.com/ubuntu/ bionic-updates main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "deb http://archive.ubuntu.com/ubuntu/ bionic-backports main restricted universe multiverse" >> /etc/apt/sources.list \
+    && echo "deb http://archive.ubuntu.com/ubuntu/ bionic-security main restricted universe multiverse" >> /etc/apt/sources.list
+
+RUN apt-get update -o Acquire::CompressionTypes::Order::=gz --fix-missing && apt-get install -y gdebi-core libxtst6:amd64 libxv1:amd64 libegl1-mesa:amd64 x11-xserver-utils
 RUN wget -O vgl3.1.deb https://sourceforge.net/projects/virtualgl/files/3.1/virtualgl_3.1_amd64.deb/download
+RUN gdebi vgl3.1.deb
 RUN dpkg -i vgl3.1.deb
 RUN vglserver_config -config +s +f -y
 
-# Set up Xvfb and VirtualGL configuration
-RUN Xvfb :2 -screen 0 1024x768x24 +extension GLX -ac +extension RENDER &
-ENV DISPLAY=:2
-
 # Configure X11 screen settings and environment variables
-RUN xset s off
-RUN xset -dpms
-RUN xset q
+ENV DISPLAY=:2
 
 # Set the PYTHONPATH environment variable
 ENV PYTHONPATH=.
 
+ADD . .
+
 # Set the entry point to run the Python script
-ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "minecraft_maze", "python", "room/experiments/sparse.py", "--port1", "31001", "--device-id", "0"]
+# Configure X11 screen settings and environment variables using Xvfb
+ENTRYPOINT ["/bin/bash", "-c", "Xvfb :2 -screen 0 1024x768x24 +extension GLX -ac +extension RENDER & \
+    export DISPLAY=:2 && \
+    DISPLAY=:0.0 xset s off && xset -dpms && xset q && \
+    conda run --no-capture-output -n minecraft_maze python room/experiments/sparse.py --port1 31001 --device-id 0"]
+
+

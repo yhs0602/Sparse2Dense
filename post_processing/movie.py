@@ -237,8 +237,12 @@ def create_video_from_positions(
 
         # Pipe frames to FFmpeg
         frame = pygame.surfarray.array3d(screen)
-        frame = frame.swapaxes(0, 1)  # Changing axes between Pygame and regular image formats
-        process.stdin.write(frame.tobytes())  # Convert frame data to bytes and send to FFmpeg
+        frame = frame.swapaxes(
+            0, 1
+        )  # Changing axes between Pygame and regular image formats
+        process.stdin.write(
+            frame.tobytes()
+        )  # Convert frame data to bytes and send to FFmpeg
 
         pygame.display.flip()
 

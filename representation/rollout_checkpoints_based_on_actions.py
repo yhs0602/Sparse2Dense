@@ -105,7 +105,9 @@ class Logger:
             im = Image.fromarray(
                 self.image_buffer.squeeze().permute(1, 2, 0).cpu().numpy(), mode="RGB"
             )
-            im = im.transpose(Transpose.ROTATE_270)  # Rotate image 270 degrees to fit in normal orientation
+            im = im.transpose(
+                Transpose.ROTATE_270
+            )  # Rotate image 270 degrees to fit in normal orientation
             im.save(image_path)
             self.rows[-1].image_idx = self.idx
             self.idx += 1
