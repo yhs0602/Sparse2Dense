@@ -97,9 +97,11 @@ def sparse_room(
     device_id: int = 0,
     extended: bool = False,
     max_steps: int = 10000000,
+    seed: int = 3,
 ):
+    set_random_seed(seed)
     # setting = select_goal_spawn()
-    group_name = f"v33-room-v1-dense-{extended}"  # {setting['spawn_idx']}
+    group_name = f"v33-room-v1-dense-{extended}-seed{seed}"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,
@@ -231,10 +233,10 @@ if __name__ == "__main__":
     port1 = args.port1
     # port2 = args.port2
     device_id = args.device_id
-    set_random_seed(args.seed)
     sparse_room(
         port1=port1,
         device_id=device_id,
         extended=args.extended,
         max_steps=args.max_steps,
+        seed=args.seed,
     )

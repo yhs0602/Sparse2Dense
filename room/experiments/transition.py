@@ -111,8 +111,10 @@ def room_transition(
     transition_timing: int,
     extended: bool,
     max_steps: int,
+    seed: int,
 ):
-    group_name = f"v33-room-v1-transition-{transition_timing}-{extended}"
+    set_random_seed(seed)
+    group_name = f"v33-room-v1-transition-{transition_timing}-{extended}-seed{seed}"
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,
@@ -264,11 +266,11 @@ if __name__ == "__main__":
     # port2 = args.port2
     device_id = args.device_id
     transition_timing = args.transition_timing
-    set_random_seed(args.seed)
     room_transition(
         port1=port1,
         device_id=device_id,
         transition_timing=transition_timing,
         extended=args.extended,
         max_steps=args.max_steps,
+        seed=args.seed,
     )
