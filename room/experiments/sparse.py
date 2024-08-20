@@ -86,7 +86,12 @@ def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
     )
 
 
-def sparse_room(port1: int = 8001, device_id: int = 0, extended: bool = False):
+def sparse_room(
+    port1: int = 8001,
+    device_id: int = 0,
+    extended: bool = False,
+    max_steps: int = 1000_0000,
+):
     # setting = select_goal_spawn()
     group_name = f"v33-room-v1-sparse-{extended}"  # {setting['spawn_idx']}
     run = wandb.init(
@@ -171,7 +176,7 @@ def sparse_room(port1: int = 8001, device_id: int = 0, extended: bool = False):
 
     try:
         model.learn(
-            total_timesteps=10_000_000,
+            total_timesteps=max_steps,
             callback=[
                 WandbCallback(
                     gradient_save_freq=500,
@@ -206,8 +211,19 @@ if __name__ == "__main__":
         action="store_true",
         help="Use extended room environment",
     )
+    arg_parser.add_argument(
+        "--max-steps",
+        type=int,
+        default=1000_0000,
+        help="Maximum number of steps to train the model for",
+    )
     args = arg_parser.parse_args()
     port1 = args.port1
     # port2 = args.port2
     device_id = args.device_id
-    sparse_room(port1=port1, device_id=device_id, extended=args.extended)
+    sparse_room(
+        port1=port1,
+        device_id=device_id,
+        extended=args.extended,
+        max_steps=args.max_steps,
+    )

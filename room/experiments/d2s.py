@@ -114,6 +114,7 @@ def room_d2s(
     device_id: int,
     transition_timing: int,
     extended: bool,
+    max_steps: int,
 ):
     group_name = f"v33-room-v1-d2s-{transition_timing}-{extended}"
     run = wandb.init(
@@ -208,7 +209,7 @@ def room_d2s(
 
     try:
         model.learn(
-            total_timesteps=10_000_000,
+            total_timesteps=max_steps,
             callback=[
                 WandbCallback(
                     gradient_save_freq=500,
@@ -250,6 +251,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Use extended room environment",
     )
+    arg_parser.add_argument(
+        "--max-steps",
+        type=int,
+        default=1000_0000,
+        help="Maximum number of steps to train the model for",
+    )
     args = arg_parser.parse_args()
     port1 = args.port1
     # port2 = args.port2
@@ -260,4 +267,5 @@ if __name__ == "__main__":
         device_id=device_id,
         transition_timing=transition_timing,
         extended=args.extended,
+        max_steps=args.max_steps,
     )
