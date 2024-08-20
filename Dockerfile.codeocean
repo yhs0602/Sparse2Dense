@@ -73,7 +73,7 @@ RUN conda install -c pytorch -c nvidia pytorch torchvision torchaudio pytorch-cu
 
 # Install and configure VirtualGL
 RUN apt-get install xserver-common libgl1 libglx-mesa0 libegl1 libglvnd0 libglx0 libgles2 libglvnd-dev  \
-    libgl1-mesa-dev libglvnd-dev mesa-common-dev libglvnd-dev -y
+    libgl1-mesa-dev libglvnd-dev libglx-dev libgl-dev -y
 
 # RUN rm -rf /var/lib/apt/lists/*
 #RUN rm -rf /etc/apt/sources.list.d/*
@@ -85,11 +85,11 @@ RUN apt-get install xserver-common libgl1 libglx-mesa0 libegl1 libglvnd0 libglx0
 #    && echo "deb http://archive.ubuntu.com/ubuntu/ bionic-backports main restricted universe multiverse" >> /etc/apt/sources.list \
 #    && echo "deb http://archive.ubuntu.com/ubuntu/ bionic-security main restricted universe multiverse" >> /etc/apt/sources.list
 
-RUN apt-get update -o Acquire::CompressionTypes::Order::=gz --fix-missing && apt-get install -y gdebi-core libxtst6:amd64 libxv1:amd64 libegl1-mesa:amd64 x11-xserver-utils
-RUN wget -O vgl3.1.deb https://sourceforge.net/projects/virtualgl/files/3.1/virtualgl_3.1_amd64.deb/download
-RUN gdebi vgl3.1.deb
-RUN dpkg -i vgl3.1.deb
-RUN vglserver_config -config +s +f -y
+RUN apt-get update -o Acquire::CompressionTypes::Order::=gz --fix-missing && apt-get install -y gdebi-core libxtst6:amd64 libxv1:amd64 libegl1-mesa:amd64 x11-xserver-utils build-essential
+# RUN wget -O vgl3.1.deb https://sourceforge.net/projects/virtualgl/files/3.1/virtualgl_3.1_amd64.deb/download
+# RUN gdebi vgl3.1.deb
+# RUN dpkg -i vgl3.1.deb
+# RUN vglserver_config -config +s +f -y
 
 # Configure X11 screen settings and environment variables
 ENV DISPLAY=:2
