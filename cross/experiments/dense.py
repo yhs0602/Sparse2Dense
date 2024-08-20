@@ -17,6 +17,7 @@ from cross.cross_env import CROSS_GOALS, make_cross_env
 from sb3_exts.episode_start_callback import EpisodeStartCallback
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
+from wandb_envs import WANDB_PROJECT, WANDB_ENTITY
 from wrappers.dense_maze_wrapper import DenseMazeWrapper
 from wrappers.episode_logger import EpisodeLoggerWrapper
 from wrappers.living_penalty import LivingPenaltyWrapper
