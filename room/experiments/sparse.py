@@ -7,6 +7,7 @@ from craftground.wrappers.vision import VisionWrapper
 from gymnasium.wrappers import TimeLimit
 from sb3_contrib import RecurrentPPO
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.utils import set_random_seed
 
 # from stable_baselines3.common.callbacks import EvalCallback
 # from stable_baselines3.common.monitor import Monitor
@@ -217,10 +218,17 @@ if __name__ == "__main__":
         default=1000_0000,
         help="Maximum number of steps to train the model for",
     )
+    arg_parser.add_argument(
+        "--seed",
+        type=int,
+        default=3,
+        help="Random seed",
+    )
     args = arg_parser.parse_args()
     port1 = args.port1
     # port2 = args.port2
     device_id = args.device_id
+    set_random_seed(args.seed)
     sparse_room(
         port1=port1,
         device_id=device_id,

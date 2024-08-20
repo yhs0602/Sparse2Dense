@@ -9,6 +9,7 @@ from sb3_contrib import RecurrentPPO
 
 # from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
@@ -257,11 +258,18 @@ if __name__ == "__main__":
         default=1000_0000,
         help="Maximum number of steps to train the model for",
     )
+    arg_parser.add_argument(
+        "--seed",
+        type=int,
+        default=3,
+        help="Random seed",
+    )
     args = arg_parser.parse_args()
     port1 = args.port1
     # port2 = args.port2
     device_id = args.device_id
     transition_timing = args.transition_timing
+    set_random_seed(args.seed)
     room_d2s(
         port1=port1,
         device_id=device_id,
