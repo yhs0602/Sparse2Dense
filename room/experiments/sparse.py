@@ -1,4 +1,6 @@
 import argparse
+import os
+from typing import Optional
 
 import gymnasium
 import wandb
@@ -93,10 +95,18 @@ def sparse_room(
     extended: bool = False,
     max_steps: int = 1000_0000,
     seed: int = 3,
+    base_checkpoint: Optional[str] = None,
 ):
     set_random_seed(seed)
     # setting = select_goal_spawn()
-    group_name = f"v33-room-v1-sparse-{extended}-seed{seed}"  # {setting['spawn_idx']}
+    from_str = ""
+    if base_checkpoint:
+        if "sparse" in base_checkpoint:
+            from_str = "sparse"
+        elif "dense" in base_checkpoint:
+            from_str = "dense"
+
+    group_name = f"v33-room-v1-sparse-{extended}-seed{seed}-from_{from_str}"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,
@@ -148,16 +158,24 @@ def sparse_room(
     #     render=False,
     # )
 
-    model = RecurrentPPO(
-        "CnnLstmPolicy",
-        env,
-        verbose=1,
-        device=get_device(device_id),
-        tensorboard_log=f"runs/{run.id}",
-        gae_lambda=0.99,
-        ent_coef=0.005,
-        n_steps=512,
-    )
+    if base_checkpoint:
+        if os.path.exists(base_checkpoint):
+            model = RecurrentPPO.load(base_checkpoint)
+            print(f"Loaded checkpoint {base_checkpoint}")
+        else:
+            raise FileNotFoundError(f"Checkpoint {base_checkpoint} not found")
+    else:
+        model = RecurrentPPO(
+            "CnnLstmPolicy",
+            env,
+            verbose=1,
+            device=get_device(device_id),
+            tensorboard_log=f"runs/{run.id}",
+            gae_lambda=0.99,
+            ent_coef=0.005,
+            n_steps=512,
+        )
+        print("Using fresh model")
 
     checkpoint_steps = [
         1000000,
@@ -226,6 +244,12 @@ if __name__ == "__main__":
         default=3,
         help="Random seed",
     )
+    arg_parser.add_argument(
+        "--base-checkpoint",
+        type=str,
+        help="Base checkpoint to resume from",
+        default=None,
+    )
     args = arg_parser.parse_args()
     port1 = args.port1
     # port2 = args.port2
@@ -236,4 +260,5 @@ if __name__ == "__main__":
         extended=args.extended,
         max_steps=args.max_steps,
         seed=args.seed,
+        base_checkpoint=args.base_checkpoint,
     )
