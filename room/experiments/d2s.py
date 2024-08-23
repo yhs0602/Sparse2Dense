@@ -266,6 +266,7 @@ if __name__ == "__main__":
         default=3,
         help="Random seed",
     )
+    arg_parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     args = arg_parser.parse_args()
     port1 = args.port1
     # port2 = args.port2

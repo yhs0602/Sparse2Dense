@@ -9,6 +9,7 @@ from gymnasium.wrappers import TimeLimit
 from sb3_contrib import RecurrentPPO
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from wandb.integration.sb3 import WandbCallback
 
@@ -126,7 +127,10 @@ def d2s(
     port2: int,
     device_id: int,
     transition_timing: int,
+    max_steps: int = 1000_0000,
+    seed: int = 3,
 ):
+    set_random_seed(seed)
     group_name = f"v30-crossw2-d2s-{transition_timing}-{TEST_GOAL_IDX}"
     run = wandb.init(
         # set the wandb project where this run will be logged
@@ -199,7 +203,7 @@ def d2s(
 
     try:
         model.learn(
-            total_timesteps=10_000_000,
+            total_timesteps=max_steps,
             callback=[
                 WandbCallback(
                     gradient_save_freq=500,
@@ -234,6 +238,19 @@ if __name__ == "__main__":
         default=250,
         help="Reward transition timing in timesteps S->D; 10_000_000; 2000000, 3000000, 4000000",
     )
+    arg_parser.add_argument(
+        "--max-steps",
+        type=int,
+        default=1000_0000,
+        help="Maximum number of steps to train the model for",
+    )
+    arg_parser.add_argument(
+        "--seed",
+        type=int,
+        default=3,
+        help="Random seed",
+    )
+    arg_parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     args = arg_parser.parse_args()
     TEST_GOAL_IDX = args.goal
     TRAIN_GOALS = [goal for i, goal in enumerate(CROSS_W2_GOALS) if i != TEST_GOAL_IDX]
@@ -247,4 +264,6 @@ if __name__ == "__main__":
         port2=port2,
         device_id=device_id,
         transition_timing=transition_timing,
+        max_steps=args.max_steps,
+        seed=args.seed,
     )
