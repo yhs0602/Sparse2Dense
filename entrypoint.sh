@@ -7,6 +7,7 @@ Xvfb :2 -screen 0 1024x768x24 +extension GLX -ac +extension RENDER &
 export DISPLAY=:2
 export PYTHONPATH=.
 export WANDB_MODE=offline
+export WANDB_DIR='../results/'
 
 # Configure X11 screen settings
 xset s off
@@ -24,6 +25,12 @@ TRANSITION_TIMING=""
 # Parse the arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
+        --type=*) TYPE="${1#*=}" ;;
+        --exclude_goal=*) EXCLUDE_GOAL="${1#*=}" ;;
+        --extended_wall=*) EXTENDED_WALL="${1#*=}" ;;
+        --reward=*) REWARD="${1#*=}" ;;
+        --goal=*) GOAL="${1#*=}" ;;
+        --transition-timing=*) TRANSITION_TIMING="${1#*=}" ;;
         --type) TYPE="$2"; shift ;;
         --exclude_goal) EXCLUDE_GOAL="$2"; shift ;;
         --extended_wall) EXTENDED_WALL=1; shift ;;  # store-true behavior
@@ -73,4 +80,4 @@ else
 fi
 
 # Run the constructed command
-$COMMAND
+$COMMAND --verbose
