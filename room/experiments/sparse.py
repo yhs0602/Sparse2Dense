@@ -160,7 +160,9 @@ def sparse_room(
 
     if base_checkpoint:
         if os.path.exists(base_checkpoint):
-            model = RecurrentPPO.load(base_checkpoint)
+            model = RecurrentPPO.load(
+                base_checkpoint, env=env, device=get_device(device_id)
+            )
             print(f"Loaded checkpoint {base_checkpoint}")
         else:
             raise FileNotFoundError(f"Checkpoint {base_checkpoint} not found")
