@@ -327,6 +327,12 @@ def main(port1: int, device_id: int, trajectory_json: str, extended: bool):
 
     global logger
     try:
+        directory_per_phase = {
+            "sparse": ["sparse", "sparse"],
+            "dense": ["dense", "dense"],
+            "s2d": ["sparse", "s2d"],
+            "d2s": ["dense", "d2s"],
+        }
         for extended_dir in os.listdir(checkpoint_dir):  # extended, not_extended
             if extended_dir == "extended" and not extended:
                 print(f"Skipping extended as {extended}")
@@ -335,61 +341,68 @@ def main(port1: int, device_id: int, trajectory_json: str, extended: bool):
                 print("Skipping not_extended")
                 continue
             algos_dir = os.path.join(checkpoint_dir, extended_dir)
-            for algo in os.listdir(algos_dir):  # dense, s2d, d2s, sparse
-                algo_dir = os.path.join(algos_dir, algo)
-                for run_name in os.listdir(algo_dir):  # abcdef
-                    run_dir = os.path.join(algo_dir, run_name)
-                    for checkpoint in os.listdir(run_dir):
-                        checkpoint_path = os.path.join(run_dir, checkpoint)
-                        if os.path.exists(checkpoint_path):
-                            model = RecurrentPPO.load(checkpoint_path)
-                            print(f"Loaded checkpoint {checkpoint_path}")
-                        else:
-                            raise FileNotFoundError(
-                                f"Context file {checkpoint_path} not found"
+            for phase_idx, phase in enumerate(["until_300M", "after_300M"]):
+                for algo in directory_per_phase.keys():
+                    seeded_dirs = os.path.join(
+                        algos_dir, phase, f"{directory_per_phase[algo][phase_idx]}/"
+                    )
+                    for seed in os.listdir(seeded_dirs):
+                        run_dir = os.path.join(seeded_dirs, seed)
+                        for checkpoint in os.listdir(run_dir):
+                            checkpoint_path = os.path.join(run_dir, checkpoint)
+                            print(f"{checkpoint_path}=")
+                            continue
+                            if os.path.exists(checkpoint_path):
+                                model = RecurrentPPO.load(checkpoint_path)
+                                print(f"Loaded checkpoint {checkpoint_path}")
+                            else:
+                                raise FileNotFoundError(
+                                    f"Context file {checkpoint_path} not found"
+                                )
+                            base_dir = "./representation_data_intermediate_checkpoints"
+                            log_dir = os.path.join(base_dir, extended_dir, algo)
+                            logger = Logger(
+                                log_dir,
+                                f"{run_name}__{checkpoint}",
                             )
-                        base_dir = "./representation_data_intermediate_checkpoints"
-                        log_dir = os.path.join(base_dir, extended_dir, algo)
-                        logger = Logger(
-                            log_dir,
-                            f"{run_name}__{checkpoint}",
-                        )
-                        print(f"Created logger for {logger.run_name}")
-                        # Patch RecurrentActorCriticPolicy.get_distribution
-                        # Rollout
-                        RecurrentActorCriticPolicy.get_distribution = (
-                            patched_get_distribution
-                        )
-                        RecurrentActorCriticPolicy._predict = patched__predict
+                            print(f"Created logger for {logger.run_name}")
+                            # Patch RecurrentActorCriticPolicy.get_distribution
+                            # Rollout
+                            RecurrentActorCriticPolicy.get_distribution = (
+                                patched_get_distribution
+                            )
+                            RecurrentActorCriticPolicy._predict = patched__predict
 
-                        # Rollout
-                        obs = env.reset()
-                        _state = None
-                        for i in range(len(actions)):
-                            action, _state = model.predict(
-                                obs, deterministic=False, state=_state
-                            )
-                            logger.log(
-                                {
-                                    "action": action,
-                                    "action_str": action_int_to_str[int(action)],
-                                    "step": i,
-                                    "actual_action_str": actions[i],
-                                    "actual_action_int": action_str_to_int[actions[i]],
-                                },
-                                commit=True,
-                            )
-                            logger.log_image(None, commit=True)
-                            # Use fixed action, not the model's
-                            action = actions[i]
+                            # Rollout
+                            obs = env.reset()
+                            _state = None
+                            for i in range(len(actions)):
+                                action, _state = model.predict(
+                                    obs, deterministic=False, state=_state
+                                )
+                                logger.log(
+                                    {
+                                        "action": action,
+                                        "action_str": action_int_to_str[int(action)],
+                                        "step": i,
+                                        "actual_action_str": actions[i],
+                                        "actual_action_int": action_str_to_int[
+                                            actions[i]
+                                        ],
+                                    },
+                                    commit=True,
+                                )
+                                logger.log_image(None, commit=True)
+                                # Use fixed action, not the model's
+                                action = actions[i]
 
-                            obs, reward, done, info = env.step(
-                                [action_str_to_int[action]]
-                            )
-                            if done:
-                                print(f"Done at {i}!!!!!!!")
-                        logger.flush()
-                        # break
+                                obs, reward, done, info = env.step(
+                                    [action_str_to_int[action]]
+                                )
+                                if done:
+                                    print(f"Done at {i}!!!!!!!")
+                            logger.flush()
+                            # break
     finally:
         env.close()
 
