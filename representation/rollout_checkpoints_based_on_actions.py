@@ -348,10 +348,9 @@ def main(port1: int, device_id: int, trajectory_json: str, extended: bool):
                     )
                     for seed in os.listdir(seeded_dirs):
                         run_dir = os.path.join(seeded_dirs, seed)
+                        run_name = f"{algo}_{seed}_{phase}"
                         for checkpoint in os.listdir(run_dir):
                             checkpoint_path = os.path.join(run_dir, checkpoint)
-                            print(f"{checkpoint_path}=")
-                            continue
                             if os.path.exists(checkpoint_path):
                                 model = RecurrentPPO.load(checkpoint_path)
                                 print(f"Loaded checkpoint {checkpoint_path}")
@@ -359,7 +358,7 @@ def main(port1: int, device_id: int, trajectory_json: str, extended: bool):
                                 raise FileNotFoundError(
                                     f"Context file {checkpoint_path} not found"
                                 )
-                            base_dir = "./representation_data_intermediate_checkpoints"
+                            base_dir = "./representation_data_fixed_seeds"
                             log_dir = os.path.join(base_dir, extended_dir, algo)
                             logger = Logger(
                                 log_dir,
