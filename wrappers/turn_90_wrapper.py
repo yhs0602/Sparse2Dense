@@ -58,3 +58,6 @@ class Turn90Wrapper(gym.Wrapper):
         elif input_act == Action.TURN_RIGHT:  # Turn right
             act[4] = 12 + 6  # Camera delta yaw (0: -180, 24: 180)
         return act
+
+    def skip_step(self):
+        return self.env.step(action=no_op())

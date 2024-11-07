@@ -112,6 +112,7 @@ def room_transition(
     extended: bool,
     max_steps: int,
     seed: int,
+    verbose: bool = False,
 ):
     set_random_seed(seed)
     group_name = f"v33-room-v1-transition-{transition_timing}-{extended}-seed{seed}"
@@ -132,7 +133,14 @@ def room_transition(
     size_y = 64
 
     # Setup train environment
-    base_env, _ = make_room_env(port1, size_x, size_y, extended=extended)
+    base_env, _ = make_room_env(
+        port1,
+        size_x,
+        size_y,
+        extended=extended,
+        verbose_gradle=verbose,
+        verbose_jvm=verbose,
+    )
     env = wrap_env(
         base_env,
         size_x,
@@ -274,4 +282,5 @@ if __name__ == "__main__":
         extended=args.extended,
         max_steps=args.max_steps,
         seed=args.seed,
+        verbose=args.verbose,
     )

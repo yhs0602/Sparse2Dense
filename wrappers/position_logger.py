@@ -27,3 +27,6 @@ class PositionLoggingWrapper(gymnasium.Wrapper):
         self.logger.log({"episode/positions": self.position_log})
         self.position_log = []
         return ret
+
+    def skip_step(self):
+        return self.env.skip_step()

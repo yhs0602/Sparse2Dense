@@ -2,6 +2,8 @@ from typing import Any, Optional, Tuple, Callable, Union, Dict
 
 from gymnasium.core import WrapperObsType, Wrapper
 
+from wrappers.turn_90_wrapper import Action
+
 
 class RoomGoalSelectionWrapper(Wrapper):
     def __init__(
@@ -30,13 +32,24 @@ class RoomGoalSelectionWrapper(Wrapper):
         self.remove_goal_indicator()
         self.room_settings = self.setup_sampler()
         # Set the indicator at the goal
+        self.set_spawn(self.room_settings["spawn"])
         self.add_goal_indicator(self.room_settings["goal"])
+        # step 8 times to make sure the goal is set
+        for _ in range(10):
+            obs, _, _, _, info = self.env.skip_step()
         return obs, info
 
     def remove_goal_indicator(
         self,
     ):
         command = self.goal_remove_command_provider()
+        self.get_wrapper_attr("add_commands")([command])
+
+    def set_spawn(
+        self,
+        spawn: Tuple[float, float, float],
+    ):
+        command = f"tp @p {spawn[0]} {spawn[1]} {spawn[2]}"
         self.get_wrapper_attr("add_commands")([command])
 
     def add_goal_indicator(

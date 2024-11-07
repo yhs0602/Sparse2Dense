@@ -13,7 +13,7 @@ def make_room_movie():
 
     # Select the project and run
     run_names = [
-        f"{WANDB_ENTITY}/{WANDB_PROJECT}/fnsv0j1p",  # transition 2M
+        f"{WANDB_ENTITY}/{WANDB_PROJECT}/w8r7kqnu",  # transition 2M
     ]
     for run_name in run_names:
         run = api.run(run_name)
@@ -40,7 +40,7 @@ def make_room_movie():
                 1,
                 0,
                 positions,
-                f"{run.id}_{episode_id}.mp4",
+                f"3movoo_{run.id}_{episode_id}.mp4",
                 episode=episode_data["episode"],
                 goals=[(int(goal1[0]), int(goal1[2]))],
                 reached_goal=reached_goal,
