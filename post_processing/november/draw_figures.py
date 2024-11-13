@@ -1,5 +1,6 @@
 import math
 import os
+from collections import defaultdict
 from typing import Tuple, List, Dict
 
 import matplotlib.pyplot as plt
@@ -62,6 +63,7 @@ def plot_groups(
     plt.figure(figsize=(14, 8))
 
     for group_name, group_data in groups.items():
+        print(group_name)
         group_data: List[pd.DataFrame]
         # ffill the x_axis
         for i in range(len(group_data)):
@@ -83,6 +85,7 @@ def plot_groups(
             assert group_data[i][axis_y_name].isnull().sum() == 0
             assert group_data[i][axis_x_name].isnull().sum() == 0
             assert len(group_data[i][axis_x_name]) == len(group_data[i][axis_y_name])
+            print(i)
 
         avg_data = calculate_group_average(group_data, axis_x_name, axis_y_name)
         std_data = calculate_group_std(group_data, axis_x_name, axis_y_name)
@@ -91,13 +94,13 @@ def plot_groups(
         std_data = running_average(std_data, window_size)
 
         # Determine color based on the group
-        if "transition" in group_name:
+        if "sparse_dense" in group_name:
             color = "#AE4338"  # 174 67 56 red
-        elif "sparse" in group_name:
+        elif "sparse_sparse" in group_name:
             color = "#57A148"  # 87 161 72 green
-        elif "dense" in group_name:
+        elif "dense_dense" in group_name:
             color = "#5D83D8"  # 93 131 216 blue
-        elif "d2s" in group_name:
+        elif "dense_sparse" in group_name:
             color = "#A68460"  # 166 132 96 brown
         else:
             raise ValueError(f"Unknown group: {group_name}")
@@ -118,6 +121,7 @@ def plot_groups(
             linewidth=5.0,
             color=color,
         )
+        print("ploted")
         plt.fill_between(
             avg_data[axis_x_name],
             avg_data[axis_y_name] - std_data[axis_y_name],
@@ -125,6 +129,7 @@ def plot_groups(
             alpha=0.3,
             color=color,
         )
+        print("filled")
 
         if "global_step" in axis_x_name and "episode" in axis_y_name:
             # print(f"{avg_data[axis_x_name]=}")
@@ -149,14 +154,20 @@ def plot_groups(
     # plt.legend()
     # plt.title(f"{axis_x_name} vs {axis_y_name}")
     y_max = 8000
+    y_min = 0
     if "rate" in axis_y_name:
         y_max = 1
     elif "length" in axis_y_name:
         y_max = 20000
     elif "eval_episode" in axis_y_name:
         y_max = 1000
-    plt.ylim(bottom=0)  # , top=y_max
-    plt.xlim(left=0)
+    if "success_rate" in axis_y_name:
+        x_max = 10000000  # 5000000
+        y_min = 0.4
+    else:
+        x_max = None
+    plt.ylim(bottom=y_min)  # , top=y_max
+    plt.xlim(left=0, right=x_max)
     plt.grid(True)
 
     # plt.show()
@@ -164,83 +175,32 @@ def plot_groups(
     axis_x_name = axis_x_name.replace("/", "_")
     axis_y_name = axis_y_name.replace("/", "_")
     figure_path = f"./figures/{groups_name}-{axis_x_name}_{axis_y_name}.png"
-    plt.savefig(figure_path, dpi=450)
+    plt.savefig(figure_path, dpi=300)
+    print(f"Saved {figure_path}")
 
 
 def main():
-    all_run_data_dir = "./all_run_data"
-    cross_0_groups = {}
-    cross_1_groups = {}
-    cross_2_groups = {}
-    room_groups = {}
-
-    useful_groupnames = {
-        # "cross_0-global_step_episode": (
-        #     # "v30-crossw2-transition-2000000-0",
-        #     "v30-crossw2-transition-1000000-0",
-        #     "v30-crossw2-transition-3000000-0",
-        #     # "v30-crossw2-d2s-3000000-0",
-        #     "v30-crossw2-d2s-2000000-0",
-        #     "v30-crossw2-d2s-1000000-0",
-        #     # "v30-crossw2-dense-0",
-        #     # "v30-crossw2-sparse-0",
-        # ),
-        # "cross_1-global_step_episode": (
-        #     "v30-crossw2-transition-1000000-1",
-        #     "v30-crossw2-transition-3000000-1",
-        #     # "v30-crossw2-transition-2000000-1",
-        #     # "v30-crossw2-d2s-2000000-1",
-        #     "v30-crossw2-d2s-1000000-1",
-        #     "v30-crossw2-d2s-3000000-1",
-        #     # "v30-crossw2-dense-1",
-        #     # "v30-crossw2-sparse-1",
-        # ),
-        # "cross_2-global_step_episode": (
-        #     # "v30-crossw2-transition-2000000-2",
-        #     "v30-crossw2-transition-1000000-2",
-        #     "v30-crossw2-transition-3000000-2",
-        #     # "v30-crossw2-d2s-2000000-2",
-        #     "v30-crossw2-d2s-1000000-2",
-        #     "v30-crossw2-d2s-3000000-2",
-        #     # "v30-crossw2-dense-2",
-        #     # "v30-crossw2-sparse-2",
-        # ),
-        "room": (
-            # "v31-room-v1-transition-1000000",
-            # "v31-room-v1-transition-2000000",
-            "v31-room-v1-transition-3000000",
-            "v31-room-v1-d2s-3000000",
-            # "v31-room-v1-d2s-2000000",
-            # "v31-room-v1-d2s-1000000",
-            "v31-room-v1-sparse",
-            "v31-room-v1-dense",
-        ),
-    }
-    flatten_groupnames = [
-        groupname
-        for groupnames in useful_groupnames.values()
-        for groupname in groupnames
-    ]
-
-    for group_dir in os.listdir(all_run_data_dir):
-        if group_dir not in flatten_groupnames:
+    all_run_data_dir = "./merged_241111"
+    room_groups = defaultdict(list)
+    for file_name in os.listdir(all_run_data_dir):
+        # check if csv
+        if not file_name.endswith(".csv"):
             continue
-        group_path = os.path.join(all_run_data_dir, group_dir)
-        if os.path.isdir(group_path):
-            group_data = load_group_data(group_path)
-            if "crossw2" in group_dir:
-                if group_dir.endswith("0"):
-                    cross_0_groups[group_dir] = group_data
-                elif group_dir.endswith("1"):
-                    cross_1_groups[group_dir] = group_data
-                elif group_dir.endswith("2"):
-                    cross_2_groups[group_dir] = group_data
-                else:
-                    raise ValueError(f"Unknown group: {group_dir}")
-            elif "room" in group_dir:
-                room_groups[group_dir] = group_data
-            else:
-                raise ValueError(f"Unknown group: {group_dir}")
+        file_path = os.path.join(all_run_data_dir, file_name)
+        # 파일 이름에서 'from'과 'to' 추출
+        parts = file_name.split("_")
+        from_type = parts[0]  # dense 또는 sparse
+        to_type = parts[2]  # dense 또는 sparse
+
+        if from_type == "dense":
+            if "7777" in file_name or "2024" in file_name:
+                continue
+
+        # CSV 파일을 DataFrame으로 읽기
+        df = pd.read_csv(file_path)
+
+        # (from, to) 키를 사용하여 딕셔너리에 DataFrame 추가
+        room_groups[f"{from_type}_{to_type}"].append(df)
     # Plot
     # cross:
     # Grouping based on the end number of the group.
@@ -267,12 +227,13 @@ def main():
     }
     # Group by eval_idx and room
     window_size = 80
-    for cross_axis in axises["cross"]:
-        plot_groups(cross_0_groups, "cross_0", cross_axis, window_size=window_size)
-        plot_groups(cross_1_groups, "cross_1", cross_axis, window_size=window_size)
-        plot_groups(cross_2_groups, "cross_2", cross_axis, window_size=window_size)
+    # for cross_axis in axises["cross"]:
+    #     plot_groups(cross_0_groups, "cross_0", cross_axis, window_size=window_size)
+    #     plot_groups(cross_1_groups, "cross_1", cross_axis, window_size=window_size)
+    #     plot_groups(cross_2_groups, "cross_2", cross_axis, window_size=window_size)
     for room_axis in axises["room"]:
         plot_groups(room_groups, "room", room_axis, window_size=window_size)
+        print(f"Plotted {room_axis}")
 
 
 if __name__ == "__main__":

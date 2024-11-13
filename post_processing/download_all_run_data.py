@@ -1,9 +1,10 @@
 import os
+from datetime import datetime
 
 import pandas as pd
 import wandb
 from tqdm import tqdm
-from wandb.apis.public import Run
+from wandb.apis.public import Run, Runs
 
 from wandb_envs import WANDB_ENTITY, WANDB_PROJECT
 
@@ -81,5 +82,28 @@ def main():
         download_wandb_file(run, "./all_run_data")
 
 
+def main241110():
+    # Get all the runs from groups
+
+    api = wandb.Api(timeout=120)
+    WANDB_ENTITY = "jourhyang123"
+    WANDB_PROJECT = "nature-journal-room_experiments"
+    runs: Runs = api.runs(f"{WANDB_ENTITY}/{WANDB_PROJECT}")
+    group_runs = [
+        run
+        for run in runs
+        if run.group.startswith("v33-room-")
+        and datetime.strptime(run.created_at, "%Y-%m-%dT%H:%M:%SZ")
+        >= datetime(datetime.now().year, 11, 1)
+    ]
+    print(f"Found {len(group_runs)} runs")
+
+    with open("run_lists241111.csv", "w") as f:
+        for run in group_runs:
+            f.write(f"{run.id}, {run.group}\n")
+    for run in tqdm(group_runs):
+        download_wandb_file(run, "./all_run_data241111")
+
+
 if __name__ == "__main__":
-    main()
+    main241110()

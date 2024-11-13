@@ -3,7 +3,84 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="/post_processing/all_run_data241110/v33-room-v1-dense-False-seed2024-from_/4mg55u8q.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/post_processing/all_run_data241110/v33-room-v1-dense-False-seed2024-from_dense/hytfqr2o.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/post_processing/all_run_data241110/v33-room-v1-dense-False-seed2024-from_sparse/3th6jufu.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/post_processing/all_run_data241110/v33-room-v1-dense-False-seed7777-from_/2yzubxkb.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/post_processing/all_run_data241111/v33-room-v1-dense-False-seed0-from_/ewkom9ct.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/post_processing/all_runs.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/post_processing/november/merged_241111/dense_to_dense_seed_0.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/post_processing/november/merged_241111/dense_to_dense_seed_1234.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/post_processing/november/merged_241111/dense_to_dense_seed_2024.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/post_processing/november/merged_241111/dense_to_dense_seed_42.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/post_processing/november/merged_241111/dense_to_dense_seed_7777.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/post_processing/november/merged_241111/dense_to_dense_seed_9876.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
