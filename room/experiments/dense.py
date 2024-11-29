@@ -101,7 +101,7 @@ def dense_room(
     max_steps: int = 10000000,
     seed: int = 3,
     base_checkpoint: Optional[str] = None,
-    entropy_coeff: float = 0.005,
+    entropy_coef: float = 0.005,
 ):
     set_random_seed(seed)
     from_str = ""
@@ -111,7 +111,7 @@ def dense_room(
         elif "dense" in base_checkpoint:
             from_str = "dense"
     # setting = select_goal_spawn()
-    group_name = f"v33-room-v1-dense-{extended}-seed{seed}-from_{from_str}-{entropy_coeff}"  # {setting['spawn_idx']}
+    group_name = f"v33-room-v1-dense-{extended}-seed{seed}-from_{from_str}-{entropy_coef}"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,
@@ -179,7 +179,7 @@ def dense_room(
             device=get_device(device_id),
             tensorboard_log=f"runs/{run.id}",
             gae_lambda=0.99,
-            ent_coef=entropy_coeff,
+            ent_coef=entropy_coef,
             n_steps=512,
         )
         print("Using fresh model")
