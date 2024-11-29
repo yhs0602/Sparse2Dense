@@ -101,7 +101,7 @@ def dense_room(
     max_steps: int = 10000000,
     seed: int = 3,
     base_checkpoint: Optional[str] = None,
-    entropy_coeff: float = 0.005,
+    entropy_coef: float = 0.005,
 ):
     set_random_seed(seed)
     from_str = ""
@@ -179,7 +179,7 @@ def dense_room(
             device=get_device(device_id),
             tensorboard_log=f"runs/{run.id}",
             gae_lambda=0.99,
-            ent_coef=entropy_coeff,
+            ent_coef=entropy_coef,
             n_steps=512,
         )
         print("Using fresh model")
