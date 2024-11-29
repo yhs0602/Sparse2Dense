@@ -111,7 +111,7 @@ def dense_room(
         elif "dense" in base_checkpoint:
             from_str = "dense"
     # setting = select_goal_spawn()
-    group_name = f"v33-room-v1-dense-{extended}-seed{seed}-from_{from_str}-{entropy_coeff}"  # {setting['spawn_idx']}
+    group_name = f"v33-room-v1-dense-{extended}-seed{seed}-from_{from_str}-{entropy_coef}"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,
