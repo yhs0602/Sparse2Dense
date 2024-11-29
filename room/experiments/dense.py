@@ -94,13 +94,14 @@ def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
     )
 
 
-def sparse_room(
+def dense_room(
     port1: int = 8001,
     device_id: int = 0,
     extended: bool = False,
     max_steps: int = 10000000,
     seed: int = 3,
     base_checkpoint: Optional[str] = None,
+    entropy_coeff: float = 0.005,
 ):
     set_random_seed(seed)
     from_str = ""
@@ -110,7 +111,7 @@ def sparse_room(
         elif "dense" in base_checkpoint:
             from_str = "dense"
     # setting = select_goal_spawn()
-    group_name = f"v33-room-v1-dense-{extended}-seed{seed}-from_{from_str}"  # {setting['spawn_idx']}
+    group_name = f"v33-room-v1-dense-{extended}-seed{seed}-from_{from_str}-{entropy_coeff}"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,
@@ -178,7 +179,7 @@ def sparse_room(
             device=get_device(device_id),
             tensorboard_log=f"runs/{run.id}",
             gae_lambda=0.99,
-            ent_coef=0.005,
+            ent_coef=entropy_coeff,
             n_steps=512,
         )
         print("Using fresh model")
@@ -254,16 +255,24 @@ if __name__ == "__main__":
         help="Base checkpoint to resume from",
         default=None,
     )
+    arg_parser.add_argument(
+        "--entropy",
+        type=float,
+        help="Entropy coefficient",
+        default=0.005,
+    )
+
     args = arg_parser.parse_args()
     port1 = args.port1
     # port2 = args.port2
     device_id = args.device_id
 
-    sparse_room(
+    dense_room(
         port1=port1,
         device_id=device_id,
         extended=args.extended,
         max_steps=args.max_steps,
         seed=args.seed,
         base_checkpoint=args.base_checkpoint,
+        entropy_coef=args.entropy,
     )
