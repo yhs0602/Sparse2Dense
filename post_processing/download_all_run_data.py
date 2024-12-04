@@ -94,15 +94,15 @@ def main241110():
         for run in runs
         if run.group.startswith("v33-room-")
         and datetime.strptime(run.created_at, "%Y-%m-%dT%H:%M:%SZ")
-        >= datetime(datetime.now().year, 11, 1)
+        >= datetime(datetime.now().year, 11, 30)
     ]
     print(f"Found {len(group_runs)} runs")
 
-    with open("run_lists241111.csv", "w") as f:
+    with open("run_lists241204.csv", "w") as f:
         for run in group_runs:
             f.write(f"{run.id}, {run.group}\n")
     for run in tqdm(group_runs):
-        download_wandb_file(run, "./all_run_data241111")
+        download_wandb_file(run, "./all_run_data241204")
 
 
 if __name__ == "__main__":

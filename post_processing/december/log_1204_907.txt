@@ -1,0 +1,49 @@
+/Users/yanghyeonseo/Developer/Sparse2Dense/venv/bin/python /Users/yanghyeonseo/Developer/Sparse2Dense/post_processing/december/merge_logs_entropy.py
+v33-room-v1-dense-False-seed1234-from_-0.01 -> Seed: 1234, is_after: False
+v33-room-v1-dense-False-seed42-from_dense-0.005 -> Seed: 42, is_after: True
+v33-room-v1-dense-False-seed1234-from_dense-0.005 -> Seed: 1234, is_after: True
+v33-room-v1-dense-False-seed0-from_dense-0.005 -> Seed: 0, is_after: True
+v33-room-v1-dense-False-seed42-from_-0.01 -> Seed: 42, is_after: False
+v33-room-v1-dense-False-seed0-from_-0.01 -> Seed: 0, is_after: False
+Seed 1234: l5udf92s.csv -> ['xmc7d3uv.csv', 'v643lml1.csv', 'mvm3c8du.csv']
+Seed 42: bkae39tw.csv -> ['noo8jk60.csv', '23ruw6o0.csv', 'oav3ebpu.csv']
+Seed 0: ibtwq64e.csv -> ['qpui9n27.csv', 'irm9ywce.csv', '2w19omxt.csv']
+{1234: {'seed': 1234, 'start_group_folder': 'v33-room-v1-dense-False-seed1234-from_-0.01', 'end_group_folder': 'v33-room-v1-dense-False-seed1234-from_dense-0.005', 'start_file': 'l5udf92s.csv', 'end_files': ['xmc7d3uv.csv', 'v643lml1.csv', 'mvm3c8du.csv']}, 42: {'seed': 42, 'start_group_folder': 'v33-room-v1-dense-False-seed42-from_-0.01', 'end_group_folder': 'v33-room-v1-dense-False-seed42-from_dense-0.005', 'start_file': 'bkae39tw.csv', 'end_files': ['noo8jk60.csv', '23ruw6o0.csv', 'oav3ebpu.csv']}, 0: {'seed': 0, 'start_group_folder': 'v33-room-v1-dense-False-seed0-from_-0.01', 'end_group_folder': 'v33-room-v1-dense-False-seed0-from_dense-0.005', 'start_file': 'ibtwq64e.csv', 'end_files': ['qpui9n27.csv', 'irm9ywce.csv', '2w19omxt.csv']}}
+Seed 1234: l5udf92s.csv -> xmc7d3uv.csv
+Global step offset: 2000896
+Episode offset: 146.0
+Saved merged log to merged_241204/1234_2000384.csv
+Seed 1234: l5udf92s.csv -> v643lml1.csv
+Global step offset: 3000832
+Episode offset: 248.0
+Saved merged log to merged_241204/1234_3000320.csv
+Seed 1234: l5udf92s.csv -> mvm3c8du.csv
+Global step offset: 1000448
+Episode offset: 73.0
+Saved merged log to merged_241204/1234_999936.csv
+Seed 42: bkae39tw.csv -> noo8jk60.csv
+Global step offset: 1000448
+Episode offset: 62.0
+Saved merged log to merged_241204/42_999936.csv
+Seed 42: bkae39tw.csv -> 23ruw6o0.csv
+Global step offset: 2000896
+Episode offset: 134.0
+Saved merged log to merged_241204/42_2000384.csv
+Seed 42: bkae39tw.csv -> oav3ebpu.csv
+Global step offset: 3000832
+Episode offset: 447.0
+Saved merged log to merged_241204/42_3000320.csv
+Seed 0: ibtwq64e.csv -> qpui9n27.csv
+Global step offset: 1000448
+Episode offset: 95.0
+Saved merged log to merged_241204/0_999936.csv
+Seed 0: ibtwq64e.csv -> irm9ywce.csv
+Global step offset: 2000896
+Episode offset: 176.0
+Saved merged log to merged_241204/0_2000384.csv
+Seed 0: ibtwq64e.csv -> 2w19omxt.csv
+Global step offset: 3000832
+Episode offset: 258.0
+Saved merged log to merged_241204/0_3000320.csv
+
+Process finished with exit code 0
