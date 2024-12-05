@@ -47,7 +47,35 @@ from wrappers.turn_90_wrapper import Turn90Wrapper
 # I'll log the starting coordinates and which one of the four it is.
 
 
-def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
+def wrap_env(
+    env,
+    size_x,
+    size_y,
+    central_logger,
+    transition_timing: int,
+) -> gymnasium.Env:
+    # Checks, Logs, Terminates
+    maze_wrapper = RoomReachCheckAndLogWrapper(
+        # Select goal when reset
+        RoomGoalSelectionWrapper(
+            PositionLoggingWrapper(
+                Turn90Wrapper(
+                    VisionWrapper(
+                        env,
+                        x_dim=size_x,
+                        y_dim=size_y,
+                    ),
+                ),
+                logger=central_logger,
+            ),
+            goal_selector=select_goal_spawn,
+            goal_set_command_provider=spawn_goal_command,
+            goal_remove_command_provider=remove_goal_command,
+        ),
+        radius=2,
+        central_logger=central_logger,
+        cooldown=2,
+    )
     return LogFlushWrapper(
         FastResetWrapper(
             RoomEpisodeLoggerWrapper(
@@ -55,31 +83,25 @@ def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
                 TimeLimit(
                     # Living penalty
                     LivingPenaltyWrapper(
-                        # Sparse reward
-                        SparseRewardWrapper(
-                            # Checks, Logs, Terminates
-                            RoomReachCheckAndLogWrapper(
-                                # Select goal when reset
-                                RoomGoalSelectionWrapper(
-                                    PositionLoggingWrapper(
-                                        Turn90Wrapper(
-                                            VisionWrapper(
-                                                env,
-                                                x_dim=size_x,
-                                                y_dim=size_y,
-                                            ),
-                                        ),
-                                        logger=central_logger,
-                                    ),
-                                    goal_selector=select_goal_spawn,
-                                    goal_set_command_provider=spawn_goal_command,
-                                    goal_remove_command_provider=remove_goal_command,
+                        # Sparse to Dense reward
+                        RewardTransitionWrapper(
+                            reward_envs=[
+                                SparseRewardWrapper(
+                                    maze_wrapper,
+                                    reward=1,
                                 ),
-                                radius=2,
-                                central_logger=central_logger,
-                                cooldown=2,
-                            ),
-                            reward=1,
+                                HomeDenseWrapper(
+                                    SparseRewardWrapper(
+                                        maze_wrapper,
+                                        reward=1,
+                                    ),
+                                    radius=5,
+                                    reward=0.001,
+                                ),
+                            ],
+                            transition_timings=[
+                                transition_timing,
+                            ],
                         ),
                         penalty_abs=0.0001,
                     ),
@@ -92,9 +114,10 @@ def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
     )
 
 
-def dense_room(
+def icm_transition(
     port1: int = 8001,
     device_id: int = 0,
+    transition_timing: int = 3000000,
     extended: bool = False,
     max_steps: int = 10000000,
     seed: int = 3,
@@ -130,7 +153,13 @@ def dense_room(
 
     # Setup train environment
     base_env, _ = make_room_env(port1, size_x, size_y, extended=extended)
-    env = wrap_env(base_env, size_x, size_y, central_logger)
+    env = wrap_env(
+        base_env,
+        size_x,
+        size_y,
+        central_logger,
+        transition_timing=transition_timing,
+    )
     env = Monitor(env)
     env = DummyVecEnv([lambda: env])
     irs = ICM(env, str(device))
@@ -230,6 +259,12 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--device-id", type=int, default=0, help="CUDA Device ID for training"
     )
+    arg_parser.add_argument(
+        "--transition-timing",
+        type=int,
+        default=250,
+        help="Reward transition timing in timesteps S->D; 10_000_000; 2000000, 3000000, 4000000",
+    )
     arg_parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     arg_parser.add_argument(
         "--extended",
@@ -267,9 +302,10 @@ if __name__ == "__main__":
     # port2 = args.port2
     device_id = args.device_id
 
-    dense_room(
+    icm_transition(
         port1=port1,
         device_id=device_id,
+        transition_timing=args.transition_timing,
         extended=args.extended,
         max_steps=args.max_steps,
         seed=args.seed,
