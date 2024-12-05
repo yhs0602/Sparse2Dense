@@ -1,3 +1,4 @@
+import wandb
 from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.callbacks import BaseCallback
 import torch as th
@@ -62,4 +63,6 @@ class RLeXploreWithOnPolicyRL(BaseCallback):
         # add the intrinsic rewards to the buffer
         self.buffer.advantages += intrinsic_rewards.cpu().numpy()
         self.buffer.returns += intrinsic_rewards.cpu().numpy()
+
+        wandb.log({"mean_intrinsic_rewards": intrinsic_rewards.mean().item()})
         # ===================== compute the intrinsic rewards ===================== #
