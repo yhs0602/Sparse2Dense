@@ -56,34 +56,30 @@ def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
                     # Living penalty
                     LivingPenaltyWrapper(
                         # Sparse reward
-                        HomeDenseWrapper(
-                            SparseRewardWrapper(
-                                # Checks, Logs, Terminates
-                                RoomReachCheckAndLogWrapper(
-                                    # Select goal when reset
-                                    RoomGoalSelectionWrapper(
-                                        PositionLoggingWrapper(
-                                            Turn90Wrapper(
-                                                VisionWrapper(
-                                                    env,
-                                                    x_dim=size_x,
-                                                    y_dim=size_y,
-                                                ),
+                        SparseRewardWrapper(
+                            # Checks, Logs, Terminates
+                            RoomReachCheckAndLogWrapper(
+                                # Select goal when reset
+                                RoomGoalSelectionWrapper(
+                                    PositionLoggingWrapper(
+                                        Turn90Wrapper(
+                                            VisionWrapper(
+                                                env,
+                                                x_dim=size_x,
+                                                y_dim=size_y,
                                             ),
-                                            logger=central_logger,
                                         ),
-                                        goal_selector=select_goal_spawn,
-                                        goal_set_command_provider=spawn_goal_command,
-                                        goal_remove_command_provider=remove_goal_command,
+                                        logger=central_logger,
                                     ),
-                                    radius=2,
-                                    central_logger=central_logger,
-                                    cooldown=2,
+                                    goal_selector=select_goal_spawn,
+                                    goal_set_command_provider=spawn_goal_command,
+                                    goal_remove_command_provider=remove_goal_command,
                                 ),
-                                reward=1,
+                                radius=2,
+                                central_logger=central_logger,
+                                cooldown=2,
                             ),
-                            radius=5,
-                            reward=0.001,
+                            reward=1,
                         ),
                         penalty_abs=0.0001,
                     ),
@@ -113,7 +109,7 @@ def dense_room(
         elif "dense" in base_checkpoint:
             from_str = "dense"
     # setting = select_goal_spawn()
-    group_name = f"v34-room-v1-icm-{extended}-seed{seed}-from_{from_str}-{entropy_coef}"  # {setting['spawn_idx']}
+    group_name = f"v34-room-v1-sparse-icm-{extended}-seed{seed}-from_{from_str}-{entropy_coef}"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,
