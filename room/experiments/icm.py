@@ -38,6 +38,7 @@ from wandb_envs import WANDB_PROJECT, WANDB_ENTITY
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.log_flush_wrapper import LogFlushWrapper
 from wrappers.position_logger import PositionLoggingWrapper
+from wrappers.reward_transition import RewardTransitionWrapper
 from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
 
