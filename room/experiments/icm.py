@@ -134,7 +134,7 @@ def icm_transition(
         elif "dense" in base_checkpoint:
             from_str = "dense"
     # setting = select_goal_spawn()
-    group_name = f"v34-room-v1-sparse-icm-{extended}-seed{seed}-from_{from_str}-{entropy_coef}"  # {setting['spawn_idx']}
+    group_name = f"v35-room-v1-sparse-icm-from_{from_str}-{entropy_coef}-ir{ir_scale}"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,
