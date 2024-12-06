@@ -124,6 +124,7 @@ def icm_transition(
     seed: int = 3,
     base_checkpoint: Optional[str] = None,
     entropy_coef: float = 0.005,
+    ir_scale: float = 0.01,
 ):
     set_random_seed(seed)
     from_str = ""
@@ -238,7 +239,7 @@ def icm_transition(
                     model_save_path=f"models/{run.id}",
                     verbose=2,
                 ),
-                RLeXploreWithOnPolicyRL(irs),
+                RLeXploreWithOnPolicyRL(irs, ir_scale),
                 checkpoint_callback,
                 # EpisodeLogger(),
                 # EpisodeStartCallback(eval_callback),
@@ -297,6 +298,12 @@ if __name__ == "__main__":
         help="Entropy coefficient",
         default=0.005,
     )
+    arg_parser.add_argument(
+        "--ir-scale",
+        type=float,
+        help="Intrinsic reward scale",
+        default=0.01,
+    )
 
     args = arg_parser.parse_args()
     port1 = args.port1
@@ -312,4 +319,5 @@ if __name__ == "__main__":
         seed=args.seed,
         base_checkpoint=args.base_checkpoint,
         entropy_coef=args.entropy,
+        ir_scale=args.ir_scale,
     )

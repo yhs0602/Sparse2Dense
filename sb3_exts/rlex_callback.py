@@ -9,9 +9,10 @@ class RLeXploreWithOnPolicyRL(BaseCallback):
     A custom callback for combining RLeXplore and on-policy algorithms from SB3.
     """
 
-    def __init__(self, irs, verbose=0):
+    def __init__(self, irs, ir_scale, verbose=0):
         super(RLeXploreWithOnPolicyRL, self).__init__(verbose)
         self.irs = irs
+        self.ir_scale = ir_scale
         self.buffer = None
 
     def init_callback(self, model: BaseAlgorithm) -> None:
@@ -61,8 +62,14 @@ class RLeXploreWithOnPolicyRL(BaseCallback):
             sync=True,
         )
         # add the intrinsic rewards to the buffer
-        self.buffer.advantages += intrinsic_rewards.cpu().numpy()
-        self.buffer.returns += intrinsic_rewards.cpu().numpy()
+        intrinsic_rewards_cpu_scaled = (intrinsic_rewards * self.ir_scale).cpu().numpy()
+        self.buffer.advantages += intrinsic_rewards_cpu_scaled
+        self.buffer.returns += intrinsic_rewards_cpu_scaled
 
-        wandb.log({"mean_intrinsic_rewards": intrinsic_rewards.mean().item()})
+        wandb.log(
+            {
+                "scaled_mean_intrinsic_rewards": intrinsic_rewards.mean().item()
+                * self.ir_scale
+            }
+        )
         # ===================== compute the intrinsic rewards ===================== #
