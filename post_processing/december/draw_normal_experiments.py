@@ -62,7 +62,9 @@ def plot_groups_normal_experiments(
 
     plt.figure(figsize=(14, 8))
 
-    plot_impl_normal_experiments(axis_x_name, axis_y_name, normal_groups, normal_groups_name, normal_window_size)
+    plot_impl_normal_experiments(
+        axis_x_name, axis_y_name, normal_groups, normal_groups_name, normal_window_size
+    )
 
     adjust_and_save_figure(axis_x_name, axis_y_name, normal_groups_name)
 
@@ -98,7 +100,9 @@ def adjust_and_save_figure(axis_x_name, axis_y_name, groups_name):
     print(f"Saved {figure_path}")
 
 
-def plot_impl_normal_experiments(axis_x_name, axis_y_name, groups, groups_name, window_size):
+def plot_impl_normal_experiments(
+    axis_x_name, axis_y_name, groups, groups_name, window_size
+):
     for group_name, group_data in groups.items():
         print(group_name)
         group_data: List[pd.DataFrame]
@@ -190,11 +194,13 @@ def plot_impl_normal_experiments(axis_x_name, axis_y_name, groups, groups_name, 
 def main():
     axises, room_groups, window_size = prepare_normal_params()
     for room_axis in axises["room"]:
-        plot_groups_normal_experiments(room_groups, "room", room_axis, normal_window_size=window_size)
+        plot_groups_normal_experiments(
+            room_groups, "room", room_axis, normal_window_size=window_size
+        )
         print(f"Plotted {room_axis}")
 
 
-def prepare_normal_params(all_run_data_dir = "./merged_241206"):
+def prepare_normal_params(all_run_data_dir="./merged_241206"):
     room_groups = defaultdict(list)
     for file_name in os.listdir(all_run_data_dir):
         # check if csv

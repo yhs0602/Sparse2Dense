@@ -154,10 +154,10 @@ def draw_entropy_figures(axis_x_name, axis_y_name, groups, groups_name, window_s
             )
 
 
-def save_entropy_figure(axis_x_name, axis_y_name, groups_name, figure_dir = "./figures"):
+def save_entropy_figure(axis_x_name, axis_y_name, groups_name, figure_dir="./figures"):
     # plt.xlabel(axis_x_name)
     # plt.ylabel(axis_y_name)
-    plt.legend()
+    # plt.legend()
     plt.title(f"{axis_x_name} vs {axis_y_name}")
     y_max = 8000
     y_min = 0
