@@ -5,7 +5,7 @@ from typing import Optional, Dict
 
 import pandas as pd
 
-base_dir = "../all_run_data241111/"
+base_dir = "../all_run_data241207/"
 
 
 def extract_info(string) -> Optional[Dict]:
@@ -55,7 +55,7 @@ def find_pairs(current_node, children, pairs):
 
 
 def iterate_and_print_parsed():
-    base_dir = "../all_run_data241110/"
+    base_dir = "../all_run_data241207/"
     for dir in os.listdir(base_dir):
         full_path = os.path.join(base_dir, dir)
         parsed = extract_info(dir)
@@ -123,6 +123,7 @@ if __name__ == "__main__":
 
         merged_log: pd.DataFrame = concat_logs(file_A, file_B)
         # save the file as csv
-        output_path = f"merged_241111/{pair[0]['type']}_to_{pair[1]['type']}_seed_{pair[1]['seed']}.csv"
+        os.makedirs("merged_241206", exist_ok=True)
+        output_path = f"merged_241206/{pair[0]['type']}_to_{pair[1]['type']}_seed_{pair[1]['seed']}.csv"
         merged_log.to_csv(output_path, index=True)
         print(f"Saved merged log to {output_path}")

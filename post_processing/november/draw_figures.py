@@ -174,13 +174,15 @@ def plot_groups(
 
     axis_x_name = axis_x_name.replace("/", "_")
     axis_y_name = axis_y_name.replace("/", "_")
-    figure_path = f"./figures/{groups_name}-{axis_x_name}_{axis_y_name}.png"
+    figure_dir = "./figures/241206"
+    os.makedirs(figure_dir, exist_ok=True)
+    figure_path = f"{figure_dir}/{groups_name}-{axis_x_name}_{axis_y_name}.png"
     plt.savefig(figure_path, dpi=300)
     print(f"Saved {figure_path}")
 
 
 def main():
-    all_run_data_dir = "./merged_241111"
+    all_run_data_dir = "./merged_241206"
     room_groups = defaultdict(list)
     for file_name in os.listdir(all_run_data_dir):
         # check if csv

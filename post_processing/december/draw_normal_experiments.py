@@ -51,23 +51,54 @@ def calculate_group_std(
 
 
 # Visualisation functions, std err
-def plot_entropy_groups(
-    groups: Dict[str, List[pd.DataFrame]],
-    groups_name: str,
-    axis: Tuple[str, str],
-    window_size=10,
+def plot_groups_normal_experiments(
+    normal_groups: Dict[str, List[pd.DataFrame]],
+    normal_groups_name: str,
+    normal_axis: Tuple[str, str],
+    normal_window_size=10,
 ):
-    axis_x_name = axis[0]
-    axis_y_name = axis[1]
+    axis_x_name = normal_axis[0]
+    axis_y_name = normal_axis[1]
 
     plt.figure(figsize=(14, 8))
 
-    draw_entropy_figures(axis_x_name, axis_y_name, groups, groups_name, window_size)
+    plot_impl_normal_experiments(axis_x_name, axis_y_name, normal_groups, normal_groups_name, normal_window_size)
 
-    save_entropy_figure(axis_x_name, axis_y_name, groups_name)
+    adjust_and_save_figure(axis_x_name, axis_y_name, normal_groups_name)
 
 
-def draw_entropy_figures(axis_x_name, axis_y_name, groups, groups_name, window_size):
+def adjust_and_save_figure(axis_x_name, axis_y_name, groups_name):
+    # plt.xlabel(axis_x_name)
+    # plt.ylabel(axis_y_name)
+    # plt.legend()
+    # plt.title(f"{axis_x_name} vs {axis_y_name}")
+    y_max = 8000
+    y_min = 0
+    if "rate" in axis_y_name:
+        y_max = 1
+    elif "length" in axis_y_name:
+        y_max = 20000
+    elif "eval_episode" in axis_y_name:
+        y_max = 1000
+    if "success_rate" in axis_y_name:
+        x_max = 10000000  # 5000000
+        y_min = 0.4
+    else:
+        x_max = None
+    plt.ylim(bottom=y_min)  # , top=y_max
+    plt.xlim(left=0, right=x_max)
+    plt.grid(True)
+    # plt.show()
+    axis_x_name = axis_x_name.replace("/", "_")
+    axis_y_name = axis_y_name.replace("/", "_")
+    figure_dir = "./figures/241206"
+    os.makedirs(figure_dir, exist_ok=True)
+    figure_path = f"{figure_dir}/{groups_name}-{axis_x_name}_{axis_y_name}.png"
+    plt.savefig(figure_path, dpi=300)
+    print(f"Saved {figure_path}")
+
+
+def plot_impl_normal_experiments(axis_x_name, axis_y_name, groups, groups_name, window_size):
     for group_name, group_data in groups.items():
         print(group_name)
         group_data: List[pd.DataFrame]
@@ -100,12 +131,14 @@ def draw_entropy_figures(axis_x_name, axis_y_name, groups, groups_name, window_s
         std_data = running_average(std_data, window_size)
 
         # Determine color based on the group
-        if "2000384" in group_name:
-            color = "#E53935"  # 밝은 빨강
-        elif "3000320" in group_name:
-            color = "#66BB6A"  # 밝은 초록
-        elif "999936" in group_name:
-            color = "#42A5F5"  # 밝은 파랑
+        if "sparse_dense" in group_name:
+            color = "#AE4338"  # 174 67 56 red
+        elif "sparse_sparse" in group_name:
+            color = "#57A148"  # 87 161 72 green
+        elif "dense_dense" in group_name:
+            color = "#5D83D8"  # 93 131 216 blue
+        elif "dense_sparse" in group_name:
+            color = "#A68460"  # 166 132 96 brown
         else:
             raise ValueError(f"Unknown group: {group_name}")
 
@@ -154,56 +187,34 @@ def draw_entropy_figures(axis_x_name, axis_y_name, groups, groups_name, window_s
             )
 
 
-def save_entropy_figure(axis_x_name, axis_y_name, groups_name, figure_dir = "./figures"):
-    # plt.xlabel(axis_x_name)
-    # plt.ylabel(axis_y_name)
-    plt.legend()
-    plt.title(f"{axis_x_name} vs {axis_y_name}")
-    y_max = 8000
-    y_min = 0
-    if "rate" in axis_y_name:
-        y_max = 1
-    elif "length" in axis_y_name:
-        y_max = 20000
-    elif "eval_episode" in axis_y_name:
-        y_max = 1000
-    if "success_rate" in axis_y_name:
-        x_max = 10000000  # 5000000
-        y_min = 0.4
-    else:
-        x_max = None
-    plt.ylim(bottom=y_min)  # , top=y_max
-    plt.xlim(left=0, right=x_max)
-    plt.grid(True)
-    # plt.show()
-    axis_x_name = axis_x_name.replace("/", "_")
-    axis_y_name = axis_y_name.replace("/", "_")
-    os.makedirs(figure_dir, exist_ok=True)
-    figure_path = f"{figure_dir}/{groups_name}-{axis_x_name}_{axis_y_name}.png"
-    os.makedirs("./figures", exist_ok=True)
-    plt.savefig(figure_path, dpi=300)
-    print(f"Saved {figure_path}")
-
-
 def main():
-    axises, room_groups, window_size = prepare_entropy_params()
+    axises, room_groups, window_size = prepare_normal_params()
     for room_axis in axises["room"]:
-        plot_entropy_groups(room_groups, "room", room_axis, window_size=window_size)
+        plot_groups_normal_experiments(room_groups, "room", room_axis, normal_window_size=window_size)
         print(f"Plotted {room_axis}")
 
 
-def prepare_entropy_params():
-    all_run_data_dir = "./merged_241204"
+def prepare_normal_params(all_run_data_dir = "./merged_241206"):
     room_groups = defaultdict(list)
     for file_name in os.listdir(all_run_data_dir):
         # check if csv
         if not file_name.endswith(".csv"):
             continue
         file_path = os.path.join(all_run_data_dir, file_name)
-        # find seed, transition_step from file_name
-        seed, step = file_name.split(".")[0].split("_")
+        # 파일 이름에서 'from'과 'to' 추출
+        parts = file_name.split("_")
+        from_type = parts[0]  # dense 또는 sparse
+        to_type = parts[2]  # dense 또는 sparse
+
+        if from_type == "dense":
+            if "7777" in file_name or "2024" in file_name:
+                continue
+
+        # CSV 파일을 DataFrame으로 읽기
         df = pd.read_csv(file_path)
-        room_groups[f"{step}"].append(df)
+
+        # (from, to) 키를 사용하여 딕셔너리에 DataFrame 추가
+        room_groups[f"{from_type}_{to_type}"].append(df)
     # Plot
     # cross:
     # Grouping based on the end number of the group.

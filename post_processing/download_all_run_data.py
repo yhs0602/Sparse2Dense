@@ -84,7 +84,6 @@ def main():
 
 def main241110():
     # Get all the runs from groups
-
     api = wandb.Api(timeout=120)
     WANDB_ENTITY = "jourhyang123"
     WANDB_PROJECT = "nature-journal-room_experiments"
@@ -94,15 +93,16 @@ def main241110():
         for run in runs
         if run.group.startswith("v33-room-")
         and datetime.strptime(run.created_at, "%Y-%m-%dT%H:%M:%SZ")
-        >= datetime(datetime.now().year, 11, 30)
+        >= datetime(datetime.now().year, 11, 1)
+        and datetime.strptime(run.created_at, "%Y-%m-%dT%H:%M:%SZ")
+        < datetime(datetime.now().year, 11, 30)
     ]
     print(f"Found {len(group_runs)} runs")
-
-    with open("run_lists241204.csv", "w") as f:
+    with open("run_lists241207.csv", "w") as f:
         for run in group_runs:
             f.write(f"{run.id}, {run.group}\n")
     for run in tqdm(group_runs):
-        download_wandb_file(run, "./all_run_data241204")
+        download_wandb_file(run, "./all_run_data241207")
 
 
 if __name__ == "__main__":
