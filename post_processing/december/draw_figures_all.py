@@ -48,11 +48,14 @@ def plot_groups(
             entropy_groups_name,
             entropy_window_size,
         )
+    else:
+        print("No entropy data")
     if normal_room_groups is not None:
-        plot_groups_normal_experiments(
+        plot_impl_normal_experiments(
+            axis_x_name,
+            axis_y_name,
             normal_room_groups,
             normal_groups_name,
-            room_axis,
             normal_window_size,
         )
     if intrinsic_room_groups is not None:

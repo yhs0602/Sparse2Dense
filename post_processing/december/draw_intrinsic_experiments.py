@@ -76,9 +76,9 @@ def plot_groups_intrinsics(axis_x_name, axis_y_name, groups, groups_name, window
 
         # Determine color based on the group
         if "0.1" in group_name:
-            color = "#E53935"  # 밝은 빨강
+            color = "#FF3935"  # 밝은 빨강
         elif "0.01" in group_name:
-            color = "#66BB6A"  # 밝은 초록
+            color = "#FFBB6A"  # 밝은 초록
         else:
             raise ValueError(f"Unknown group: {group_name}")
 

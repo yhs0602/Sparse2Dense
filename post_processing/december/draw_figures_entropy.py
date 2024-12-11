@@ -68,6 +68,7 @@ def plot_entropy_groups(
 
 
 def draw_entropy_figures(axis_x_name, axis_y_name, groups, groups_name, window_size):
+    print(f"Entropy {groups_name}/{axis_x_name}/{axis_y_name}")
     for group_name, group_data in groups.items():
         print(group_name)
         group_data: List[pd.DataFrame]
