@@ -1,5 +1,5 @@
+import os
 from matplotlib import pyplot as plt
-from sympy.stats import entropy
 
 from post_processing.december.draw_figures_entropy import (
     prepare_entropy_params,
@@ -12,6 +12,14 @@ from post_processing.december.draw_normal_experiments import (
     plot_groups_normal_experiments,
     plot_impl_normal_experiments,
 )
+from post_processing.december.draw_intrinsic_experiments import (
+    prepare_intrinsic_params,
+    plot_groups_intrinsics,
+)
+
+current_file_path = __file__
+current_directory = os.path.dirname(current_file_path)
+current_canonical_directory = os.path.realpath(current_directory)
 
 
 def plot_groups(
@@ -23,28 +31,43 @@ def plot_groups(
     normal_groups_name,
     room_axis,
     normal_window_size,
+    intrinsic_room_groups,
+    intrinsic_groups_name,
+    intrinsic_window_size,
 ):
     axis_x_name = entropy_axis[0]
     axis_y_name = entropy_axis[1]
 
     plt.figure(figsize=(14, 8))
 
-    draw_entropy_figures(
-        axis_x_name,
-        axis_y_name,
-        entropy_room_groups,
-        entropy_groups_name,
-        entropy_window_size,
-    )
-    plot_impl_normal_experiments(
-        axis_x_name,
-        axis_y_name,
-        normal_room_groups,
-        normal_groups_name,
-        normal_window_size,
-    )
+    if entropy_room_groups is not None:
+        draw_entropy_figures(
+            axis_x_name,
+            axis_y_name,
+            entropy_room_groups,
+            entropy_groups_name,
+            entropy_window_size,
+        )
+    if normal_room_groups is not None:
+        plot_groups_normal_experiments(
+            normal_room_groups,
+            normal_groups_name,
+            room_axis,
+            normal_window_size,
+        )
+    if intrinsic_room_groups is not None:
+        plot_groups_intrinsics(
+            axis_x_name,
+            axis_y_name,
+            intrinsic_room_groups,
+            intrinsic_groups_name,
+            intrinsic_window_size,
+        )
     save_entropy_figure(
-        axis_x_name, axis_y_name, entropy_groups_name, "./figures/241206_all"
+        axis_x_name,
+        axis_y_name,
+        entropy_groups_name,
+        f"{current_canonical_directory}/figures/241211_all_all",
     )
 
     # axis_x_name = normal_axis[0]
@@ -52,11 +75,23 @@ def plot_groups(
 
 
 def main():
-    entropy_axises, entropy_room_groups, entropy_window_size = prepare_entropy_params()
-    normal_axises, normal_room_groups, normal_window_size = prepare_normal_params(
-        "../november/merged_241206"
+    entropy_room_groups = None
+    entropy_window_size = 80
+    normal_room_groups = None
+    normal_window_size = 80
+
+    entropy_axises, entropy_room_groups, entropy_window_size = prepare_entropy_params(
+        f"{current_canonical_directory}/../merged_entropy_241211"
     )
-    for room_axis in entropy_axises["room"]:
+    intrinsic_axises, intrinsic_room_groups, intrinsic_window_size = (
+        prepare_intrinsic_params(
+            f"{current_canonical_directory}/../all_run_data241211-icm"
+        )
+    )
+    normal_axises, normal_room_groups, normal_window_size = prepare_normal_params(
+        f"{current_canonical_directory}/../merged_all_241211"
+    )
+    for room_axis in intrinsic_axises["room"]:
         plot_groups(
             entropy_room_groups,
             "room",
@@ -66,6 +101,9 @@ def main():
             "room",
             room_axis,
             normal_window_size,
+            intrinsic_room_groups,
+            "room",
+            intrinsic_window_size,
         )
         print(f"Plotted {room_axis}")
 

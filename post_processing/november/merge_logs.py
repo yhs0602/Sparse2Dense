@@ -5,7 +5,10 @@ from typing import Optional, Dict
 
 import pandas as pd
 
-base_dir = "../all_run_data241207/"
+current_file_path = __file__
+current_directory = os.path.dirname(current_file_path)
+current_canonical_directory = os.path.realpath(current_directory)
+base_dir = f"{current_canonical_directory}/../all_run_data241211-all/"
 
 
 def extract_info(string) -> Optional[Dict]:
@@ -106,6 +109,7 @@ if __name__ == "__main__":
     # iterate_and_print_parsed()
     seed_groups = iterate_and_group_by_seed()
     pairs_to_merge = get_pairs_to_merge(seed_groups)
+    output_directory = f"{current_canonical_directory}/../merged_all_241211"
     for pair in pairs_to_merge:
         print(
             f"Merge {pair[0]['type']} (seed {pair[0]['seed']}) to {pair[1]['type']} (seed {pair[1]['seed']})"
@@ -123,7 +127,7 @@ if __name__ == "__main__":
 
         merged_log: pd.DataFrame = concat_logs(file_A, file_B)
         # save the file as csv
-        os.makedirs("merged_241206", exist_ok=True)
-        output_path = f"merged_241206/{pair[0]['type']}_to_{pair[1]['type']}_seed_{pair[1]['seed']}.csv"
+        os.makedirs(output_directory, exist_ok=True)
+        output_path = f"{output_directory}/{pair[0]['type']}_to_{pair[1]['type']}_seed_{pair[1]['seed']}.csv"
         merged_log.to_csv(output_path, index=True)
         print(f"Saved merged log to {output_path}")

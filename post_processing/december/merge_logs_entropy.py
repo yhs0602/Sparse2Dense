@@ -4,7 +4,11 @@ from typing import Tuple
 
 import pandas as pd
 
-base_dir = "../all_run_data241204/"
+
+current_file_path = __file__
+current_directory = os.path.dirname(current_file_path)
+current_canonical_directory = os.path.realpath(current_directory)
+base_dir = f"{current_canonical_directory}/../all_run_data241211-entropy/"
 
 
 def extract_info(string) -> Tuple[int, bool]:
@@ -116,7 +120,8 @@ if __name__ == "__main__":
     # iterate_and_print_parsed()
     seed_groups = iterate_and_group_by_seed()
     print(seed_groups)
-    os.makedirs("merged_241204/", exist_ok=True)
+    output_directory = f"{current_canonical_directory}/../merged_entropy_241211/"
+    os.makedirs(output_directory, exist_ok=True)
     for seed, info in seed_groups.items():
         start_file = info["start_file"]
         end_files = info["end_files"]
@@ -130,6 +135,6 @@ if __name__ == "__main__":
             path2 = os.path.abspath(os.path.join(base_dir, end_group_folder, end_file))
             merged_log, transition_timestep = concat_logs(path1, path2)
             # save the file as csv
-            output_path = f"merged_241204/{seed}_{transition_timestep}.csv"
+            output_path = f"{output_directory}/{seed}_{transition_timestep}.csv"
             merged_log.to_csv(output_path, index=True)
             print(f"Saved merged log to {output_path}")
