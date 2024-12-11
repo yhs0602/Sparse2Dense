@@ -7,7 +7,7 @@ import wandb
 from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.vision import VisionWrapper
 from gymnasium.wrappers import TimeLimit
-from rllte.xplore.reward import ICM
+from rllte.xplore.reward import ICM, NGU
 from sb3_contrib import RecurrentPPO
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
@@ -124,6 +124,7 @@ def icm_transition(
     seed: int = 3,
     base_checkpoint: Optional[str] = None,
     entropy_coef: float = 0.005,
+    ir_type: str = "icm",
     ir_scale: float = 0.01,
 ):
     set_random_seed(seed)
@@ -134,7 +135,7 @@ def icm_transition(
         elif "dense" in base_checkpoint:
             from_str = "dense"
     # setting = select_goal_spawn()
-    group_name = f"v35-room-v1-sparse-icm-from_{from_str}-{entropy_coef}-ir{ir_scale}"  # {setting['spawn_idx']}
+    group_name = f"v36-room-s2d-{ir_type}-from_{from_str}-{entropy_coef}-ir{ir_scale}"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,
@@ -164,7 +165,13 @@ def icm_transition(
     )
     env = Monitor(env)
     env = DummyVecEnv([lambda: env])
-    irs = ICM(env, str(device))
+
+    if ir_type == "icm":
+        irs = ICM(env, str(device))
+    elif ir_type == "ngu":
+        irs = NGU(env, str(device))
+    else:
+        raise ValueError(f"Unknown intrinsic reward type: {ir_type}")
     env = VecVideoRecorder(
         env,
         f"videos/{run.id}",
@@ -299,6 +306,13 @@ if __name__ == "__main__":
         default=0.005,
     )
     arg_parser.add_argument(
+        "--ir-type",
+        type=str,
+        help="Intrinsic reward type",
+        default="icm",
+        choices=["icm", "ngu"],
+    )
+    arg_parser.add_argument(
         "--ir-scale",
         type=float,
         help="Intrinsic reward scale",
@@ -319,5 +333,6 @@ if __name__ == "__main__":
         seed=args.seed,
         base_checkpoint=args.base_checkpoint,
         entropy_coef=args.entropy,
+        ir_type=args.ir_type,
         ir_scale=args.ir_scale,
     )
