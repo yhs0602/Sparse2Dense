@@ -169,7 +169,8 @@ def icm_transition(
     if ir_type == "icm":
         irs = ICM(env, str(device))
     elif ir_type == "ngu":
-        irs = NGU(env, str(device))
+        irs = NGU(env, str(device), mrs=ir_scale)
+        ir_scale = 1
     else:
         raise ValueError(f"Unknown intrinsic reward type: {ir_type}")
     env = VecVideoRecorder(
