@@ -70,7 +70,7 @@ def plot_groups(
         axis_x_name,
         axis_y_name,
         entropy_groups_name,
-        f"{current_canonical_directory}/figures/241211_all_all",
+        f"{current_canonical_directory}/figures/241214_all",
     )
 
     # axis_x_name = normal_axis[0]
@@ -94,6 +94,7 @@ def main():
     normal_axises, normal_room_groups, normal_window_size = prepare_normal_params(
         f"{current_canonical_directory}/../merged_all_241211"
     )
+    entropy_room_groups = None
     for room_axis in intrinsic_axises["room"]:
         plot_groups(
             entropy_room_groups,

@@ -139,10 +139,13 @@ def plot_impl_normal_experiments(
             color = "#AE4338"  # 174 67 56 red
         elif "sparse_sparse" in group_name:
             color = "#57A148"  # 87 161 72 green
+            continue
         elif "dense_dense" in group_name:
             color = "#5D83D8"  # 93 131 216 blue
+            continue
         elif "dense_sparse" in group_name:
             color = "#A68460"  # 166 132 96 brown
+            continue
         else:
             raise ValueError(f"Unknown group: {group_name}")
 
