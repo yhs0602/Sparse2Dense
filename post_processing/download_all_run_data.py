@@ -44,6 +44,8 @@ def download_wandb_file(run: Run, download_dir):
                 "2/success_count",
                 "3/success_count",
                 "episode/spawn_idx",
+                "scaled_mean_intrinsic_rewards",
+                "episode/reward",
             ]
         else:
             columns = [
@@ -112,14 +114,14 @@ def main241110():
     WANDB_ENTITY = "jourhyang123"
     WANDB_PROJECT = "nature-journal-room_experiments"
     runs: Runs = api.runs(f"{WANDB_ENTITY}/{WANDB_PROJECT}")
-    group_runs = [run for run in runs if entropy_predicate(run)]
+    group_runs = [run for run in runs if icm_predicate(run)]
     print(f"Found {len(group_runs)} runs")
-    with open(f"{current_canonical_directory}/run_lists241211-entropy.csv", "w") as f:
+    with open(f"{current_canonical_directory}/run_lists241214-icm-with-reward.csv", "w") as f:
         for run in group_runs:
             f.write(f"{run.id}, {run.group}\n")
     for run in tqdm(group_runs):
         download_wandb_file(
-            run, f"{current_canonical_directory}/all_run_data241211-entropy"
+            run, f"{current_canonical_directory}/all_run_data241214-icm-with-reward"
         )
 
 

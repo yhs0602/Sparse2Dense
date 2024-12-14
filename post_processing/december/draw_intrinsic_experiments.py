@@ -36,6 +36,7 @@ def prepare_intrinsic_params(
             ("global_step", "1/success_rate"),
             ("global_step", "2/success_rate"),
             ("global_step", "3/success_rate"),
+            ("episode", "scaled_mean_intrinsic_rewards"),
         ],
     }
     window_size = 80
@@ -71,8 +72,10 @@ def plot_groups_intrinsics(axis_x_name, axis_y_name, groups, groups_name, window
         avg_data = calculate_group_average(group_data, axis_x_name, axis_y_name)
         std_data = calculate_group_std(group_data, axis_x_name, axis_y_name)
 
-        avg_data = running_average(avg_data, window_size)
-        std_data = running_average(std_data, window_size)
+        window_size_to_use = window_size
+        if axis_y_name != "scaled_mean_intrinsic_rewards":
+            avg_data = running_average(avg_data, window_size_to_use)
+            std_data = running_average(std_data, window_size_to_use)
 
         # Determine color based on the group
         if "0.1" in group_name:

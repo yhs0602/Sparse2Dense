@@ -51,13 +51,16 @@ def plot_groups(
     else:
         print("No entropy data")
     if normal_room_groups is not None:
-        plot_impl_normal_experiments(
-            axis_x_name,
-            axis_y_name,
-            normal_room_groups,
-            normal_groups_name,
-            normal_window_size,
-        )
+        try:
+            plot_impl_normal_experiments(
+                axis_x_name,
+                axis_y_name,
+                normal_room_groups,
+                normal_groups_name,
+                normal_window_size,
+            )
+        except KeyError:
+            print(f"KeyError: {axis_x_name}, {axis_y_name}")
     if intrinsic_room_groups is not None:
         plot_groups_intrinsics(
             axis_x_name,
@@ -70,7 +73,7 @@ def plot_groups(
         axis_x_name,
         axis_y_name,
         entropy_groups_name,
-        f"{current_canonical_directory}/figures/241214_all",
+        f"{current_canonical_directory}/figures/241214_all-icm_ir",
     )
 
     # axis_x_name = normal_axis[0]
@@ -88,7 +91,7 @@ def main():
     )
     intrinsic_axises, intrinsic_room_groups, intrinsic_window_size = (
         prepare_intrinsic_params(
-            f"{current_canonical_directory}/../all_run_data241211-icm"
+            f"{current_canonical_directory}/../all_run_data241214-icm"
         )
     )
     normal_axises, normal_room_groups, normal_window_size = prepare_normal_params(
