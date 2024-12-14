@@ -171,6 +171,9 @@ def save_entropy_figure(axis_x_name, axis_y_name, groups_name, figure_dir="./fig
     if "success_rate" in axis_y_name:
         x_max = 10000000  # 5000000
         y_min = 0.3
+    elif "episode/reward" in axis_y_name:
+        y_min = -2
+        x_max = None
     else:
         x_max = None
     plt.ylim(bottom=y_min)  # , top=y_max

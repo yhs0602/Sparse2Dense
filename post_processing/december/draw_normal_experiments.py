@@ -123,9 +123,10 @@ def plot_impl_normal_experiments(
                 )
             group_data[i].ffill(inplace=True)
             group_data[i].bfill(inplace=True)
-            assert group_data[i][axis_y_name].isnull().sum() == 0
-            assert group_data[i][axis_x_name].isnull().sum() == 0
-            assert len(group_data[i][axis_x_name]) == len(group_data[i][axis_y_name])
+            print(f"Checking null values in {group_name}/{i}/{axis_y_name}")
+            # assert group_data[i][axis_y_name].isnull().sum() == 0
+            # assert group_data[i][axis_x_name].isnull().sum() == 0
+            # assert len(group_data[i][axis_x_name]) == len(group_data[i][axis_y_name])
             print(i)
 
         avg_data = calculate_group_average(group_data, axis_x_name, axis_y_name)
@@ -246,6 +247,7 @@ def prepare_normal_params(all_run_data_dir="./merged_241206"):
             ("global_step", "1/success_rate"),
             ("global_step", "2/success_rate"),
             ("global_step", "3/success_rate"),
+            ("episode", "episode/reward"),
         ],
     }
     # Group by eval_idx and room

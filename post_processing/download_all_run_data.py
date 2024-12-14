@@ -97,6 +97,18 @@ normal_predicate = lambda run: (
     >= datetime(datetime.now().year, 11, 1)
 )
 
+normal_s2d_predicate = lambda run: (
+    normal_predicate(run)
+    and "from_sparse" in run.group
+    and "dense-False" in run.group
+)
+
+normal_s2d_begin_predicate = lambda run: (
+    normal_predicate(run)
+    and run.group.endswith("from_")
+    and "sparse-False" in run.group
+)
+
 icm_predicate = lambda run: (run.group.startswith("v35-room-"))
 
 icm_1_predicate = lambda run: (run.group.startswith("v34-room-"))
@@ -114,14 +126,14 @@ def main241110():
     WANDB_ENTITY = "jourhyang123"
     WANDB_PROJECT = "nature-journal-room_experiments"
     runs: Runs = api.runs(f"{WANDB_ENTITY}/{WANDB_PROJECT}")
-    group_runs = [run for run in runs if icm_predicate(run)]
+    group_runs = [run for run in runs if normal_s2d_begin_predicate(run)]
     print(f"Found {len(group_runs)} runs")
-    with open(f"{current_canonical_directory}/run_lists241214-icm-with-reward.csv", "w") as f:
+    with open(f"{current_canonical_directory}/run_lists241214-s2d-with-reward.csv", "w") as f:
         for run in group_runs:
             f.write(f"{run.id}, {run.group}\n")
     for run in tqdm(group_runs):
         download_wandb_file(
-            run, f"{current_canonical_directory}/all_run_data241214-icm-with-reward"
+            run, f"{current_canonical_directory}/all_run_data241214-s2d-with-reward"
         )
 
 

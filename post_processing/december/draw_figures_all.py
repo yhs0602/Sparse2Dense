@@ -59,8 +59,8 @@ def plot_groups(
                 normal_groups_name,
                 normal_window_size,
             )
-        except KeyError:
-            print(f"KeyError: {axis_x_name}, {axis_y_name}")
+        except KeyError as e:
+            print(f"KeyError | AssertionError: {axis_x_name}, {axis_y_name}, {e}")
     if intrinsic_room_groups is not None:
         plot_groups_intrinsics(
             axis_x_name,
@@ -91,11 +91,11 @@ def main():
     )
     intrinsic_axises, intrinsic_room_groups, intrinsic_window_size = (
         prepare_intrinsic_params(
-            f"{current_canonical_directory}/../all_run_data241214-icm"
+            f"{current_canonical_directory}/../all_run_data241214-icm-with-reward"
         )
     )
     normal_axises, normal_room_groups, normal_window_size = prepare_normal_params(
-        f"{current_canonical_directory}/../merged_all_241211"
+        f"{current_canonical_directory}/../merged_all_241214-s2d-with-reward"
     )
     entropy_room_groups = None
     for room_axis in intrinsic_axises["room"]:

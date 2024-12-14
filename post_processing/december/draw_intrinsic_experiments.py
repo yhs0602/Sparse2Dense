@@ -37,6 +37,7 @@ def prepare_intrinsic_params(
             ("global_step", "2/success_rate"),
             ("global_step", "3/success_rate"),
             ("episode", "scaled_mean_intrinsic_rewards"),
+            ("episode", "episode/reward"),
         ],
     }
     window_size = 80
