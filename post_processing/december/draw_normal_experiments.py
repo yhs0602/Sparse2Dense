@@ -161,7 +161,7 @@ def plot_impl_normal_experiments(
         plt.plot(
             avg_data[axis_x_name],
             avg_data[axis_y_name],
-            label=f"group: {group_name}",
+            label=f"S2D",
             linewidth=5.0,
             color=color,
         )

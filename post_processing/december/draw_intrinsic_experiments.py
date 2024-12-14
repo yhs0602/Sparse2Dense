@@ -77,8 +77,10 @@ def plot_groups_intrinsics(axis_x_name, axis_y_name, groups, groups_name, window
         # Determine color based on the group
         if "0.1" in group_name:
             color = "#FF3935"  # 밝은 빨강
+            label = "Intrinsic Motivation (0.1) + S2D"
         elif "0.01" in group_name:
             color = "#FFBB6A"  # 밝은 초록
+            label = "Intrinsic Motivation (0.01) + S2D"
         else:
             raise ValueError(f"Unknown group: {group_name}")
 
@@ -94,7 +96,7 @@ def plot_groups_intrinsics(axis_x_name, axis_y_name, groups, groups_name, window
         plt.plot(
             avg_data[axis_x_name],
             avg_data[axis_y_name],
-            label=f"group: {group_name}",
+            label=label,
             linewidth=5.0,
             color=color,
         )
