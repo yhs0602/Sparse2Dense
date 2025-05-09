@@ -84,20 +84,10 @@ def wrap_env(
                     # Living penalty
                     LivingPenaltyWrapper(
                         # Sparse to Dense reward
-                        reward_envs=[
-                            SparseRewardWrapper(
-                                maze_wrapper,
-                                reward=1,
-                            ),
-                            HomeDenseWrapper(
-                                SparseRewardWrapper(
-                                    maze_wrapper,
-                                    reward=1,
-                                ),
-                                radius=5,
-                                reward=0.001,
-                            ),
-                        ],
+                        env=SparseRewardWrapper(
+                            maze_wrapper,
+                            reward=1,
+                        ),
                         penalty_abs=0.0001,
                     ),
                     max_episode_steps=20000,
