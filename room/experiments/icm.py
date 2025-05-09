@@ -155,7 +155,7 @@ def icm_transition(
         irs = NGU(env, str(device), mrs=ir_scale)
         ir_scale = 1
     elif ir_type == "e3b":
-        irs = E3B(env, str(device), mrs=ir_scale)
+        irs = E3B(env, str(device))
         ir_scale = 1
     else:
         raise ValueError(f"Unknown intrinsic reward type: {ir_type}")
