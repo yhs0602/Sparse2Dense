@@ -272,12 +272,12 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--device-id", type=int, default=0, help="CUDA Device ID for training"
     )
-    arg_parser.add_argument(
-        "--transition-timing",
-        type=int,
-        default=250,
-        help="Reward transition timing in timesteps S->D; 10_000_000; 2000000, 3000000, 4000000",
-    )
+    # arg_parser.add_argument(
+    #     "--transition-timing",
+    #     type=int,
+    #     default=250,
+    #     help="Reward transition timing in timesteps S->D; 10_000_000; 2000000, 3000000, 4000000",
+    # )
     arg_parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     arg_parser.add_argument(
         "--extended",
@@ -314,7 +314,7 @@ if __name__ == "__main__":
         type=str,
         help="Intrinsic reward type",
         default="icm",
-        choices=["icm", "ngu"],
+        choices=["icm", "ngu", "e3b"],
     )
     arg_parser.add_argument(
         "--ir-scale",
