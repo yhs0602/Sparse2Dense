@@ -7,7 +7,7 @@ import wandb
 from craftground.wrappers.fast_reset import FastResetWrapper
 from craftground.wrappers.vision import VisionWrapper
 from gymnasium.wrappers import TimeLimit
-from rllte.xplore.reward import ICM, NGU
+from rllte.xplore.reward import ICM, NGU, E3B
 from sb3_contrib import RecurrentPPO
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
@@ -170,6 +170,9 @@ def icm_transition(
         irs = ICM(env, str(device))
     elif ir_type == "ngu":
         irs = NGU(env, str(device), mrs=ir_scale)
+        ir_scale = 1
+    elif ir_type == "e3b":
+        irs = E3B(env, str(device), mrs=ir_scale)
         ir_scale = 1
     else:
         raise ValueError(f"Unknown intrinsic reward type: {ir_type}")

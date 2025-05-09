@@ -109,7 +109,9 @@ if __name__ == "__main__":
     # iterate_and_print_parsed()
     seed_groups = iterate_and_group_by_seed()
     pairs_to_merge = get_pairs_to_merge(seed_groups)
-    output_directory = f"{current_canonical_directory}/../merged_all_241214-s2d-with-reward"
+    output_directory = (
+        f"{current_canonical_directory}/../merged_all_241214-s2d-with-reward"
+    )
     for pair in pairs_to_merge:
         print(
             f"Merge {pair[0]['type']} (seed {pair[0]['seed']}) to {pair[1]['type']} (seed {pair[1]['seed']})"

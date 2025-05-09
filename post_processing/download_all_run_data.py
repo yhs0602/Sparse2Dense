@@ -98,9 +98,7 @@ normal_predicate = lambda run: (
 )
 
 normal_s2d_predicate = lambda run: (
-    normal_predicate(run)
-    and "from_sparse" in run.group
-    and "dense-False" in run.group
+    normal_predicate(run) and "from_sparse" in run.group and "dense-False" in run.group
 )
 
 normal_s2d_begin_predicate = lambda run: (
@@ -128,7 +126,9 @@ def main241110():
     runs: Runs = api.runs(f"{WANDB_ENTITY}/{WANDB_PROJECT}")
     group_runs = [run for run in runs if normal_s2d_begin_predicate(run)]
     print(f"Found {len(group_runs)} runs")
-    with open(f"{current_canonical_directory}/run_lists241214-s2d-with-reward.csv", "w") as f:
+    with open(
+        f"{current_canonical_directory}/run_lists241214-s2d-with-reward.csv", "w"
+    ) as f:
         for run in group_runs:
             f.write(f"{run.id}, {run.group}\n")
     for run in tqdm(group_runs):
