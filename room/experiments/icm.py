@@ -53,7 +53,6 @@ def wrap_env(
     size_x,
     size_y,
     central_logger,
-    transition_timing: int,
 ) -> gymnasium.Env:
     # Checks, Logs, Terminates
     maze_wrapper = RoomReachCheckAndLogWrapper(
@@ -85,25 +84,20 @@ def wrap_env(
                     # Living penalty
                     LivingPenaltyWrapper(
                         # Sparse to Dense reward
-                        RewardTransitionWrapper(
-                            reward_envs=[
+                        reward_envs=[
+                            SparseRewardWrapper(
+                                maze_wrapper,
+                                reward=1,
+                            ),
+                            HomeDenseWrapper(
                                 SparseRewardWrapper(
                                     maze_wrapper,
                                     reward=1,
                                 ),
-                                HomeDenseWrapper(
-                                    SparseRewardWrapper(
-                                        maze_wrapper,
-                                        reward=1,
-                                    ),
-                                    radius=5,
-                                    reward=0.001,
-                                ),
-                            ],
-                            transition_timings=[
-                                transition_timing,
-                            ],
-                        ),
+                                radius=5,
+                                reward=0.001,
+                            ),
+                        ],
                         penalty_abs=0.0001,
                     ),
                     max_episode_steps=20000,
@@ -161,7 +155,6 @@ def icm_transition(
         size_x,
         size_y,
         central_logger,
-        transition_timing=transition_timing,
     )
     env = Monitor(env)
     env = DummyVecEnv([lambda: env])
@@ -331,7 +324,6 @@ if __name__ == "__main__":
     icm_transition(
         port1=port1,
         device_id=device_id,
-        transition_timing=args.transition_timing,
         extended=args.extended,
         max_steps=args.max_steps,
         seed=args.seed,
