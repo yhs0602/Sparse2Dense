@@ -17,6 +17,7 @@ from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import DummyVecEnv, VecVideoRecorder
 from wandb.integration.sb3 import WandbCallback
 
+from room.experiments.transpose import VisionTransposeWrapper
 from room.room_env import (
     select_goal_spawn,
     define_room_metrics,
@@ -24,7 +25,6 @@ from room.room_env import (
     remove_goal_command,
     make_room_env,
 )
-from room.wrappers.room_dense_wrapper import HomeDenseWrapper
 from room.wrappers.room_episode_logger import RoomEpisodeLoggerWrapper
 from room.wrappers.room_goal_spawn_setup_wrapper import RoomGoalSelectionWrapper
 from room.wrappers.room_reach_check_log_wrapper import RoomReachCheckAndLogWrapper
@@ -38,7 +38,6 @@ from wandb_envs import WANDB_PROJECT, WANDB_ENTITY
 from wrappers.living_penalty import LivingPenaltyWrapper
 from wrappers.log_flush_wrapper import LogFlushWrapper
 from wrappers.position_logger import PositionLoggingWrapper
-from wrappers.reward_transition import RewardTransitionWrapper
 from wrappers.sparse_maze_wrapper import SparseRewardWrapper
 from wrappers.turn_90_wrapper import Turn90Wrapper
 
@@ -76,6 +75,7 @@ def wrap_env(
         central_logger=central_logger,
         cooldown=2,
     )
+    env = VisionTransposeWrapper(x_dim=size_x, y_dim=size_y, env=maze_wrapper)
     return LogFlushWrapper(
         FastResetWrapper(
             RoomEpisodeLoggerWrapper(
@@ -85,7 +85,7 @@ def wrap_env(
                     LivingPenaltyWrapper(
                         # Sparse to Dense reward
                         env=SparseRewardWrapper(
-                            maze_wrapper,
+                            env,
                             reward=1,
                         ),
                         penalty_abs=0.0001,
@@ -119,7 +119,7 @@ def icm_transition(
         elif "dense" in base_checkpoint:
             from_str = "dense"
     # setting = select_goal_spawn()
-    group_name = f"v36-room-s2d-{ir_type}-from_{from_str}-{entropy_coef}-ir{ir_scale}"  # {setting['spawn_idx']}
+    group_name = f"v40-room-s2d-{ir_type}-from_{from_str}-{entropy_coef}-ir{ir_scale}"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,

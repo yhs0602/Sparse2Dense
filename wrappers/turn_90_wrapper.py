@@ -2,7 +2,7 @@ from enum import Enum
 from typing import SupportsFloat, Any, List, Optional
 
 import gymnasium as gym
-from craftground.craftground.minecraft import no_op
+from craftground.environment.action_space import no_op
 from gymnasium.core import WrapperActType, WrapperObsType
 
 

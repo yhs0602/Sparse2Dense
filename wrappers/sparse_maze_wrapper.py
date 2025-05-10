@@ -27,7 +27,7 @@ class SparseRewardWrapper(Wrapper):
         self, action: WrapperActType
     ) -> tuple[WrapperObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         obs, reward, terminated, truncated, info = self.env.step(action)
-        if self.env.reached_goal:
+        if self.get_wrapper_attr("reached_goal"):
             reward += self.reward
         return (
             obs,

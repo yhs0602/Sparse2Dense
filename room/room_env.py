@@ -3,9 +3,11 @@ import random
 from typing import Tuple
 
 import wandb
-from craftground import craftground
-from craftground.craftground import CraftGroundEnvironment
-from craftground.craftground.screen_encoding_modes import ScreenEncodingMode
+from craftground import make
+from craftground import CraftGroundEnvironment
+from craftground.screen_encoding_modes import ScreenEncodingMode
+from craftground import InitialEnvironmentConfig
+from craftground.initial_environment_config import DaylightMode, WorldType
 
 from utils.check_vglrun import check_vglrun
 
@@ -190,40 +192,33 @@ def make_room_env(
     template_name = "room_v3" if extended else "room_with_item"
     map_path = extended_map_path if extended else normal_map_path
     return (
-        craftground.make(
+        make(
+            initial_env_config=InitialEnvironmentConfig(
+                image_width=size_x,
+                image_height=size_y,
+                world_type=WorldType.SUPERFLAT,
+                initial_extra_commands=[
+                    "time set noon",
+                    f"place template minecraft:{template_name} 0 0 0",
+                    f"tp @p {INITIAL_POSITION[0]} {INITIAL_POSITION[1]} {INITIAL_POSITION[2]} {INITIAL_POSITION[3]} {INITIAL_POSITION[4]}",  # x y z yaw pitch
+                ],
+                hud_hidden=True,
+                render_distance=5,
+                simulation_distance=5,
+                structure_paths=[
+                    map_path,
+                ],
+                seed="12345",
+                screen_encoding_mode=ScreenEncodingMode.RAW,
+                no_fov_effect=True,
+            )
+            .set_allow_mob_spawn(False)
+            .set_daylight_cycle_mode(DaylightMode.ALWAYS_DAY)
+            .set_initial_weather("clear")
+            .freeze_weather(True),
             port=port,
-            initialInventoryCommands=[],
             verbose=verbose,
-            initialPosition=[5, 5, 5],  # nullable
-            initialMobsCommands=[],
-            imageSizeX=size_x,
-            imageSizeY=size_y,
-            visibleSizeX=size_x,
-            visibleSizeY=size_y,
-            seed=12345,  # nullable
-            allowMobSpawn=False,
-            alwaysDay=True,
-            alwaysNight=False,
-            initialWeather="clear",  # nullable
-            isHardCore=False,
-            isWorldFlat=True,  # superflat world
-            obs_keys=[],  # No sound subtitles
-            miscStatKeys=[],  # No stats
-            initialExtraCommands=[
-                "time set noon",
-                f"place template minecraft:{template_name} 0 0 0",
-                f"tp @p {INITIAL_POSITION[0]} {INITIAL_POSITION[1]} {INITIAL_POSITION[2]} {INITIAL_POSITION[3]} {INITIAL_POSITION[4]}",
-                # "effect give @p minecraft:speed infinite 1 true",  # speed effect, particle hidden
-            ],  # x y z yaw pitch
-            isHudHidden=True,
             render_action=False,
-            render_distance=5,
-            simulation_distance=5,
-            structure_paths=[
-                map_path,
-            ],
-            no_pov_effect=True,
-            screen_encoding_mode=ScreenEncodingMode.RAW,
             use_vglrun=check_vglrun(),
             verbose_python=verbose_python,
             verbose_gradle=verbose_gradle,
