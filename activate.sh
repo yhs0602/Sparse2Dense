@@ -1,3 +1,3 @@
 export PYTHONPATH=.
 export DISPLAY=:2
-conda activate maze120
+mamba activate sparse2dense

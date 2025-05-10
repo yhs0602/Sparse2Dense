@@ -164,3 +164,10 @@ features from the Minecraft Toddler Playroom environment.
 
 # Code Ocean Submission
 Due to resource constraints on the Code Ocean platform, the execution was configured to run only 20100 steps instead of the originally intended 1 million steps. The number of steps can be adjusted via execution parameters. For full-scale experiments, it is recommended to increase the step count in the execution parameters accordingly.
+
+
+# pip chill
+pip install pip-chill
+pip-chill > requirements.in
+pip-compile requirements.in
+pip-sync
