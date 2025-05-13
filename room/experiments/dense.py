@@ -110,6 +110,12 @@ def dense_room(
             from_str = "sparse"
         elif "dense" in base_checkpoint:
             from_str = "dense"
+        elif "ir-e3b" in base_checkpoint:
+            from_str = "ir-e3b"
+        elif "ir-icm" in base_checkpoint:
+            from_str = "ir-icm"
+        elif "ir-ngu" in base_checkpoint:
+            from_str = "ir-ngu"
     # setting = select_goal_spawn()
     group_name = f"v33-room-v1-dense-{extended}-from_{from_str}-{entropy_coef}"  # {setting['spawn_idx']}
     run = wandb.init(
