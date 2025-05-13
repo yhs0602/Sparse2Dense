@@ -139,7 +139,7 @@ def icm_transition(
     device = get_device(device_id)
 
     # Setup train environment
-    base_env, _ = make_room_env(port1, size_x, size_y, extended=extended)
+    base_env, _ = make_room_env(port1, size_x, size_y, extended=extended, verbose_gradle=True, verbose_jvm=True)
     env = wrap_env(
         base_env,
         size_x,

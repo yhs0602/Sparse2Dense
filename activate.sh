@@ -1,3 +1,3 @@
 export PYTHONPATH=.
-export DISPLAY=:2
+export DISPLAY=:0
 mamba activate sparse2dense
