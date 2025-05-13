@@ -131,8 +131,8 @@ def dense_room(
     # Setup train environment
     base_env, _ = make_room_env(port1, size_x, size_y, extended=extended)
     env = wrap_env(base_env, size_x, size_y, central_logger)
-    env = DummyVecEnv([lambda: env])
     env = Monitor(env)
+    env = DummyVecEnv([lambda: env])
     env = VecVideoRecorder(
         env,
         f"videos/{run.id}",

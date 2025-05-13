@@ -221,7 +221,9 @@ def icm_transition(
         8000000,
     ]
     checkpoint_callback = CustomCheckpointCallback(
-        steps=checkpoint_steps, save_path=f"models/{extended}/dense/{run.id}", verbose=1
+        steps=checkpoint_steps,
+        save_path=f"models/{extended}/ir-{ir_type}/{seed}",
+        verbose=1,
     )
 
     try:
