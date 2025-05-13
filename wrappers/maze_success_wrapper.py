@@ -29,7 +29,7 @@ class MazeSuccessWrapper(Wrapper):
         self, action: WrapperActType
     ) -> tuple[WrapperObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         obs, reward, terminated, truncated, info = self.env.step(action)
-        info_obs = info["obs"]
+        info_obs = info["full"]
         x = info_obs.x
         y = info_obs.y
         z = info_obs.z

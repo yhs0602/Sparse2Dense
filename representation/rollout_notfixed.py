@@ -201,7 +201,7 @@ class GetPositionWrapper(gymnasium.Wrapper):
         self, *, seed: Optional[int] = None, options: Optional[Dict[str, Any]] = None
     ) -> tuple[WrapperObsType, dict[str, Any]]:
         obs, info = self.env.reset(seed=seed, options=options)
-        info_obs = info["obs"]
+        info_obs = info["full"]
         pos = (info_obs.x, info_obs.y, info_obs.z, info_obs.yaw)
         logger.log(
             {"position_x": pos[0], "position_z": pos[2], "position_yaw": pos[3]},
@@ -213,7 +213,7 @@ class GetPositionWrapper(gymnasium.Wrapper):
         self, action: WrapperActType
     ) -> tuple[WrapperObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         obs, reward, terminated, truncated, info = self.env.step(action)
-        info_obs = info["obs"]
+        info_obs = info["full"]
         pos = (info_obs.x, info_obs.y, info_obs.z, info_obs.yaw)
         logger.log(
             {"position_x": pos[0], "position_z": pos[2], "position_yaw": pos[3]},

@@ -16,7 +16,7 @@ class FishAnythingWrapper(Wrapper):
         self, action: WrapperActType
     ) -> tuple[WrapperObsType, SupportsFloat, bool, bool, dict[str, Any]]:
         obs, reward, terminated, truncated, info = self.env.step(action)
-        info_obs = info["obs"]
+        info_obs = info["full"]
         experience = info_obs.misc_statistics["experience"]
         # print(fish_caught)
         self.experience_deque.append(experience)
