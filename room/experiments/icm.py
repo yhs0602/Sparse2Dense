@@ -130,6 +130,12 @@ def icm_transition(
         monitor_gym=True,  # auto-upload the videos of agents playing the game
         save_code=True,  # optional
         tags=["room-v1"],
+        config={
+            "seed": seed,
+            "entropy_coef": entropy_coef,
+            "extended": extended,
+            "from_str": from_str,
+        },
     )
     central_logger = CentralLogger()
     define_room_metrics()
