@@ -60,7 +60,6 @@ def draw_ir_figures(
 
             group_data.append(df)
 
-
         # Data preparation done.
         # Now calculate the average and std of the group
         avg_data = calculate_group_average(group_data, axis_x_name, axis_y_name)
@@ -155,6 +154,18 @@ def main():
     for (algo, timing), files in grouped_data.items():
         print(f"{algo=}, {timing=}, {len(files)=}")
 
+    # Filter
+    # e3b = 2M, icm = 1M ngu = 1M
+    # Filter the grouped_data
+    filtered_grouped_data = {}
+    for (algo, timing), files in grouped_data.items():
+        if algo == "e3b" and timing == "2M":
+            filtered_grouped_data[(algo, timing)] = files
+        elif algo == "icm" and timing == "1M":
+            filtered_grouped_data[(algo, timing)] = files
+        elif algo == "ngu" and timing == "1M":
+            filtered_grouped_data[(algo, timing)] = files
+
     # Draw graph by grouped data
     axis_list = [
         ("episode", "episode/length"),
@@ -167,15 +178,13 @@ def main():
 
     for axis in axis_list:
         plt.figure(figsize=(14, 8))
-        draw_ir_figures(axis[0], axis[1], grouped_data, algo, 100)
+        draw_ir_figures(axis[0], axis[1], filtered_grouped_data, algo, 100)
         plt.title(f"{axis[0]}/{axis[1]}")
         plt.xlabel(axis[0])
         plt.ylabel(axis[1])
         plt.legend()
         # plt.show()
-        filename = (
-            f"ir_figs/{axis[0].replace('/', '_')}_{axis[1].replace('/', '_')}.png"
-        )
+        filename = f"ir_figs_filtered/{axis[0].replace('/', '_')}_{axis[1].replace('/', '_')}.png"
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         plt.savefig(filename)
 
