@@ -7,6 +7,11 @@ import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 
+from post_processing.december.draw_normal_experiments import (
+    plot_impl_normal_experiments,
+    prepare_normal_params,
+)
+
 
 # Running Averaging Calculation Functions
 def running_average(data, window_size: int):
@@ -43,6 +48,7 @@ def draw_ir_figures(
     groups: Dict[Tuple[str, str], List[str]],
     groups_name,
     window_size,
+    normal_room_groups: Dict[str, List[pd.DataFrame]],
 ):
     print(f"Intrinsic Reward {groups_name}/{axis_x_name}/{axis_y_name}")
 
@@ -121,6 +127,11 @@ def draw_ir_figures(
             print(
                 f"{algo}/{timing};{axis_y_name}:        {slope:.2f}\\stdv{{{slope_std:.2f}}}"
             )
+    # Draw normal data
+    for group, dfs in normal_room_groups.items():
+        print(f"{group=}")
+        for df in dfs:
+            pass
     print("Done")
 
 
@@ -134,8 +145,11 @@ def main():
 
     grouped_data = {}
 
-    for algo in os.listdir("ir_runs"):
-        merged_dir = f"ir_runs/{algo}/merged"
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    ir_runs_dir = f"{this_dir}/ir_runs"
+
+    for algo in os.listdir(ir_runs_dir):
+        merged_dir = f"{ir_runs_dir}/{algo}/merged"
         for file in os.listdir(merged_dir):
             seed = file.split("-")[0]
             timing = file.split("_")[-1].split(".")[0]
@@ -157,7 +171,7 @@ def main():
     # Filter
     # e3b = 2M, icm = 1M ngu = 1M
     # Filter the grouped_data
-    filtered_grouped_data = {}
+    filtered_grouped_data: Dict[Tuple[str, str], List[str]] = {}
     for (algo, timing), files in grouped_data.items():
         if algo == "e3b" and timing == "2M":
             filtered_grouped_data[(algo, timing)] = files
@@ -165,6 +179,14 @@ def main():
             filtered_grouped_data[(algo, timing)] = files
         elif algo == "ngu" and timing == "1M":
             filtered_grouped_data[(algo, timing)] = files
+
+    ###########
+    # Prepare normal data
+    normal_axises, normal_room_groups, normal_window_size = prepare_normal_params(
+        f"{this_dir}/../post_processing/merged_all_241214-s2d-with-reward"
+    )
+    normal_room_groups: Dict[str, List[pd.DataFrame]]
+    ###########
 
     # Draw graph by grouped data
     axis_list = [
@@ -178,13 +200,30 @@ def main():
 
     for axis in axis_list:
         plt.figure(figsize=(14, 8))
-        draw_ir_figures(axis[0], axis[1], filtered_grouped_data, algo, 100)
+        draw_ir_figures(
+            axis[0],
+            axis[1],
+            filtered_grouped_data,
+            algo,
+            window_size=normal_window_size,
+            normal_room_groups=normal_room_groups,
+        )
+        try:
+            plot_impl_normal_experiments(
+                axis[0],
+                axis[1],
+                normal_room_groups,
+                "normal",
+                normal_window_size,
+            )
+        except KeyError as e:
+            print(f"KeyError | AssertionError: {axis[0]}, {axis[1]}, {e}")
         plt.title(f"{axis[0]}/{axis[1]}")
         plt.xlabel(axis[0])
         plt.ylabel(axis[1])
         plt.legend()
         # plt.show()
-        filename = f"ir_figs_filtered/{axis[0].replace('/', '_')}_{axis[1].replace('/', '_')}.png"
+        filename = f"{ir_runs_dir}/../ir_figs_filtered_all/{axis[0].replace('/', '_')}_{axis[1].replace('/', '_')}.png"
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         plt.savefig(filename)
 
