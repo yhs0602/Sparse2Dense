@@ -3,13 +3,11 @@ from matplotlib import pyplot as plt
 
 from post_processing.december.draw_figures_entropy import (
     prepare_entropy_params,
-    plot_entropy_groups,
     draw_entropy_figures,
     save_entropy_figure,
 )
 from post_processing.december.draw_normal_experiments import (
     prepare_normal_params,
-    plot_groups_normal_experiments,
     plot_impl_normal_experiments,
 )
 from post_processing.december.draw_intrinsic_experiments import (
