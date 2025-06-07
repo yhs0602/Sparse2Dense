@@ -121,7 +121,10 @@ def icm_transition(
         elif "dense" in base_checkpoint:
             from_str = "dense"
     # setting = select_goal_spawn()
-    group_name = f"v40-room-s2d-{ir_type}-from_{from_str}-{entropy_coef}-ir{ir_scale}"  # {setting['spawn_idx']}
+    if use_pbim:
+        group_name = f"v40-room-s2d-{ir_type}-from_{from_str}-{entropy_coef}-ir{ir_scale}-pbim"  # {setting['spawn_idx']}
+    else:
+        group_name = f"v40-room-s2d-{ir_type}-from_{from_str}-{entropy_coef}-ir{ir_scale}"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,
