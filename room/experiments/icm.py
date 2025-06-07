@@ -32,6 +32,7 @@ from sb3_exts.custom_checkpoint_callback import CustomCheckpointCallback
 from sb3_exts.rlex_callback import RLeXploreWithOnPolicyRL
 
 # from sb3_exts.episode_start_callback import EpisodeStartCallback
+from sb3_exts.rlex_pbim_callback import RLeXplorePBIMWithOnPolicyRL
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
 from wandb_envs import WANDB_PROJECT, WANDB_ENTITY
@@ -110,6 +111,7 @@ def icm_transition(
     entropy_coef: float = 0.005,
     ir_type: str = "icm",
     ir_scale: float = 0.01,
+    use_pbim: bool = False,
 ):
     set_random_seed(seed)
     from_str = ""
@@ -234,6 +236,11 @@ def icm_transition(
         verbose=1,
     )
 
+    if use_pbim:
+        rlx_callback = RLeXplorePBIMWithOnPolicyRL(irs, ir_scale)
+    else:
+        rlx_callback = RLeXploreWithOnPolicyRL(irs, ir_scale)
+
     try:
         model.learn(
             total_timesteps=max_steps,
@@ -243,7 +250,7 @@ def icm_transition(
                     model_save_path=f"models/{run.id}",
                     verbose=2,
                 ),
-                RLeXploreWithOnPolicyRL(irs, ir_scale),
+                rlx_callback,
                 checkpoint_callback,
                 # EpisodeLogger(),
                 # EpisodeStartCallback(eval_callback),
@@ -315,6 +322,11 @@ if __name__ == "__main__":
         help="Intrinsic reward scale",
         default=0.01,
     )
+    arg_parser.add_argument(
+        "--pbim",
+        action="store_true",
+        help="Use PBIM",
+    )
 
     args = arg_parser.parse_args()
     port1 = args.port1
@@ -331,4 +343,5 @@ if __name__ == "__main__":
         entropy_coef=args.entropy,
         ir_type=args.ir_type,
         ir_scale=args.ir_scale,
+        use_pbim=args.pbim,
     )
