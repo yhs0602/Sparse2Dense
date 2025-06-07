@@ -9,8 +9,8 @@ class NormalizedPBIMWrapper(gymnasium.Wrapper):
     Parameters:
         env (gymnasium.Env): Base environment.
         intrinsic_reward_fn (callable): Function f(obs, action, next_obs) -> float raw intrinsic reward F_t.
-        gamma (float): Discount factor used in shaping (\u03b3).
-        running_mean_alpha (float): Smoothing factor for updating mean intrinsic reward \u0304F.
+        gamma (float): Discount factor used in shaping (gamma).
+        running_mean_alpha (float): Smoothing factor for updating mean intrinsic reward F.
         max_episode_steps (int, optional): Maximum steps per episode. If None, uses env.spec.max_episode_steps.
     """
 
