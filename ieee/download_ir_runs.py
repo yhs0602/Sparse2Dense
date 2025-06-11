@@ -3,6 +3,8 @@ import pandas as pd
 import wandb
 
 from tqdm import tqdm
+import argparse
+from wandb.apis.public import Run
 
 
 class IRRun:
@@ -44,9 +46,12 @@ class IRRunGroup:
             yield full_runs
 
 
-def main():
+def main(is_pbim: bool = False):
     # load latest_runs.csv
-    df = pd.read_csv("latest_runs.csv")
+    if is_pbim:
+        df = pd.read_csv("latest_runs_pbim.csv")
+    else:
+        df = pd.read_csv("latest_runs.csv")
     df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     df.columns = df.columns.str.strip()
     print(df.head())
@@ -103,12 +108,22 @@ def main():
             ):
                 # save as {seed}-{run_id}.csv
                 file_name = f"{ir_run.seed}-{ir_run.run_id}.csv"
-                file_path = f"ir_runs/{algo}/{checkpoint}/{file_name}"
+                if is_pbim:
+                    file_path = f"ir_runs_pbim/{algo}/{checkpoint}/{file_name}"
+                else:
+                    file_path = f"ir_runs/{algo}/{checkpoint}/{file_name}"
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
                 if not os.path.exists(file_path):
+                    if pd.isna(ir_run.run_id) or not ir_run.run_id:
+                        print(f"Run {ir_run.run_id} is nan")
+                        continue
                     # download from wandb
-                    run = api.run(
+                    run: Run = api.run(
                         f"jourhyang123/Sparse2Dense-room_experiments/{ir_run.run_id}"
                     )
+                    if run.state != "finished":
+                        print(f"Run {ir_run.run_id} is not finished")
+                        continue
                     history = run.scan_history()
                     columns = [
                         "step",
@@ -136,7 +151,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    argparse = argparse.ArgumentParser()
+    argparse.add_argument("--pbim", action="store_true")
+    args = argparse.parse_args()
+    main(args.pbim)
 
 
 # 이제 내가 wandb에서 해당 run들을 다운받은다음에 그 run에 대하여
