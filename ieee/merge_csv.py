@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+import argparse
 
 
 def merge_and_save(base_file, million_file, num_million):
@@ -79,9 +80,10 @@ def merge_and_save(base_file, million_file, num_million):
     df_combined.to_csv(merged_path, index=False)
 
 
-def main():
-    for algo in os.listdir("ir_runs"):
-        algo_dir = f"ir_runs/{algo}"
+def main(is_pbim: bool):
+    bed_dir = "ir_runs_pbim" if is_pbim else "ir_runs"
+    for algo in os.listdir(bed_dir):
+        algo_dir = f"{bed_dir}/{algo}"
         base_dir = f"{algo_dir}/base"
         million_dir = f"{algo_dir}/100만"
         million_dir2 = f"{algo_dir}/200만"
@@ -97,18 +99,26 @@ def main():
             "3M": {},
         }
         for csv in os.listdir(base_dir):
+            if not csv.endswith(".csv"):
+                continue
             seed = csv.split("-")[0]
             files["base"][seed] = f"{base_dir}/{csv}"
             seeds.add(seed)
         for csv in os.listdir(million_dir):
+            if not csv.endswith(".csv"):
+                continue
             seed = csv.split("-")[0]
             files["1M"][seed] = f"{million_dir}/{csv}"
             seeds.add(seed)
         for csv in os.listdir(million_dir2):
+            if not csv.endswith(".csv"):
+                continue
             seed = csv.split("-")[0]
             files["2M"][seed] = f"{million_dir2}/{csv}"
             seeds.add(seed)
         for csv in os.listdir(million_dir3):
+            if not csv.endswith(".csv"):
+                continue
             seed = csv.split("-")[0]
             files["3M"][seed] = f"{million_dir3}/{csv}"
             seeds.add(seed)
@@ -116,10 +126,22 @@ def main():
         print(seeds)
 
         for seed in seeds:
-            base_file = files["base"][seed]
-            million_file = files["1M"][seed]
+            base_file = files["base"].get(seed, None)
+            if not base_file:
+                print(f"No base file for seed {seed}")
+                continue
+            million_file = files["1M"].get(seed, None)
+            if not million_file:
+                print(f"No 1M file for seed {seed}")
+                continue
             million_file2 = files["2M"].get(seed, None)
+            if not million_file2:
+                print(f"No 2M file for seed {seed}")
+                continue
             million_file3 = files["3M"].get(seed, None)
+            if not million_file3:
+                print(f"No 3M file for seed {seed}")
+                continue
             print(f"{base_file} + {million_file}")
             print(f"{base_file} + {million_file2}")
             print(f"{base_file} + {million_file3}")
@@ -130,4 +152,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--pbim", action="store_true")
+    args = parser.parse_args()
+    main(args.pbim)
