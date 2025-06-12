@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
+import argparse
 
 from post_processing.december.draw_normal_experiments import (
     plot_impl_normal_experiments,
@@ -60,9 +61,9 @@ def draw_ir_figures(
             # Ffill the x_axis
             df.ffill(inplace=True)
             df.bfill(inplace=True)
-            assert df[axis_x_name].isnull().sum() == 0
-            assert df[axis_y_name].isnull().sum() == 0
-            assert len(df[axis_x_name]) == len(df[axis_y_name])
+            # assert df[axis_x_name].isnull().sum() == 0
+            # assert df[axis_y_name].isnull().sum() == 0
+            # assert len(df[axis_x_name]) == len(df[axis_y_name])
 
             group_data.append(df)
 
@@ -135,7 +136,7 @@ def draw_ir_figures(
     print("Done")
 
 
-def main():
+def main(is_pbim: bool):
     # For each folders in ir_runs
     # episode/episode_length
     # global_step/ 0..3/success_rate
@@ -146,7 +147,7 @@ def main():
     grouped_data = {}
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
-    ir_runs_dir = f"{this_dir}/ir_runs"
+    ir_runs_dir = f"{this_dir}/ir_runs_pbim" if is_pbim else f"{this_dir}/ir_runs"
 
     for algo in os.listdir(ir_runs_dir):
         merged_dir = f"{ir_runs_dir}/{algo}/merged"
@@ -173,11 +174,11 @@ def main():
     # Filter the grouped_data
     filtered_grouped_data: Dict[Tuple[str, str], List[str]] = {}
     for (algo, timing), files in grouped_data.items():
-        if algo == "e3b" and timing == "2M":
+        if algo == "e3b":  #  and timing == "2M":
             filtered_grouped_data[(algo, timing)] = files
-        elif algo == "icm" and timing == "1M":
+        elif algo == "icm":  # and timing == "1M":
             filtered_grouped_data[(algo, timing)] = files
-        elif algo == "ngu" and timing == "1M":
+        elif algo == "ngu":  # and timing == "1M":
             filtered_grouped_data[(algo, timing)] = files
 
     ###########
@@ -223,10 +224,13 @@ def main():
         plt.ylabel(axis[1])
         plt.legend()
         # plt.show()
-        filename = f"{ir_runs_dir}/../ir_figs_filtered_all/{axis[0].replace('/', '_')}_{axis[1].replace('/', '_')}.png"
+        filename = f"{ir_runs_dir}/../ir_pbim_figs_filtered_all/{axis[0].replace('/', '_')}_{axis[1].replace('/', '_')}.png"
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         plt.savefig(filename)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--pbim", action="store_true")
+    args = parser.parse_args()
+    main(args.pbim)

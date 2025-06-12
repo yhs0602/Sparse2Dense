@@ -131,24 +131,25 @@ def main(is_pbim: bool):
                 print(f"No base file for seed {seed}")
                 continue
             million_file = files["1M"].get(seed, None)
-            if not million_file:
+            if million_file:
+                print(f"{base_file} + {million_file}")
+                merge_and_save(base_file, million_file, 1)
+            else:
                 print(f"No 1M file for seed {seed}")
-                continue
             million_file2 = files["2M"].get(seed, None)
-            if not million_file2:
+            if million_file2:
+                print(f"{base_file} + {million_file2}")
+                merge_and_save(base_file, million_file2, 2)
+            else:
                 print(f"No 2M file for seed {seed}")
                 continue
             million_file3 = files["3M"].get(seed, None)
-            if not million_file3:
+            if million_file3:
+                print(f"{base_file} + {million_file3}")
+                merge_and_save(base_file, million_file3, 3)
+            else:
                 print(f"No 3M file for seed {seed}")
                 continue
-            print(f"{base_file} + {million_file}")
-            print(f"{base_file} + {million_file2}")
-            print(f"{base_file} + {million_file3}")
-            # Merge and fill the values
-            merge_and_save(base_file, million_file, 1)
-            merge_and_save(base_file, million_file2, 2)
-            merge_and_save(base_file, million_file3, 3)
 
 
 if __name__ == "__main__":

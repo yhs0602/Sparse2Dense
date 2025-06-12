@@ -127,7 +127,7 @@ def dense_room(
         else:
             timing_str = "unknown"
     # setting = select_goal_spawn()
-    group_name = f"v41-room-v1-dense-{extended}-from_{from_str}(transition-{timing_str})-{entropy_coef}-from_pbim"  # {setting['spawn_idx']}
+    group_name = f"v42-room-v1-dense-{extended}-from_{from_str}(transition-{timing_str})-{entropy_coef}-from_pbim"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,
