@@ -10,6 +10,7 @@ from gymnasium.wrappers import TimeLimit
 from sb3_contrib import RecurrentPPO
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
+from rllte.xplore.reward import ICM, NGU, E3B
 
 # from stable_baselines3.common.callbacks import EvalCallback
 # from stable_baselines3.common.monitor import Monitor
@@ -30,6 +31,7 @@ from room.wrappers.room_reach_check_log_wrapper import RoomReachCheckAndLogWrapp
 from sb3_exts.custom_checkpoint_callback import CustomCheckpointCallback
 
 # from sb3_exts.episode_start_callback import EpisodeStartCallback
+from sb3_exts.rlex_pbim_callback import RLeXplorePBIMWithOnPolicyRL
 from utils.central_logger import CentralLogger
 from utils.get_device import get_device
 from wandb_envs import WANDB_PROJECT, WANDB_ENTITY
@@ -102,6 +104,9 @@ def dense_room(
     seed: int = 3,
     base_checkpoint: Optional[str] = None,
     entropy_coef: float = 0.005,
+    ir_type: str = None,
+    ir_scale: float = 0.01,
+    pbim: bool = False,
 ):
     set_random_seed(seed)
     from_str = ""
@@ -127,7 +132,8 @@ def dense_room(
         else:
             timing_str = "unknown"
     # setting = select_goal_spawn()
-    group_name = f"v42-room-v1-dense-{extended}-from_{from_str}(transition-{timing_str})-{entropy_coef}-from_pbim"  # {setting['spawn_idx']}
+    to_pbim_str = "pbim" if pbim else "no_pbim"
+    group_name = f"v42-room-v1-dense-{extended}-from_{from_str}(transition-{timing_str})-{entropy_coef}-from_pbim-{to_pbim_str}"  # {setting['spawn_idx']}
     run = wandb.init(
         # set the wandb project where this run will be logged
         project=WANDB_PROJECT,
@@ -144,6 +150,7 @@ def dense_room(
             "extended": extended,
             "from_str": from_str,
             "timing_str": timing_str,
+            "pbim": pbim,
         },
     )
     central_logger = CentralLogger()
@@ -162,6 +169,24 @@ def dense_room(
         record_video_trigger=lambda x: x % 20000 == 0,
         video_length=20000,
     )
+
+    device = get_device(device_id)
+    if pbim:
+        if ir_type == "icm":
+            irs = ICM(env, str(device))
+        elif ir_type == "ngu":
+            irs = NGU(env, str(device), mrs=ir_scale)
+            ir_scale = 1
+        elif ir_type == "e3b":
+            irs = E3B(env, str(device))
+            ir_scale = 1
+        else:
+            raise ValueError(f"Unknown intrinsic reward type: {ir_type}")
+        rlx_callback = RLeXplorePBIMWithOnPolicyRL(irs, ir_scale)
+    else:
+        if ir_type:
+            raise ValueError(f"Intrinsic reward type is not supported for non-pbim")
+        rlx_callback = None
     # Setup eval environment
     # eval_base_env, _ = make_room_env(port2, size_x, size_y, verbose_gradle=True)
     # eval_env = wrap_env(
@@ -199,7 +224,7 @@ def dense_room(
             "CnnLstmPolicy",
             env,
             verbose=1,
-            device=get_device(device_id),
+            device=device,
             tensorboard_log=f"runs/{run.id}",
             gae_lambda=0.99,
             ent_coef=entropy_coef,
@@ -224,18 +249,19 @@ def dense_room(
     )
 
     try:
+        callbacks = [
+            WandbCallback(
+                gradient_save_freq=500,
+                model_save_path=f"models/{run.id}",
+                verbose=2,
+            ),
+            checkpoint_callback,
+        ]
+        if rlx_callback:
+            callbacks.append(rlx_callback)
         model.learn(
             total_timesteps=max_steps,
-            callback=[
-                WandbCallback(
-                    gradient_save_freq=500,
-                    model_save_path=f"models/{run.id}",
-                    verbose=2,
-                ),
-                checkpoint_callback,
-                # EpisodeLogger(),
-                # EpisodeStartCallback(eval_callback),
-            ],
+            callback=callbacks,
         )
         model.save(f"ckpts/{group_name}-{run.name}.ckpt")
 
@@ -284,6 +310,23 @@ if __name__ == "__main__":
         help="Entropy coefficient",
         default=0.005,
     )
+    arg_parser.add_argument(
+        "--pbim",
+        action="store_true",
+        help="Use pbim",
+    )
+    arg_parser.add_argument(
+        "--ir-type",
+        type=str,
+        help="Intrinsic reward type",
+        default=None,
+    )
+    arg_parser.add_argument(
+        "--ir-scale",
+        type=float,
+        help="Intrinsic reward scale",
+        default=0.01,
+    )
 
     args = arg_parser.parse_args()
     port1 = args.port1
@@ -298,4 +341,7 @@ if __name__ == "__main__":
         seed=args.seed,
         base_checkpoint=args.base_checkpoint,
         entropy_coef=args.entropy,
+        pbim=args.pbim,
+        ir_type=args.ir_type,
+        ir_scale=args.ir_scale,
     )
