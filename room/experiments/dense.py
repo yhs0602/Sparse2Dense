@@ -50,28 +50,26 @@ from wrappers.turn_90_wrapper import Turn90Wrapper
 
 def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
     # Checks, Logs, Terminates
-    maze_wrapper = (
-        RoomReachCheckAndLogWrapper(
-            # Select goal when reset
-            RoomGoalSelectionWrapper(
-                PositionLoggingWrapper(
-                    Turn90Wrapper(
-                        VisionWrapper(
-                            env,
-                            x_dim=size_x,
-                            y_dim=size_y,
-                        ),
+    maze_wrapper = RoomReachCheckAndLogWrapper(
+        # Select goal when reset
+        RoomGoalSelectionWrapper(
+            PositionLoggingWrapper(
+                Turn90Wrapper(
+                    VisionWrapper(
+                        env,
+                        x_dim=size_x,
+                        y_dim=size_y,
                     ),
-                    logger=central_logger,
                 ),
-                goal_selector=select_goal_spawn,
-                goal_set_command_provider=spawn_goal_command,
-                goal_remove_command_provider=remove_goal_command,
+                logger=central_logger,
             ),
-            radius=2,
-            central_logger=central_logger,
-            cooldown=2,
+            goal_selector=select_goal_spawn,
+            goal_set_command_provider=spawn_goal_command,
+            goal_remove_command_provider=remove_goal_command,
         ),
+        radius=2,
+        central_logger=central_logger,
+        cooldown=2,
     )
     env = VisionTransposeWrapper(x_dim=size_x, y_dim=size_y, env=maze_wrapper)
     return LogFlushWrapper(
