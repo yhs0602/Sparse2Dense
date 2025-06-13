@@ -17,6 +17,7 @@ from rllte.xplore.reward import ICM, NGU, E3B
 from stable_baselines3.common.vec_env import DummyVecEnv, VecVideoRecorder
 from wandb.integration.sb3 import WandbCallback
 
+from room.experiments.transpose import VisionTransposeWrapper
 from room.room_env import (
     select_goal_spawn,
     define_room_metrics,
@@ -48,6 +49,31 @@ from wrappers.turn_90_wrapper import Turn90Wrapper
 
 
 def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
+    # Checks, Logs, Terminates
+    maze_wrapper = (
+        RoomReachCheckAndLogWrapper(
+            # Select goal when reset
+            RoomGoalSelectionWrapper(
+                PositionLoggingWrapper(
+                    Turn90Wrapper(
+                        VisionWrapper(
+                            env,
+                            x_dim=size_x,
+                            y_dim=size_y,
+                        ),
+                    ),
+                    logger=central_logger,
+                ),
+                goal_selector=select_goal_spawn,
+                goal_set_command_provider=spawn_goal_command,
+                goal_remove_command_provider=remove_goal_command,
+            ),
+            radius=2,
+            central_logger=central_logger,
+            cooldown=2,
+        ),
+    )
+    env = VisionTransposeWrapper(x_dim=size_x, y_dim=size_y, env=maze_wrapper)
     return LogFlushWrapper(
         FastResetWrapper(
             RoomEpisodeLoggerWrapper(
@@ -58,28 +84,7 @@ def wrap_env(env, size_x, size_y, central_logger) -> gymnasium.Env:
                         # Sparse reward
                         HomeDenseWrapper(
                             SparseRewardWrapper(
-                                # Checks, Logs, Terminates
-                                RoomReachCheckAndLogWrapper(
-                                    # Select goal when reset
-                                    RoomGoalSelectionWrapper(
-                                        PositionLoggingWrapper(
-                                            Turn90Wrapper(
-                                                VisionWrapper(
-                                                    env,
-                                                    x_dim=size_x,
-                                                    y_dim=size_y,
-                                                ),
-                                            ),
-                                            logger=central_logger,
-                                        ),
-                                        goal_selector=select_goal_spawn,
-                                        goal_set_command_provider=spawn_goal_command,
-                                        goal_remove_command_provider=remove_goal_command,
-                                    ),
-                                    radius=2,
-                                    central_logger=central_logger,
-                                    cooldown=2,
-                                ),
+                                env,
                                 reward=1,
                             ),
                             radius=5,
