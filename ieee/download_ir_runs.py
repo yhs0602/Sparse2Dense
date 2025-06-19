@@ -49,7 +49,7 @@ class IRRunGroup:
 def main(is_pbim: bool = False):
     # load latest_runs.csv
     if is_pbim:
-        df = pd.read_csv("latest_runs_pbim.csv")
+        df = pd.read_csv("latest_runs_pbim2.csv")
     else:
         df = pd.read_csv("latest_runs.csv")
     df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
