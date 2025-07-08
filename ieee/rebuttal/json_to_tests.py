@@ -10,15 +10,6 @@ def t_test():
 
 def anova(groups: Dict[str, Tuple[float, float]], n=7):
     # 그룹별 mean/std
-    groups = {
-        "S2D(C_1)": (138.71, 3.71),
-        "S2D(C_2)": (63.40, 160.55),
-        "S2D(C_3)": (168.88, 23.66),
-        "OnlySparse": (142.50, 4.25),
-        "OnlyDense": (139.68, 14.90),
-        "D2S(C_1)": (140.75, 7.46),
-        "D2S(C_2)": (130.63, 19.69),
-    }
     # 가상 샘플 생성
     samples = []
     for mean, std in groups.values():
@@ -49,13 +40,34 @@ def main():
         print("D2S(C_2): ", row["D2S(C_2)"]["value"], "±", row["D2S(C_2)"]["stdv"])
 
         groups = {
-            "S2D(C_1)": (row["S2D(C_1)"]["value"], row["S2D(C_1)"]["stdv"]),
-            "S2D(C_2)": (row["S2D(C_2)"]["value"], row["S2D(C_2)"]["stdv"]),
-            "S2D(C_3)": (row["S2D(C_3)"]["value"], row["S2D(C_3)"]["stdv"]),
-            "OnlySparse": (row["OnlySparse"]["value"], row["OnlySparse"]["stdv"]),
-            "OnlyDense": (row["OnlyDense"]["value"], row["OnlyDense"]["stdv"]),
-            "D2S(C_1)": (row["D2S(C_1)"]["value"], row["D2S(C_1)"]["stdv"]),
-            "D2S(C_2)": (row["D2S(C_2)"]["value"], row["D2S(C_2)"]["stdv"]),
+            "S2D(C_1)": (
+                float(row["S2D(C_1)"]["value"]),
+                float(row["S2D(C_1)"]["stdv"]),
+            ),
+            "S2D(C_2)": (
+                float(row["S2D(C_2)"]["value"]),
+                float(row["S2D(C_2)"]["stdv"]),
+            ),
+            "S2D(C_3)": (
+                float(row["S2D(C_3)"]["value"]),
+                float(row["S2D(C_3)"]["stdv"]),
+            ),
+            "OnlySparse": (
+                float(row["OnlySparse"]["value"]),
+                float(row["OnlySparse"]["stdv"]),
+            ),
+            "OnlyDense": (
+                float(row["OnlyDense"]["value"]),
+                float(row["OnlyDense"]["stdv"]),
+            ),
+            "D2S(C_1)": (
+                float(row["D2S(C_1)"]["value"]),
+                float(row["D2S(C_1)"]["stdv"]),
+            ),
+            "D2S(C_2)": (
+                float(row["D2S(C_2)"]["value"]),
+                float(row["D2S(C_2)"]["stdv"]),
+            ),
         }
         anova_result = anova(groups)
         print(
