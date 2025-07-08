@@ -147,9 +147,11 @@ def main(is_pbim: bool):
     grouped_data = {}
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
-    ir_runs_dir = f"{this_dir}/ir_runs_pbim" if is_pbim else f"{this_dir}/ir_runs"
+    ir_runs_dir = f"{this_dir}/ir_runs_full_pbim" if is_pbim else f"{this_dir}/ir_runs"
 
     for algo in os.listdir(ir_runs_dir):
+        if algo == ".DS_Store":
+            continue
         merged_dir = f"{ir_runs_dir}/{algo}/merged"
         for file in os.listdir(merged_dir):
             seed = file.split("-")[0]
@@ -224,7 +226,7 @@ def main(is_pbim: bool):
         plt.ylabel(axis[1])
         plt.legend()
         # plt.show()
-        filename = f"{ir_runs_dir}/../ir_pbim_figs_filtered_all/{axis[0].replace('/', '_')}_{axis[1].replace('/', '_')}.png"
+        filename = f"{ir_runs_dir}/../ir_full_pbim_figs_filtered_all/{axis[0].replace('/', '_')}_{axis[1].replace('/', '_')}.png"
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         plt.savefig(filename)
 

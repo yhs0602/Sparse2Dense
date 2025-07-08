@@ -81,8 +81,10 @@ def merge_and_save(base_file, million_file, num_million):
 
 
 def main(is_pbim: bool):
-    bed_dir = "ir_runs_pbim" if is_pbim else "ir_runs"
+    bed_dir = "ir_runs_full_pbim" if is_pbim else "ir_runs"
     for algo in os.listdir(bed_dir):
+        if algo == ".DS_Store":
+            continue
         algo_dir = f"{bed_dir}/{algo}"
         base_dir = f"{algo_dir}/base"
         million_dir = f"{algo_dir}/100만"
