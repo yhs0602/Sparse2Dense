@@ -3,6 +3,8 @@ from typing import Dict, Tuple
 import numpy as np
 from scipy.stats import f_oneway
 
+np.random.seed(42)
+
 
 def t_test():
     pass
