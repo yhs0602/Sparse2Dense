@@ -21,16 +21,23 @@ def download_wandb_file(run: Run, download_dir):
     group_dir = os.path.join(download_dir, run_group)
     os.makedirs(group_dir, exist_ok=True)
 
-    file_path = os.path.join(group_dir, f"{run_id}.csv")
+    file_path = os.path.join(group_dir, f"{run_id}.csv.gz")
     print(f"Downloading {run_id} to {file_path}")
 
     if not os.path.exists(file_path):
-        scan_history = run.scan_history(keys=["episode", "episode/positions"])
+        scan_history = run.scan_history(
+            keys=["step", "global_step", "episode", "episode/positions"]
+        )
         data = [
-            [row.get(column) for column in ["_step", "episode", "episode/positions"]]
+            [
+                row.get(column)
+                for column in ["step", "global_step", "episode", "episode/positions"]
+            ]
             for row in scan_history
         ]
-        df = pd.DataFrame(data, columns=["_step", "episode", "episode/positions"])
+        df = pd.DataFrame(
+            data, columns=["step", "global_step", "episode", "episode/positions"]
+        )
         df.to_csv(file_path, compression="gzip")
         # history = run.history(keys=["episode", "episode/positions"], samples=500)
         # history.to_csv(file_path)
