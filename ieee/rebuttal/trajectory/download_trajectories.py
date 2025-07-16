@@ -26,18 +26,16 @@ def download_wandb_file(run: Run, download_dir):
 
     if not os.path.exists(file_path):
         scan_history = run.scan_history(
-            keys=["step", "global_step", "episode", "episode/positions"]
+            keys=["global_step", "episode", "episode/positions"]
         )
         data = [
             [
                 row.get(column)
-                for column in ["step", "global_step", "episode", "episode/positions"]
+                for column in ["global_step", "episode", "episode/positions"]
             ]
             for row in scan_history
         ]
-        df = pd.DataFrame(
-            data, columns=["step", "global_step", "episode", "episode/positions"]
-        )
+        df = pd.DataFrame(data, columns=["global_step", "episode", "episode/positions"])
         df.to_csv(file_path, compression="gzip")
         # history = run.history(keys=["episode", "episode/positions"], samples=500)
         # history.to_csv(file_path)
