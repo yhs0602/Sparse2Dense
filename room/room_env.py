@@ -188,6 +188,8 @@ def make_room_env(
     verbose_python: bool = False,
     verbose_gradle: bool = False,
     verbose_jvm: bool = False,
+    requires_depth: bool = False,
+    requires_depth_conversion: bool = False,
 ) -> Tuple[CraftGroundEnvironment, list[str]]:
     template_name = "room_v3" if extended else "room_with_item"
     map_path = extended_map_path if extended else normal_map_path
@@ -211,6 +213,8 @@ def make_room_env(
                 seed="12345",
                 screen_encoding_mode=ScreenEncodingMode.RAW,
                 no_fov_effect=True,
+                requires_depth=requires_depth,
+                requires_depth_conversion=requires_depth_conversion,
             )
             .set_allow_mob_spawn(False)
             .set_daylight_cycle_mode(DaylightMode.ALWAYS_DAY)
