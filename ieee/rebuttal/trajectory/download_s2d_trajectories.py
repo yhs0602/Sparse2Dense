@@ -41,7 +41,7 @@ def download_wandb_file(run: Run, download_dir: str):
         return
 
 
-def get_run(seed, transition_timing, timing):
+def get_run(seed, transition_timing, timing) -> str:
     sparse_base_3M = {
         0: "nk51vw9k",
         42: "9gnwujc3",
