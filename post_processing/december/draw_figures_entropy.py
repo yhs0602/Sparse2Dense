@@ -156,13 +156,19 @@ def draw_entropy_figures(axis_x_name, axis_y_name, groups, groups_name, window_s
 
 
 def save_entropy_figure(
-    axis_x_name, axis_y_name, groups_name, figure_dir="./figures", do_legend=True
+    axis_x_name,
+    axis_y_name,
+    groups_name,
+    figure_dir="./figures",
+    do_legend=True,
+    do_title=True,
 ):
     # plt.xlabel(axis_x_name)
     # plt.ylabel(axis_y_name)
     if do_legend:
         plt.legend()
-    plt.title(f"{axis_x_name} vs {axis_y_name}")
+    if do_title:
+        plt.title(f"{axis_x_name} vs {axis_y_name}")
     y_max = 8000
     y_min = 0
     if "rate" in axis_y_name:
@@ -188,8 +194,9 @@ def save_entropy_figure(
     os.makedirs(figure_dir, exist_ok=True)
     figure_path = f"{figure_dir}/{groups_name}-{axis_x_name}_{axis_y_name}.png"
     os.makedirs("./figures", exist_ok=True)
-    plt.savefig(figure_path, dpi=300)
-    print(f"Saved {figure_path}")
+    plt.savefig(figure_path, dpi=300, bbox_inches="tight")
+    plt.savefig(figure_path.replace(".png", ".pdf"), format="pdf", bbox_inches="tight")
+    print(f"Saved {figure_path} and {figure_path.replace('.png', '.pdf')}")
 
 
 def main():

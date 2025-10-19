@@ -24,11 +24,11 @@ current_canonical_directory = os.path.realpath(current_directory)
 mpl.rcParams.update(
     {
         # "figure.figsize": (18, 5),  # subplot enlarge
-        "axes.titlesize": 12,
-        "axes.labelsize": 11,
-        "legend.fontsize": 10,
-        "pdf.fonttype": 42,  #  Preserve font type
-        "ps.fonttype": 42,
+        # "axes.titlesize": 12,
+        # "axes.labelsize": 11,
+        # "legend.fontsize": 10,
+        # "pdf.fonttype": 42,  #  Preserve font type
+        # "ps.fonttype": 42,
     }
 )
 
@@ -89,7 +89,6 @@ def plot_groups(
             entropy_room_groups,
             entropy_groups_name,
             entropy_window_size,
-            do_legend=False,
         )
     else:
         print("No entropy data")
@@ -124,6 +123,8 @@ def plot_groups(
         axis_y_name,
         entropy_groups_name,
         f"{current_canonical_directory}/figures/241214_all-icm_ir-251019",
+        do_title=False,
+        do_legend=True,
     )
 
     # fig.savefig(
