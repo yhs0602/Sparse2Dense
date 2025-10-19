@@ -1,5 +1,7 @@
 import os
 from matplotlib import pyplot as plt
+import matplotlib as mpl
+
 
 from post_processing.december.draw_figures_entropy import (
     prepare_entropy_params,
@@ -18,6 +20,48 @@ from post_processing.december.draw_intrinsic_experiments import (
 current_file_path = __file__
 current_directory = os.path.dirname(current_file_path)
 current_canonical_directory = os.path.realpath(current_directory)
+
+mpl.rcParams.update(
+    {
+        # "figure.figsize": (18, 5),  # subplot enlarge
+        "axes.titlesize": 12,
+        "axes.labelsize": 11,
+        "legend.fontsize": 10,
+        "pdf.fonttype": 42,  #  Preserve font type
+        "ps.fonttype": 42,
+    }
+)
+
+LINESTYLES = ["-", "--", "-.", ":", (0, (3, 1, 1, 1))]
+COLORS = plt.get_cmap("tab10").colors  #  Contrast appropriate
+
+
+def move_legend_outside(ax):
+    handles, labels = ax.get_legend_handles_labels()
+    if handles:
+        ax.legend(
+            handles,
+            labels,
+            loc="upper left",
+            bbox_to_anchor=(1.02, 1),
+            borderaxespad=0.0,
+            frameon=False,
+        )
+
+
+def restyle_axes(ax):
+    # Reduce excessive red dominance: uniform thickness, uniform zorder
+    for i, line in enumerate(ax.get_lines()):
+        # line.set_linewidth(1.8)
+        line.set_zorder(2)
+        # line.set_color(COLORS[i % len(COLORS)])
+        # line.set_linestyle(LINESTYLES[i % len(LINESTYLES)])
+    # Reduce CI(alpha) to improve readability: apply to fill_between artists
+    for coll in ax.collections:
+        try:
+            coll.set_alpha(0.15)  # Reduce CI(alpha) to improve readability
+        except Exception:
+            pass
 
 
 def plot_groups(
@@ -45,6 +89,7 @@ def plot_groups(
             entropy_room_groups,
             entropy_groups_name,
             entropy_window_size,
+            do_legend=False,
         )
     else:
         print("No entropy data")
@@ -67,12 +112,25 @@ def plot_groups(
             intrinsic_groups_name,
             intrinsic_window_size,
         )
+
+    # axes = fig.get_axes()
+    # for ax in axes:
+    #     restyle_axes(ax)
+    #     move_legend_outside(ax)
+    # fig.tight_layout()
+
     save_entropy_figure(
         axis_x_name,
         axis_y_name,
         entropy_groups_name,
-        f"{current_canonical_directory}/figures/241214_all-icm_ir",
+        f"{current_canonical_directory}/figures/241214_all-icm_ir-251019",
     )
+
+    # fig.savefig(
+    #     f"{current_canonical_directory}/figures/241214_all-icm_ir-251019.pdf",
+    #     format="pdf",
+    #     bbox_inches="tight",
+    # )
 
     # axis_x_name = normal_axis[0]
     # axis_y_name = normal_axis[1]

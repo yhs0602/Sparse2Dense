@@ -51,17 +51,58 @@ def calculate_group_std(
 
 
 # Visualisation functions, std err
-def plot_groups(
-    groups: Dict[str, List[pd.DataFrame]],
-    groups_name: str,
-    axis: Tuple[str, str],
-    window_size=10,
+def plot_groups_normal_experiments(
+    normal_groups: Dict[str, List[pd.DataFrame]],
+    normal_groups_name: str,
+    normal_axis: Tuple[str, str],
+    normal_window_size=10,
 ):
-    axis_x_name = axis[0]
-    axis_y_name = axis[1]
+    axis_x_name = normal_axis[0]
+    axis_y_name = normal_axis[1]
 
     plt.figure(figsize=(14, 8))
 
+    plot_impl_normal_experiments(
+        axis_x_name, axis_y_name, normal_groups, normal_groups_name, normal_window_size
+    )
+
+    adjust_and_save_figure(axis_x_name, axis_y_name, normal_groups_name)
+
+
+def adjust_and_save_figure(axis_x_name, axis_y_name, groups_name):
+    # plt.xlabel(axis_x_name)
+    # plt.ylabel(axis_y_name)
+    # plt.legend()
+    # plt.title(f"{axis_x_name} vs {axis_y_name}")
+    y_max = 8000
+    y_min = 0
+    if "rate" in axis_y_name:
+        y_max = 1
+    elif "length" in axis_y_name:
+        y_max = 20000
+    elif "eval_episode" in axis_y_name:
+        y_max = 1000
+    if "success_rate" in axis_y_name:
+        x_max = 10000000  # 5000000
+        y_min = 0.4
+    else:
+        x_max = None
+    plt.ylim(bottom=y_min)  # , top=y_max
+    plt.xlim(left=0, right=x_max)
+    plt.grid(True)
+    # plt.show()
+    axis_x_name = axis_x_name.replace("/", "_")
+    axis_y_name = axis_y_name.replace("/", "_")
+    figure_dir = "./figures/241206"
+    os.makedirs(figure_dir, exist_ok=True)
+    figure_path = f"{figure_dir}/{groups_name}-{axis_x_name}_{axis_y_name}.png"
+    plt.savefig(figure_path, dpi=300)
+    print(f"Saved {figure_path}")
+
+
+def plot_impl_normal_experiments(
+    axis_x_name, axis_y_name, groups, groups_name, window_size
+):
     for group_name, group_data in groups.items():
         print(group_name)
         group_data: List[pd.DataFrame]
@@ -149,40 +190,17 @@ def plot_groups(
                 f"{groups_name}/{group_name};{axis_y_name}:        {slope:.2f}\\stdv{{{slope_std:.2f}}}"
             )
 
-    # plt.xlabel(axis_x_name)
-    # plt.ylabel(axis_y_name)
-    # plt.legend()
-    # plt.title(f"{axis_x_name} vs {axis_y_name}")
-    y_max = 8000
-    y_min = 0
-    if "rate" in axis_y_name:
-        y_max = 1
-    elif "length" in axis_y_name:
-        y_max = 20000
-    elif "eval_episode" in axis_y_name:
-        y_max = 1000
-    if "success_rate" in axis_y_name:
-        x_max = 10000000  # 5000000
-        y_min = 0.4
-    else:
-        x_max = None
-    plt.ylim(bottom=y_min)  # , top=y_max
-    plt.xlim(left=0, right=x_max)
-    plt.grid(True)
-
-    # plt.show()
-
-    axis_x_name = axis_x_name.replace("/", "_")
-    axis_y_name = axis_y_name.replace("/", "_")
-    figure_dir = "./figures/241206"
-    os.makedirs(figure_dir, exist_ok=True)
-    figure_path = f"{figure_dir}/{groups_name}-{axis_x_name}_{axis_y_name}.png"
-    plt.savefig(figure_path, dpi=300, bbox_inches="tight")
-    print(f"Saved {figure_path}")
-
 
 def main():
-    all_run_data_dir = "./merged_241206"
+    axises, room_groups, window_size = prepare_normal_params()
+    for room_axis in axises["room"]:
+        plot_groups_normal_experiments(
+            room_groups, "room", room_axis, normal_window_size=window_size
+        )
+        print(f"Plotted {room_axis}")
+
+
+def prepare_normal_params(all_run_data_dir="./merged_241206"):
     room_groups = defaultdict(list)
     for file_name in os.listdir(all_run_data_dir):
         # check if csv
@@ -233,9 +251,7 @@ def main():
     #     plot_groups(cross_0_groups, "cross_0", cross_axis, window_size=window_size)
     #     plot_groups(cross_1_groups, "cross_1", cross_axis, window_size=window_size)
     #     plot_groups(cross_2_groups, "cross_2", cross_axis, window_size=window_size)
-    for room_axis in axises["room"]:
-        plot_groups(room_groups, "room", room_axis, window_size=window_size)
-        print(f"Plotted {room_axis}")
+    return axises, room_groups, window_size
 
 
 if __name__ == "__main__":

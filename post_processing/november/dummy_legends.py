@@ -182,27 +182,8 @@ def plot_groups(
 
 
 def main():
-    all_run_data_dir = "./merged_241206"
     room_groups = defaultdict(list)
-    for file_name in os.listdir(all_run_data_dir):
-        # check if csv
-        if not file_name.endswith(".csv"):
-            continue
-        file_path = os.path.join(all_run_data_dir, file_name)
-        # 파일 이름에서 'from'과 'to' 추출
-        parts = file_name.split("_")
-        from_type = parts[0]  # dense 또는 sparse
-        to_type = parts[2]  # dense 또는 sparse
-
-        if from_type == "dense":
-            if "7777" in file_name or "2024" in file_name:
-                continue
-
-        # CSV 파일을 DataFrame으로 읽기
-        df = pd.read_csv(file_path)
-
-        # (from, to) 키를 사용하여 딕셔너리에 DataFrame 추가
-        room_groups[f"{from_type}_{to_type}"].append(df)
+    room_groups[f"{from_type}_{to_type}"].append(df)
     # Plot
     # cross:
     # Grouping based on the end number of the group.
