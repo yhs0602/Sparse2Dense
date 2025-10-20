@@ -26,7 +26,7 @@ Usage of Conda is recommended, and the current installation guide is centered ar
     ```
    if you want to run on headless server, follow the instructions of the next step.
 4. The ways to run the minecraft server with 3d acceleration support, follow the
-   steps [here](https://yhs0602.github.io/CraftGround/headless.html).
+   steps [here](https://yhs0602.github.io/CraftGround/installation/headless.html).
 
 ## Running experiments
 
