@@ -3,6 +3,7 @@ import os
 from typing import Dict, List, Tuple
 
 from matplotlib import pyplot as plt
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
 import numpy as np
 import pandas as pd
 
@@ -105,10 +106,13 @@ def plot_groups_intrinsics(axis_x_name, axis_y_name, groups, groups_name, window
             color=color,
         )
         print("ploted")
+        y_avg = np.clip(avg_data[axis_y_name], 0, None)
+        y_low = np.clip(avg_data[axis_y_name] - std_data[axis_y_name], 0, None)
+        y_high = np.clip(avg_data[axis_y_name] + std_data[axis_y_name], 0, None)
         plt.fill_between(
             avg_data[axis_x_name],
-            avg_data[axis_y_name] - std_data[axis_y_name],
-            avg_data[axis_y_name] + std_data[axis_y_name],
+            y_low,
+            y_high,
             alpha=0.3,
             color=color,
         )
@@ -131,3 +135,44 @@ def plot_groups_intrinsics(axis_x_name, axis_y_name, groups, groups_name, window
             print(
                 f"{groups_name}/{group_name};{axis_y_name}:        {slope:.2f}\\stdv{{{slope_std:.2f}}}"
             )
+
+    if axis_y_name == "scaled_mean_intrinsic_rewards":
+        ax = plt.gca()
+        # ax.get_legend().remove()
+        axins = inset_axes(
+            ax,
+            width="35%",
+            height="45%",
+            loc="upper left",
+            bbox_to_anchor=(0.25, 0.0, 1, 1),
+            bbox_transform=ax.transAxes,
+            borderpad=1.0,
+        )
+
+        # Copy data to inset
+        for ln in ax.get_lines():
+            axins.plot(
+                ln.get_xdata(),
+                ln.get_ydata(),
+                linewidth=ln.get_linewidth(),
+                color=ln.get_color(),
+                linestyle=ln.get_linestyle(),
+            )
+
+        axins.set_xlim(0, 400)  # Initial zoom region
+        # axins.get_legend().remove()
+        ys = np.concatenate(
+            [ln.get_ydata() for ln in ax.get_lines() if np.size(ln.get_ydata())]
+        )
+        # ax.get_legend().remove()
+        ys = ys[np.isfinite(ys)]
+        if ys.size:
+            ymin, ymax = ys.min(), ys.max()
+            axins.set_ylim(ymin, ymax)
+
+        mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="0.5")
+
+        # Move legend outside
+        # h, l = ax.get_legend_handles_labels()
+        # if h:
+        #     ax.legend(h, l, loc="upper left", bbox_to_anchor=(1.02, 1), frameon=False)

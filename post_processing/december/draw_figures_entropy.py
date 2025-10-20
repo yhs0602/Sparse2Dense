@@ -183,6 +183,9 @@ def save_entropy_figure(
     elif "episode/reward" in axis_y_name:
         y_min = -2
         x_max = None
+    # elif "scaled_mean_intrinsic_rewards" in axis_y_name:
+    #     y_min = 0
+    #     x_max = 0.6
     else:
         x_max = None
     plt.ylim(bottom=y_min)  # , top=y_max
